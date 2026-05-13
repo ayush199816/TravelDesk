@@ -9,26 +9,36 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      api.get('/auth/me')
-        .then(res => {
-          if (res.data.role) {
-            setUser(res.data);
-            setUserType('user');
-          } else {
-            setUser({ username: res.data.username });
-            setUserType('mainAdmin');
+    const initAuth = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          try {
+            const res = await api.get('/auth/me');
+            if (res.data && res.data.role) {
+              setUser(res.data);
+              setUserType('user');
+            } else if (res.data && res.data.username) {
+              setUser({ username: res.data.username });
+              setUserType('mainAdmin');
+            } else {
+              localStorage.removeItem('token');
+              delete api.defaults.headers.common['Authorization'];
+            }
+          } catch (error) {
+            console.log('Auth check failed, clearing token:', error.message);
+            localStorage.removeItem('token');
+            delete api.defaults.headers.common['Authorization'];
           }
-        })
-        .catch(() => {
-          localStorage.removeItem('token');
-          delete api.defaults.headers.common['Authorization'];
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+        }
+      } catch (error) {
+        console.log('Auth initialization error:', error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initAuth();
   }, []);
 
   const loginMainAdmin = async (username, password) => {

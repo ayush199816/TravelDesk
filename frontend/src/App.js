@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 import MainAdminLogin from './pages/MainAdminLogin';
 import OrgLogin from './pages/OrgLogin';
 import MainAdminDashboard from './pages/MainAdminDashboard';
@@ -22,8 +23,9 @@ import './App.css';
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
         <Routes>
           <Route path="/" element={<MainAdminLogin />} />
           <Route path="/org-login" element={<OrgLogin />} />
@@ -76,8 +78,9 @@ function App() {
             </ProtectedRoute>
           } />
         </Routes>
-      </Router>
-    </AuthProvider>
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 
