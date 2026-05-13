@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
-import axios from 'axios';
+import api from '../api/axios';
 
 const SalesDashboard = () => {
   const { user, logout } = useContext(AuthContext);
@@ -51,7 +51,7 @@ const SalesDashboard = () => {
   const fetchMyLeads = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`/api/leads/my-leads?assignedTo=${user._id}&organization=${user.organization._id}`);
+      const response = await api.get(`/leads/my-leads?assignedTo=${user._id}&organization=${user.organization._id}`);
       setLeads(response.data);
       setFilteredLeads(response.data);
     } catch (error) {
@@ -63,7 +63,7 @@ const SalesDashboard = () => {
 
   const fetchLeadStatuses = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/organizations/${user.organization._id}/lead-statuses`);
+      const response = await api.get(`/organizations/${user.organization._id}/lead-statuses`);
       setLeadStatuses(response.data);
     } catch (error) {
       console.error('Error fetching lead statuses:', error);
@@ -172,7 +172,7 @@ const SalesDashboard = () => {
       if (!user?._id) {
         delete leadData.assignedTo;
       }
-      await axios.post('/api/leads', leadData);
+      await api.post('/leads', leadData);
       fetchMyLeads();
       setShowAddForm(false);
       setFormData({
@@ -198,7 +198,7 @@ const SalesDashboard = () => {
   const handleEdit = async (lead) => {
     try {
       // Fetch the lead with populated edit history
-      const response = await axios.get(`/api/leads/${lead._id}`);
+      const response = await api.get(`/leads/${lead._id}`);
       const fullLead = response.data;
       setEditingLead(fullLead);
       setFormData({
@@ -245,7 +245,7 @@ const SalesDashboard = () => {
         ...formData,
         tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
       };
-      await axios.put(`/api/leads/${editingLead._id}`, leadData);
+      await api.put(`/leads/${editingLead._id}`, leadData);
       fetchMyLeads();
       setShowEditForm(false);
       setEditingLead(null);

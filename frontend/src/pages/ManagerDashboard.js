@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
 import { AuthContext } from '../contexts/AuthContext';
 
 const ManagerDashboard = () => {
@@ -167,7 +167,7 @@ const ManagerDashboard = () => {
       console.log('🔍 DEBUG - Fetching quotes for leads');
       
       // Fetch all quotes for the organization
-      const quotesResponse = await axios.get(`/api/quotes?organization=${user.organization._id}`);
+      const quotesResponse = await api.get(`/quotes?organization=${user.organization._id}`);
       const quotes = quotesResponse.data;
       
       console.log('🔍 DEBUG - Quotes fetched:', quotes.length);
@@ -345,8 +345,7 @@ const ManagerDashboard = () => {
   const fetchLeads = useCallback(async () => {
     try {
       console.log('🔍 DEBUG - Fetching leads for organization:', user.organization._id);
-      const response = await axios.get(`/api/leads?organization=${user.organization._id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      const response = await api.get(`/leads?organization=${user.organization._id}`, {
       });
       console.log('🔍 DEBUG - Leads fetched:', response.data.length);
       console.log('🔍 DEBUG - Leads data sample:', response.data.slice(0, 3).map(lead => ({
@@ -378,7 +377,7 @@ const ManagerDashboard = () => {
   const fetchSalesUsers = useCallback(async () => {
     try {
       console.log('🔍 DEBUG - Fetching sales users for organization:', user.organization._id);
-      const response = await axios.get(`/api/leads/users/sales?organization=${user.organization._id}`);
+      const response = await api.get(`/leads/users/sales?organization=${user.organization._id}`);
       console.log('🔍 DEBUG - Sales users fetched:', response.data.length);
       console.log('🔍 DEBUG - Sales users data:', response.data.map(user => ({
         id: user._id,
@@ -390,7 +389,7 @@ const ManagerDashboard = () => {
 
       // Fetch lead statuses - use default statuses if API fails
       try {
-        const statusesResponse = await axios.get(`/api/leads/statuses`);
+        const statusesResponse = await api.get(`/leads/statuses`);
         setLeadStatuses(statusesResponse.data || ['new', 'contacted', 'qualified', 'proposal_sent', 'converted', 'booking_confirmed', 'lost']);
       } catch (statusError) {
         console.log('Using default lead statuses');
@@ -408,7 +407,7 @@ const ManagerDashboard = () => {
   // Fetch sightseeings
   const fetchSightseeings = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/sightseeings?organization=${user.organization._id}`);
+      const response = await api.get(`/sightseeings?organization=${user.organization._id}`);
       setSightseeings(response.data);
     } catch (error) {
       console.error('Error fetching sightseeings:', error);
@@ -418,7 +417,7 @@ const ManagerDashboard = () => {
   // Fetch transfers
   const fetchTransfers = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/transfers?organization=${user.organization._id}`);
+      const response = await api.get(`/transfers?organization=${user.organization._id}`);
       setTransfers(response.data);
     } catch (error) {
       console.error('Error fetching transfers:', error);
@@ -428,7 +427,7 @@ const ManagerDashboard = () => {
   // Fetch hotels
   const fetchHotels = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/hotels?organization=${user.organization._id}`);
+      const response = await api.get(`/hotels?organization=${user.organization._id}`);
       setHotels(response.data);
     } catch (error) {
       console.error('Error fetching hotels:', error);
@@ -583,7 +582,7 @@ const ManagerDashboard = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/api/leads', {
+      const response = await api.post('/leads', {
         ...formData,
         organization: user.organization._id,
         leadNumber: `L-${Date.now()}`
@@ -607,7 +606,7 @@ const ManagerDashboard = () => {
 
   const updateLeadStatus = async (leadId, newStatus) => {
     try {
-      await axios.put(`/api/leads/${leadId}`, { status: newStatus });
+      await api.put(`/leads/${leadId}`, { status: newStatus });
       setLeads(prev => prev.map(lead => 
         lead._id === leadId ? { ...lead, status: newStatus } : lead
       ));
@@ -633,7 +632,7 @@ const ManagerDashboard = () => {
   const handleDeleteLead = async (leadId) => {
     if (window.confirm('Are you sure you want to delete this lead?')) {
       try {
-        await axios.delete(`/api/leads/${leadId}`);
+        await api.delete(`/leads/${leadId}`);
         setLeads(prev => prev.filter(lead => lead._id !== leadId));
       } catch (error) {
         console.error('Error deleting lead:', error);

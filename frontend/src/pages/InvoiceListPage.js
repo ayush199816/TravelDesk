@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { 
   Table, 
   Button, 
@@ -32,8 +32,7 @@ const InvoiceListPage = () => {
 
   const fetchInvoices = async () => {
     try {
-      const response = await axios.get('/api/invoices', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      const response = await api.get('/invoices', {
       });
       setInvoices(response.data);
     } catch (error) {
@@ -62,16 +61,14 @@ const InvoiceListPage = () => {
 
     try {
       // Mark payment cycle as paid
-      await axios.post(`/api/invoices/${selectedInvoice._id}/pay-cycle`, paymentForm, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      await api.post(`/invoices/${selectedInvoice._id}/pay-cycle`, paymentForm, {
       });
 
       // Verify UTR (automatically for demo)
-      await axios.put(`/api/invoices/${selectedInvoice._id}/verify-utr`, {
+      await api.put(`/invoices/${selectedInvoice._id}/verify-utr`, {
         cycleNumber: parseInt(paymentForm.cycleNumber),
         utrVerified: true
       }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
 
       setShowPaymentModal(false);
