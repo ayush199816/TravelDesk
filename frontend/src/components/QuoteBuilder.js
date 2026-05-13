@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { AuthContext } from '../contexts/AuthContext';
 import currencyService from '../services/currencyService';
 
@@ -91,8 +91,8 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
     try {
       setLoading(true);
       const [servicesResponse, hotelsResponse] = await Promise.all([
-        axios.get(`/api/quotes/available-services?organization=${user.organization._id}&country=${quoteData.country}&startDate=${quoteData.travelStartDate}&endDate=${quoteData.travelEndDate}`),
-        axios.get(`/api/hotels?organization=${user.organization._id}`)
+        api.get(`/quotes/available-services?organization=${user.organization._id}&country=${quoteData.country}&startDate=${quoteData.travelStartDate}&endDate=${quoteData.travelEndDate}`),
+        api.get(`/hotels?organization=${user.organization._id}`)
       ]);
       
       console.log('Fetched hotels:', hotelsResponse.data);
@@ -110,7 +110,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
       // Try fetching hotels without country filter as fallback
       try {
         console.log('Trying fallback hotel fetch without country filter...');
-        const hotelsResponse = await axios.get(`/api/hotels?organization=${user.organization._id}`);
+        const hotelsResponse = await api.get(`/hotels?organization=${user.organization._id}`);
         console.log('Fallback hotels:', hotelsResponse.data);
         setAvailableHotels(hotelsResponse.data);
       } catch (hotelError) {
@@ -177,7 +177,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
   const fetchHotels = useCallback(async () => {
     try {
       console.log('Fetching hotels independently...');
-      const hotelsResponse = await axios.get(`/api/hotels?organization=${user.organization._id}`);
+      const hotelsResponse = await api.get(`/hotels?organization=${user.organization._id}`);
       console.log('Fetched hotels independently:', hotelsResponse.data);
       setAvailableHotels(hotelsResponse.data);
     } catch (error) {
@@ -360,8 +360,8 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
           try {
             setLoading(true);
             const [servicesResponse, hotelsResponse] = await Promise.all([
-              axios.get(`/api/quotes/available-services?organization=${user.organization._id}&country=${quote.country}&startDate=${new Date(quote.travelStartDate).toISOString().split('T')[0]}&endDate=${new Date(quote.travelEndDate).toISOString().split('T')[0]}`),
-              axios.get(`/api/hotels?organization=${user.organization._id}`)
+              api.get(`/quotes/available-services?organization=${user.organization._id}&country=${quote.country}&startDate=${new Date(quote.travelStartDate).toISOString().split('T')[0]}&endDate=${new Date(quote.travelEndDate).toISOString().split('T')[0]}`),
+              api.get(`/hotels?organization=${user.organization._id}`)
             ]);
             setAvailableSightseeings(servicesResponse.data.sightseeings);
             setAvailableTransfers(servicesResponse.data.transfers);
@@ -658,7 +658,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
       }
       
       // Save temporary hotel to database first
-      const response = await axios.post('/api/temporary-hotels', {
+      const response = await api.post('/temporary-hotels', {
         name: tempHotelData.name,
         city: tempHotelData.city,
         country: tempHotelData.country,
@@ -856,10 +856,10 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
       let response;
       if (quote) {
         // Update existing quote
-        response = await axios.put(`/api/quotes/${quote._id}`, quotePayload);
+        response = await api.put(`/quotes/${quote._id}`, quotePayload);
       } else {
         // Create new quote
-        response = await axios.post('/api/quotes', quotePayload);
+        response = await api.post('/quotes', quotePayload);
       }
       
       onSave(response.data);
@@ -1184,7 +1184,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                 }}
               >
                 <option value="">🔍 Search hotels... {hotelSearch && `(searching: ${hotelSearch})`}</option>
-                {filteredHotels.map(hotel => (
+                {Array.isArray(filteredHotels) && filteredHotels.map(hotel => (
                   <option key={hotel._id} value={hotel._id}>
                     {hotel.name} - {hotel.city} ({'⭐'.repeat(hotel.starRating)})
                   </option>
