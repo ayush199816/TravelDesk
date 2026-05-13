@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 
 const InvoiceListPageSimple = () => {
@@ -30,7 +30,7 @@ const InvoiceListPageSimple = () => {
 
   const fetchInvoices = async () => {
     try {
-      const response = await axios.get('/api/invoices', {
+      const response = await api.get('/api/invoices', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setInvoices(response.data);
@@ -119,7 +119,7 @@ const InvoiceListPageSimple = () => {
 
   const handleDownloadPDF = async (invoiceId, invoiceNumber) => {
     try {
-      const response = await axios.get(`/api/invoices/${invoiceId}/pdf`, {
+      const response = await api.get(`/api/invoices/${invoiceId}/pdf`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         responseType: 'blob'
       });
@@ -149,7 +149,7 @@ const InvoiceListPageSimple = () => {
 
     try {
       // Mark payment cycle as paid
-      await axios.post(`/api/invoices/${selectedInvoice._id}/pay-cycle`, {
+      await api.post(`/api/invoices/${selectedInvoice._id}/pay-cycle`, {
         cycleNumber: parseInt(paymentForm.cycleNumber),
         utrNumber: paymentForm.utrNumber
       }, {
@@ -157,7 +157,7 @@ const InvoiceListPageSimple = () => {
       });
 
       // Verify UTR (automatically for demo)
-      await axios.put(`/api/invoices/${selectedInvoice._id}/verify-utr`, {
+      await api.put(`/api/invoices/${selectedInvoice._id}/verify-utr`, {
         cycleNumber: parseInt(paymentForm.cycleNumber),
         utrVerified: true
       }, {
@@ -432,7 +432,7 @@ const InvoiceListPageSimple = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredInvoices.map((invoice) => {
+                    {Array.isArray(filteredInvoices) && filteredInvoices.map((invoice) => {
                   const paidCycles = invoice.paymentCycles?.filter(c => c.status === 'paid').length || 0;
                   const totalCycles = invoice.paymentCycles?.length || 0;
                   const progressPercentage = totalCycles > 0 ? (paidCycles / totalCycles) * 100 : 0;
