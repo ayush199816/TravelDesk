@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 
 const QuoteConversionButtonSimple = ({ quote, onConverted }) => {
   const [loading, setLoading] = useState(false);
@@ -16,9 +16,7 @@ const QuoteConversionButtonSimple = ({ quote, onConverted }) => {
     setSuccess('');
 
     try {
-      const response = await axios.post(`/api/quotes/${quote._id}/convert`, {}, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      const response = await api.post(`/quotes/${quote._id}/convert`, {});
 
       setSuccess('Quote marked as converted successfully!');
       if (onConverted) {
