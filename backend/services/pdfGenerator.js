@@ -26,29 +26,10 @@ class PDFGenerator {
         ]
       };
       
-      // For Render environment, we might need to specify the Chrome executable path
+      // For Render environment, use system Chromium
       if (process.env.RENDER) {
-        // Try to find Chrome in common locations
-        const possiblePaths = [
-          '/usr/bin/google-chrome-stable',
-          '/usr/bin/google-chrome',
-          '/usr/bin/chromium-browser',
-          '/usr/bin/chromium',
-          '/opt/render/.cache/puppeteer/chrome/linux-*/chrome-linux64/chrome'
-        ];
-        
-        for (const path of possiblePaths) {
-          try {
-            const fs = require('fs');
-            if (fs.existsSync(path)) {
-              puppeteerOptions.executablePath = path;
-              console.log('✅ Found Chrome at:', path);
-              break;
-            }
-          } catch (err) {
-            // Continue trying next path
-          }
-        }
+        puppeteerOptions.executablePath = '/usr/bin/chromium-browser';
+        console.log('🎯 Using system Chromium at: /usr/bin/chromium-browser');
       }
       
       console.log('🚀 Launching Puppeteer with options:', puppeteerOptions);
