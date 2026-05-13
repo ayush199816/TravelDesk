@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 
 const SimpleTemplateManager = ({ user }) => {
   const [predefinedTemplates, setPredefinedTemplates] = useState([]);
@@ -32,7 +32,7 @@ const SimpleTemplateManager = ({ user }) => {
 
   const fetchPredefinedTemplates = async () => {
     try {
-      const response = await axios.get('/api/predefined-templates');
+      const response = await api.get('/api/predefined-templates');
       setPredefinedTemplates(response.data);
     } catch (error) {
       console.error('Error fetching predefined templates:', error);
@@ -43,7 +43,7 @@ const SimpleTemplateManager = ({ user }) => {
   const fetchCountryTemplates = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/pdf-templates', {
+      const response = await api.get('/api/pdf-templates', {
         params: { organization: user.organization._id }
       });
       console.log('Fetched templates:', response.data);
@@ -101,7 +101,7 @@ const SimpleTemplateManager = ({ user }) => {
         formDataToSend.append('lastPageBackground', backgrounds.lastPageBackground);
       }
       
-      await axios.post('/api/pdf-templates', formDataToSend, {
+      await api.post('/api/pdf-templates', formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -151,7 +151,7 @@ const SimpleTemplateManager = ({ user }) => {
         formDataToSend.append('lastPageBackground', formData.lastPageBackground);
       }
 
-      await axios.post('/api/pdf-templates', formDataToSend, {
+      await api.post('/api/pdf-templates', formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -182,7 +182,7 @@ const SimpleTemplateManager = ({ user }) => {
     }
 
     try {
-      await axios.delete(`/api/pdf-templates/${templateId}`);
+      await api.delete(`/api/pdf-templates/${templateId}`);
       setMessage('Template deleted successfully!');
       fetchCountryTemplates();
     } catch (error) {
@@ -326,7 +326,7 @@ const SimpleTemplateManager = ({ user }) => {
           setLoading(true);
           setError('');
           
-          const response = await axios.get(`/api/pdf-generator/preview/${template.country}`);
+          const response = await api.get(`/api/pdf-generator/preview/${template.country}`);
           setHtmlContent(response.data);
         } catch (err) {
           console.error('Error fetching preview:', err);
@@ -439,7 +439,7 @@ const SimpleTemplateManager = ({ user }) => {
         <div>
           <h2>Choose a Template Style</h2>
           <div style={styles.templateGrid}>
-            {predefinedTemplates.map((template) => (
+            {Array.isArray(predefinedTemplates) && predefinedTemplates.map((template) => (
               <div
                 key={template._id}
                 style={{
@@ -596,7 +596,7 @@ const SimpleTemplateManager = ({ user }) => {
             </div>
           ) : (
             <div style={styles.templateGrid}>
-              {countryTemplates.map((template) => (
+              {Array.isArray(countryTemplates) && countryTemplates.map((template) => (
                 <div key={template._id} style={styles.templateCard}>
                   <h3>{template.country}</h3>
                   <p><strong>Created:</strong> {new Date(template.createdAt).toLocaleDateString()}</p>

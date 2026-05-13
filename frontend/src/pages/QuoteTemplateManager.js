@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 
 const QuoteTemplateManager = () => {
@@ -37,18 +37,18 @@ const QuoteTemplateManager = () => {
       console.log('Fetching templates for country:', selectedCountry);
       
       // Get all templates to extract available countries
-      const allResponse = await axios.get('/api/quote-templates', {
+      const allResponse = await api.get('/api/quote-templates', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       console.log('All templates:', allResponse.data);
       
       // Extract unique countries
-      const countries = ['Default', ...new Set(allResponse.data.map(t => t.country).filter(c => c && c !== 'Default'))];
+      const countries = ['Default', ...new Set(Array.isArray(allResponse.data) ? allResponse.data.map(t => t.country).filter(c => c && c !== 'Default') : [])];
       console.log('Extracted countries:', countries);
       setAvailableCountries(countries.length > 1 ? countries : ['Default', 'Dubai', 'India', 'USA', 'UK', 'Canada', 'Australia', 'UAE', 'Singapore', 'Malaysia', 'Thailand', 'Europe']);
       
       // Get templates for selected country
-      const response = await axios.get('/api/quote-templates', {
+      const response = await api.get('/api/quote-templates', {
         params: { country: selectedCountry },
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
@@ -66,7 +66,7 @@ const QuoteTemplateManager = () => {
       console.log('Fetching template for country:', selectedCountry);
       
       // First, try to get templates for the selected country
-      const templatesResponse = await axios.get('/api/quote-templates', {
+      const templatesResponse = await api.get('/api/quote-templates', {
         params: { country: selectedCountry },
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
@@ -81,7 +81,7 @@ const QuoteTemplateManager = () => {
       } else {
         // If no templates for this country, get the default template
         console.log('No templates found for country, getting default');
-        const response = await axios.get('/api/quote-templates/default', {
+        const response = await api.get('/api/quote-templates/default', {
           params: { country: selectedCountry },
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
@@ -128,7 +128,7 @@ const QuoteTemplateManager = () => {
     
     setSaving(true);
     try {
-      const response = await axios.put(`/api/quote-templates/${currentTemplate._id}`, currentTemplate, {
+      const response = await api.put(`/api/quote-templates/${currentTemplate._id}`, currentTemplate, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       console.log('Saved template response:', response.data.name, 'Country:', response.data.country);
@@ -166,7 +166,7 @@ const QuoteTemplateManager = () => {
 
   const handleCreateNew = async () => {
     try {
-      const response = await axios.post('/api/quote-templates', {
+      const response = await api.post('/api/quote-templates', {
         name: `${selectedCountry === 'Default' ? 'Custom' : selectedCountry} Template ${templates.length + 1}`,
         country: selectedCountry,
         colors: currentTemplate.colors,
@@ -189,7 +189,7 @@ const QuoteTemplateManager = () => {
 
   const handleSetAsDefault = async (templateId) => {
     try {
-      await axios.put(`/api/quote-templates/${templateId}/set-default`, {}, {
+      await api.put(`/api/quote-templates/${templateId}/set-default`, {}, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       fetchTemplates();
@@ -284,7 +284,7 @@ const QuoteTemplateManager = () => {
                 onChange={(e) => setSelectedCountry(e.target.value)}
                 style={{ padding: '8px', fontSize: '14px', minWidth: '150px' }}
               >
-                {availableCountries.map(country => (
+                {Array.isArray(availableCountries) && availableCountries.map(country => (
                   <option key={country} value={country}>{country}</option>
                 ))}
               </select>
@@ -301,7 +301,7 @@ const QuoteTemplateManager = () => {
                 }}
                 style={{ padding: '8px', fontSize: '14px', minWidth: '200px' }}
               >
-                {templates.map(template => (
+                {Array.isArray(templates) && templates.map(template => (
                   <option key={template._id} value={template._id}>
                     {template.name} {template.isDefault && '(Default)'}
                   </option>
@@ -428,7 +428,7 @@ const QuoteTemplateManager = () => {
           overflow: 'hidden'
         }}>
           <div style={{ display: 'flex', borderBottom: '1px solid #ddd' }}>
-            {tabs.map(tab => (
+            {Array.isArray(tabs) && tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -1378,7 +1378,7 @@ const QuoteTemplateManager = () => {
                     style={{ width: '100%', padding: '8px' }}
                   />
                 </div>
-                {currentTemplate.messages.nextSteps.map((step, index) => (
+                {Array.isArray(currentTemplate?.messages?.nextSteps) && currentTemplate.messages.nextSteps.map((step, index) => (
                   <div key={index} style={{ gridColumn: '1 / -1' }}>
                     <label>Next Step {index + 1}:</label>
                     <textarea 
