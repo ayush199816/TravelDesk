@@ -12,10 +12,48 @@ class PDFGenerator {
 
   async initBrowser() {
     if (!this.browser) {
-      this.browser = await puppeteer.launch({
+      const puppeteerOptions = {
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-      });
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--single-process',
+          '--disable-gpu'
+        ]
+      };
+      
+      // For Render environment, we might need to specify the Chrome executable path
+      if (process.env.RENDER) {
+        // Try to find Chrome in common locations
+        const possiblePaths = [
+          '/usr/bin/google-chrome-stable',
+          '/usr/bin/google-chrome',
+          '/usr/bin/chromium-browser',
+          '/usr/bin/chromium',
+          '/opt/render/.cache/puppeteer/chrome/linux-*/chrome-linux64/chrome'
+        ];
+        
+        for (const path of possiblePaths) {
+          try {
+            const fs = require('fs');
+            if (fs.existsSync(path)) {
+              puppeteerOptions.executablePath = path;
+              console.log('✅ Found Chrome at:', path);
+              break;
+            }
+          } catch (err) {
+            // Continue trying next path
+          }
+        }
+      }
+      
+      console.log('🚀 Launching Puppeteer with options:', puppeteerOptions);
+      this.browser = await puppeteer.launch(puppeteerOptions);
+      console.log('✅ Puppeteer browser launched successfully');
     }
   }
 

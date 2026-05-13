@@ -19,7 +19,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "build": "echo 'Backend build complete'"
+    "build": "npx puppeteer browsers install chrome --path /opt/render/.cache/puppeteer && echo 'Backend build complete'"
   },
   "keywords": [],
   "author": "",
