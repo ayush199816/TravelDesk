@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
 import { AuthContext } from '../contexts/AuthContext';
 import SimpleTemplateManager from './SimpleTemplateManager';
 
@@ -34,7 +34,7 @@ const OrgAdminDashboard = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('/api/auth/users');
+      const res = await api.get('/api/auth/users');
       setUsers(res.data);
     } catch (err) {
       console.error('Error fetching users');
@@ -50,12 +50,12 @@ const OrgAdminDashboard = () => {
       console.log('User organization ID:', user?.organization?._id);
       console.log('Fetching organization data for:', user.organization._id);
       
-      const response = await axios.get(`/api/organizations/${user.organization._id}`);
+      const response = await api.get(`/api/organizations/${user.organization._id}`);
       setOrganizationData(response.data);
       console.log('Organization data fetched:', response.data);
       
       // Fetch lead statuses
-      const statusesResponse = await axios.get(`/api/organizations/${user.organization._id}/lead-statuses`);
+      const statusesResponse = await api.get(`/api/organizations/${user.organization._id}/lead-statuses`);
       setLeadStatuses(statusesResponse.data);
       console.log('Lead statuses fetched:', statusesResponse.data);
       console.log('=== END FETCH DEBUG ===');
@@ -72,7 +72,7 @@ const OrgAdminDashboard = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/auth/users', { name, email, password, phone, role });
+      await api.post('/api/auth/users', { name, email, password, phone, role });
       alert('User added');
       fetchUsers();
     } catch (err) {
@@ -88,7 +88,7 @@ const OrgAdminDashboard = () => {
 
   const handleUpdate = async () => {
     try {
-      await axios.put(`/api/auth/users/${editingUser._id}`, { role: editRole, password: editPassword });
+      await api.put(`/api/auth/users/${editingUser._id}`, { role: editRole, password: editPassword });
       alert('User updated');
       setEditingUser(null);
       fetchUsers();
@@ -100,7 +100,7 @@ const OrgAdminDashboard = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure?')) return;
     try {
-      await axios.delete(`/api/auth/users/${id}`);
+      await api.delete(`/api/auth/users/${id}`);
       alert('User deleted');
       fetchUsers();
     } catch (err) {
@@ -146,7 +146,7 @@ const OrgAdminDashboard = () => {
       console.log('Request URL:', `/api/organizations/${user.organization._id}`);
       console.log('Request data:', { leadStatuses: tempStatuses });
       
-      const response = await axios.put(`/api/organizations/${user.organization._id}`, {
+      const response = await api.put(`/api/organizations/${user.organization._id}`, {
         leadStatuses: tempStatuses
       });
       console.log('Save response:', response.data);
@@ -187,7 +187,7 @@ const OrgAdminDashboard = () => {
       console.log('User role:', user.role);
       console.log('Temp currency:', tempCurrency);
       
-      const response = await axios.put(`/api/organizations/${user.organization._id}`, {
+      const response = await api.put(`/api/organizations/${user.organization._id}`, {
         currency: tempCurrency
       });
       console.log('Save response:', response.data);
@@ -494,7 +494,7 @@ const OrgAdminDashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {users.map(u => (
+            {Array.isArray(users) && users.map(u => (
               <tr key={u._id}>
                 <td style={styles.usersTd}>{u.name}</td>
                 <td style={styles.usersTd}>{u.email}</td>
@@ -670,7 +670,7 @@ const OrgAdminDashboard = () => {
                   </div>
                   
                   <div style={styles.statusList}>
-                    {tempStatuses.map(status => (
+                    {Array.isArray(tempStatuses) && tempStatuses.map(status => (
                       <div key={status} style={styles.statusItem}>
                         <span>{status}</span>
                         <button 
@@ -724,7 +724,7 @@ const OrgAdminDashboard = () => {
               ) : (
                 <div>
                   <div style={{display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '15px'}}>
-                    {leadStatuses.map(status => (
+                    {Array.isArray(leadStatuses) && leadStatuses.map(status => (
                       <span key={status} style={{
                         padding: '6px 12px', 
                         backgroundColor: '#28a745', 
