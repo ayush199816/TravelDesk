@@ -103,7 +103,7 @@ const SimpleTemplateManager = ({ user }) => {
         formDataToSend.append('lastPageBackground', backgrounds.lastPageBackground);
       }
       
-      await api.post('/api/pdf-templates', formDataToSend, {
+      await api.post('/pdf-templates', formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -153,7 +153,7 @@ const SimpleTemplateManager = ({ user }) => {
         formDataToSend.append('lastPageBackground', formData.lastPageBackground);
       }
 
-      await api.post('/api/pdf-templates', formDataToSend, {
+      await api.post('/pdf-templates', formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -184,7 +184,7 @@ const SimpleTemplateManager = ({ user }) => {
     }
 
     try {
-      await api.delete(`/api/pdf-templates/${templateId}`);
+      await api.delete(`/pdf-templates/${templateId}`);
       setMessage('Template deleted successfully!');
       fetchCountryTemplates();
     } catch (error) {

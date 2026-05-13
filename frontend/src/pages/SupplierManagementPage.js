@@ -81,11 +81,11 @@ const SupplierManagementPage = () => {
     e.preventDefault();
     try {
       if (editingSupplier) {
-        await api.put(`/api/suppliers/${editingSupplier._id}`, formData, {
+        await api.put(`/suppliers/${editingSupplier._id}`, formData, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
       } else {
-        await api.post('/api/suppliers', formData, {
+        await api.post('/suppliers', formData, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
       }
@@ -111,7 +111,7 @@ const SupplierManagementPage = () => {
     }
     
     try {
-      await api.delete(`/api/suppliers/${supplierId}`, {
+      await api.delete(`/suppliers/${supplierId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       fetchSuppliers();

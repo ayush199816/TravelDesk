@@ -72,7 +72,7 @@ const OrgAdminDashboard = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/api/auth/users', { name, email, password, phone, role });
+      await api.post('/auth/users', { name, email, password, phone, role });
       alert('User added');
       fetchUsers();
     } catch (err) {
@@ -88,7 +88,7 @@ const OrgAdminDashboard = () => {
 
   const handleUpdate = async () => {
     try {
-      await api.put(`/api/auth/users/${editingUser._id}`, { role: editRole, password: editPassword });
+      await api.put(`/auth/users/${editingUser._id}`, { role: editRole, password: editPassword });
       alert('User updated');
       setEditingUser(null);
       fetchUsers();
@@ -100,7 +100,7 @@ const OrgAdminDashboard = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure?')) return;
     try {
-      await api.delete(`/api/auth/users/${id}`);
+      await api.delete(`/auth/users/${id}`);
       alert('User deleted');
       fetchUsers();
     } catch (err) {
@@ -146,7 +146,7 @@ const OrgAdminDashboard = () => {
       console.log('Request URL:', `/api/organizations/${user.organization._id}`);
       console.log('Request data:', { leadStatuses: tempStatuses });
       
-      const response = await api.put(`/api/organizations/${user.organization._id}`, {
+      const response = await api.put(`/organizations/${user.organization._id}`, {
         leadStatuses: tempStatuses
       });
       console.log('Save response:', response.data);
@@ -187,7 +187,7 @@ const OrgAdminDashboard = () => {
       console.log('User role:', user.role);
       console.log('Temp currency:', tempCurrency);
       
-      const response = await api.put(`/api/organizations/${user.organization._id}`, {
+      const response = await api.put(`/organizations/${user.organization._id}`, {
         currency: tempCurrency
       });
       console.log('Save response:', response.data);

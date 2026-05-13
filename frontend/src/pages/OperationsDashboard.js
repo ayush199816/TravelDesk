@@ -554,7 +554,7 @@ const OperationsDashboard = () => {
       if (!formData.assignedTo) {
         delete leadData.assignedTo;
       }
-      await api.post('/api/leads', leadData);
+      await api.post('/leads', leadData);
       fetchLeads();
       setShowAddForm(false);
       setFormData({
@@ -609,7 +609,7 @@ const OperationsDashboard = () => {
         ...formData,
         tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
       };
-      await api.put(`/api/leads/${editingLead._id}`, leadData);
+      await api.put(`/leads/${editingLead._id}`, leadData);
       fetchLeads();
       setShowEditForm(false);
       setEditingLead(null);
@@ -657,7 +657,7 @@ const OperationsDashboard = () => {
   const handleDeleteLead = async (leadId) => {
     if (window.confirm('Are you sure you want to delete this lead?')) {
       try {
-        await api.delete(`/api/leads/${leadId}`);
+        await api.delete(`/leads/${leadId}`);
         fetchLeads();
       } catch (error) {
         console.error('Error deleting lead:', error);
@@ -936,11 +936,11 @@ const OperationsDashboard = () => {
       console.log('Frontend - Sending hotel with images:', hotelImages.length);
       
       if (editingHotel) {
-        await api.put(`/api/hotels/${editingHotel._id}`, formData, {
+        await api.put(`/hotels/${editingHotel._id}`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       } else {
-        await api.post('/api/hotels', formData, {
+        await api.post('/hotels', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       }
@@ -991,7 +991,7 @@ const OperationsDashboard = () => {
   const deleteHotel = async (id) => {
     if (window.confirm('Are you sure you want to delete this hotel?')) {
       try {
-        await api.delete(`/api/hotels/${id}`);
+        await api.delete(`/hotels/${id}`);
         fetchHotels();
       } catch (error) {
         console.error('Error deleting hotel:', error);
@@ -1025,7 +1025,7 @@ const OperationsDashboard = () => {
 
   const updateLeadStatus = async (leadId, newStatus) => {
     try {
-      await api.put(`/api/leads/${leadId}`, { status: newStatus });
+      await api.put(`/leads/${leadId}`, { status: newStatus });
       fetchLeads();
     } catch (error) {
       console.error('Error updating lead status:', error);
@@ -1058,11 +1058,11 @@ const OperationsDashboard = () => {
       console.log('Frontend - Sending sightseeing with images:', sightseeingImages.length);
       
       if (editingSightseeing) {
-        await api.put(`/api/sightseeings/${editingSightseeing._id}`, formData, {
+        await api.put(`/sightseeings/${editingSightseeing._id}`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       } else {
-        await api.post('/api/sightseeings', formData, {
+        await api.post('/sightseeings', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       }
@@ -1097,9 +1097,9 @@ const OperationsDashboard = () => {
       };
       
       if (editingTransfer) {
-        await api.put(`/api/transfers/${editingTransfer._id}`, data);
+        await api.put(`/transfers/${editingTransfer._id}`, data);
       } else {
-        await api.post('/api/transfers', data);
+        await api.post('/transfers', data);
       }
       
       fetchTransfers();
@@ -1125,7 +1125,7 @@ const OperationsDashboard = () => {
   const deleteSightseeing = async (id) => {
     if (window.confirm('Are you sure you want to delete this sightseeing?')) {
       try {
-        await api.delete(`/api/sightseeings/${id}`);
+        await api.delete(`/sightseeings/${id}`);
         fetchSightseeings();
       } catch (error) {
         console.error('Error deleting sightseeing:', error);
@@ -1136,7 +1136,7 @@ const OperationsDashboard = () => {
   const deleteTransfer = async (id) => {
     if (window.confirm('Are you sure you want to delete this transfer?')) {
       try {
-        await api.delete(`/api/transfers/${id}`);
+        await api.delete(`/transfers/${id}`);
         fetchTransfers();
       } catch (error) {
         console.error('Error deleting transfer:', error);

@@ -128,7 +128,7 @@ const QuoteTemplateManager = () => {
     
     setSaving(true);
     try {
-      const response = await api.put(`/api/quote-templates/${currentTemplate._id}`, currentTemplate, {
+      const response = await api.put(`/quote-templates/${currentTemplate._id}`, currentTemplate, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       console.log('Saved template response:', response.data.name, 'Country:', response.data.country);
@@ -166,7 +166,7 @@ const QuoteTemplateManager = () => {
 
   const handleCreateNew = async () => {
     try {
-      const response = await api.post('/api/quote-templates', {
+      const response = await api.post('/quote-templates', {
         name: `${selectedCountry === 'Default' ? 'Custom' : selectedCountry} Template ${templates.length + 1}`,
         country: selectedCountry,
         colors: currentTemplate.colors,
@@ -189,7 +189,7 @@ const QuoteTemplateManager = () => {
 
   const handleSetAsDefault = async (templateId) => {
     try {
-      await api.put(`/api/quote-templates/${templateId}/set-default`, {}, {
+      await api.put(`/quote-templates/${templateId}/set-default`, {}, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       fetchTemplates();

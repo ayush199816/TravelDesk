@@ -149,7 +149,7 @@ const InvoiceListPageSimple = () => {
 
     try {
       // Mark payment cycle as paid
-      await api.post(`/api/invoices/${selectedInvoice._id}/pay-cycle`, {
+      await api.post(`/invoices/${selectedInvoice._id}/pay-cycle`, {
         cycleNumber: parseInt(paymentForm.cycleNumber),
         utrNumber: paymentForm.utrNumber
       }, {
@@ -157,7 +157,7 @@ const InvoiceListPageSimple = () => {
       });
 
       // Verify UTR (automatically for demo)
-      await api.put(`/api/invoices/${selectedInvoice._id}/verify-utr`, {
+      await api.put(`/invoices/${selectedInvoice._id}/verify-utr`, {
         cycleNumber: parseInt(paymentForm.cycleNumber),
         utrVerified: true
       }, {

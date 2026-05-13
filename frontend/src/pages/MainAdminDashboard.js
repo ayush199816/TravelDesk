@@ -44,7 +44,7 @@ const MainAdminDashboard = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/api/auth/organizations', { name, logo, address, phone, adminUsername, adminPassword });
+      await api.post('/auth/organizations', { name, logo, address, phone, adminUsername, adminPassword });
       alert('Organization created');
       fetchOrganizations();
     } catch (err) {
