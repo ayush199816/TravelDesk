@@ -1,3 +1,8 @@
+// Set Puppeteer cache directory for Render
+if (process.env.RENDER) {
+  process.env.PUPPETEER_CACHE_DIR = '/opt/render/.cache/puppeteer';
+}
+
 const puppeteer = require('puppeteer');
 const Quote = require('../models/Quote');
 const Lead = require('../models/Lead');
