@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { AuthContext } from '../contexts/AuthContext';
 
 const QuoteSupplierSection = ({ quote, onAssignmentUpdated }) => {
@@ -33,20 +33,17 @@ const QuoteSupplierSection = ({ quote, onAssignmentUpdated }) => {
 
   const fetchAssignments = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/supplier-assignments/quote/${quote._id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      setAssignments(response.data);
+      const response = await api.get(`/supplier-assignments/quote/${quote._id}`);
+      setAssignments(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching assignments:', error);
+      setAssignments([]);
     }
   }, [quote._id]);
 
   const fetchQuoteDetails = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/quotes/${quote._id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      const response = await api.get(`/quotes/${quote._id}`);
       console.log('Quote details fetched:', response.data);
       console.log('Quote details days count:', response.data.days?.length || 0);
       console.log('Quote details hotels count:', response.data.hotels?.length || 0);
@@ -58,9 +55,7 @@ const QuoteSupplierSection = ({ quote, onAssignmentUpdated }) => {
 
   const checkForInvoice = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/invoices?quoteId=${quote._id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      const response = await api.get(`/invoices?quoteId=${quote._id}`);
       
       const hasInvoiceForQuote = response.data.length > 0;
       setHasInvoice(hasInvoiceForQuote);
@@ -83,9 +78,7 @@ const QuoteSupplierSection = ({ quote, onAssignmentUpdated }) => {
 
   const fetchSuppliers = async () => {
     try {
-      const response = await axios.get('/api/suppliers', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      const response = await api.get('/suppliers');
       setSuppliers(response.data);
     } catch (error) {
       console.error('Error fetching suppliers:', error);
@@ -122,14 +115,10 @@ const QuoteSupplierSection = ({ quote, onAssignmentUpdated }) => {
       };
       
       if (editingAssignment) {
-        await axios.put(`/api/supplier-assignments/${editingAssignment._id}`, assignmentData, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
+        await api.put(`/supplier-assignments/${editingAssignment._id}`, assignmentData);
         setSuccess(`Successfully updated assignment for ${selectedItems.length} ${formData.activityType}(s)`);
       } else {
-        await axios.post('/api/supplier-assignments', assignmentData, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
+        await api.post('/supplier-assignments', assignmentData);
         setSuccess(`Successfully assigned ${selectedItems.length} ${formData.activityType}(s) to supplier`);
       }
       
@@ -165,9 +154,7 @@ const QuoteSupplierSection = ({ quote, onAssignmentUpdated }) => {
     }
     
     try {
-      await axios.delete(`/api/supplier-assignments/${assignmentId}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      await api.delete(`/supplier-assignments/${assignmentId}`);
       fetchAssignments();
       if (onAssignmentUpdated) {
         onAssignmentUpdated();
@@ -189,11 +176,8 @@ const QuoteSupplierSection = ({ quote, onAssignmentUpdated }) => {
 
   const handleSubmitMarkPaid = async () => {
     try {
-      const response = await axios.patch(`/api/supplier-assignments/${markingPaidAssignment._id}/mark-paid`, 
-        paymentFormData,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        }
+      const response = await api.patch(`/supplier-assignments/${markingPaidAssignment._id}/mark-paid`, 
+        paymentFormData
       );
       
       setSuccess(response.data.message);
@@ -959,7 +943,7 @@ const QuoteSupplierSection = ({ quote, onAssignmentUpdated }) => {
           )}
 
           {/* Assignments List */}
-          {assignments.length > 0 && (
+          {assignments && Array.isArray(assignments) && assignments.length > 0 && (
             <div style={{ marginTop: '30px' }}>
               <h6 style={{ marginBottom: '15px' }}>Current Assignments</h6>
               <div style={{
