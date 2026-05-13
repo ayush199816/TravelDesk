@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 
 export const AuthContext = createContext();
 
@@ -11,8 +11,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      axios.get('/api/auth/me')
+      api.get('/api/auth/me')
         .then(res => {
           if (res.data.role) {
             setUser(res.data);
@@ -24,7 +23,7 @@ export const AuthProvider = ({ children }) => {
         })
         .catch(() => {
           localStorage.removeItem('token');
-          delete axios.defaults.headers.common['Authorization'];
+          delete api.defaults.headers.common['Authorization'];
         })
         .finally(() => setLoading(false));
     } else {
@@ -33,20 +32,18 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const loginMainAdmin = async (username, password) => {
-    const res = await axios.post('/api/auth/main-admin/login', { username, password });
+    const res = await api.post('/api/auth/main-admin/login', { username, password });
     localStorage.setItem('token', res.data.token);
     setUser({ username });
     setUserType('mainAdmin');
-    axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
     return res.data;
   };
 
   const loginUser = async (email, password) => {
-    const res = await axios.post('/api/auth/login', { email, password });
+    const res = await api.post('/api/auth/login', { email, password });
     localStorage.setItem('token', res.data.token);
     setUser(res.data.user);
     setUserType('user');
-    axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
     return res.data;
   };
 
@@ -54,7 +51,6 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     setUser(null);
     setUserType(null);
-    delete axios.defaults.headers.common['Authorization'];
   };
 
   return (
