@@ -558,18 +558,11 @@ const LeadDetailPage = () => {
 
   const handleDownloadPDF = async (quote, index) => {
     try {
-      const response = await fetch(`/api/pdf-generator/quote/${quote._id}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+      const response = await api.get(`/pdf-generator/quote/${quote._id}`, {
+        responseType: 'blob'
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to generate PDF');
-      }
-
-      const blob = await response.blob();
+      const blob = response.data;
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.style.display = 'none';

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 
 // PreviewIframe component to handle authentication
 const PreviewIframe = ({ template }) => {
@@ -13,7 +13,7 @@ const PreviewIframe = ({ template }) => {
         setLoading(true);
         setError('');
         
-        const response = await axios.get(`/api/pdf-generator/preview/${template.country}`);
+        const response = await api.get(`/pdf-generator/preview/${template.country}`);
         setHtmlContent(response.data);
         console.log('Preview HTML loaded successfully, length:', response.data.length);
       } catch (err) {
@@ -134,7 +134,7 @@ const PDFTemplateManager = ({ user }) => {
   const fetchTemplates = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/pdf-templates?organization=${user.organization._id}`);
+      const response = await api.get(`/pdf-templates?organization=${user.organization._id}`);
       setTemplates(response.data);
     } catch (error) {
       console.error('Error fetching templates:', error);
@@ -166,7 +166,7 @@ const PDFTemplateManager = ({ user }) => {
         formDataToSend.append('lastPageBackground', files.lastPageBackground);
       }
 
-      await axios.post('/api/pdf-templates', formDataToSend, {
+      await api.post('/pdf-templates', formDataToSend, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
@@ -241,7 +241,7 @@ const PDFTemplateManager = ({ user }) => {
     if (!window.confirm('Are you sure you want to delete this template?')) return;
 
     try {
-      await axios.delete(`/api/pdf-templates/${templateId}`);
+      await api.delete(`/pdf-templates/${templateId}`);
       setMessage('Template deleted successfully!');
       fetchTemplates();
     } catch (error) {
