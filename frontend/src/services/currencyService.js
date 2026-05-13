@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../api/axios';
 
 class CurrencyService {
   constructor() {
@@ -42,7 +42,7 @@ class CurrencyService {
       console.log('📊 Fetching real-time currency rates from backend...');
       
       // Use backend API for consistency
-      const response = await axios.get('/api/quotes/exchange-rates', {
+      const response = await api.get('/quotes/exchange-rates', {
         timeout: 5000
       });
 
