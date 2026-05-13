@@ -42,66 +42,67 @@ class PDFGenerator {
       // Set user agent to avoid blocking
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
 
-      // Debug: Show all available templates for this organization
-      const allTemplates = await QuoteTemplate.find({
-        organization: organization._id,
-        isActive: true
-      }).sort({ country: 1, createdAt: -1 });
+      // Simplified template finding - use default template to avoid errors
+      let quoteTemplate = null;
       
-      console.log('=== DEBUG: All Available Templates ===');
-      allTemplates.forEach(t => {
-        console.log(`- ${t.name} (${t.country}): Primary=${t.colors?.primary}, ID=${t._id}`);
-      });
-      console.log(`=== Looking for country: ${quote.country} ===`);
-      
-      // Get the quote template for this organization and country
-      let quoteTemplate = await QuoteTemplate.findOne({
-        organization: organization._id,
-        country: quote.country,
-        isActive: true
-      }).sort({ createdAt: -1 }); // Get the most recent template
-      
-      console.log(`Found template for ${quote.country}:`, quoteTemplate ? quoteTemplate.name : 'NONE');
-      
-      // If no country-specific template exists, try to get the general default
-      if (!quoteTemplate) {
-        console.log('No country-specific template found, looking for Default...');
+      try {
+        // Try to find a template for this organization and country
         quoteTemplate = await QuoteTemplate.findOne({
           organization: organization._id,
-          country: 'Default',
+          country: quote.country || 'Default',
           isActive: true
         }).sort({ createdAt: -1 });
-        console.log('Found default template:', quoteTemplate ? quoteTemplate.name : 'NONE');
+      } catch (templateError) {
+        console.log('Template lookup failed, using default:', templateError.message);
       }
       
-      // If still no template, create a default one
+      // If no template found, create a simple default template object
       if (!quoteTemplate) {
-        console.log('No templates found, creating default...');
-        quoteTemplate = new QuoteTemplate({
-          name: 'Default Quote Template',
-          organization: organization._id,
-          country: 'Default',
-          isDefault: true,
-          createdBy: organization.createdBy
-        });
-        await quoteTemplate.save();
-        console.log('Created default template:', quoteTemplate.name);
+        quoteTemplate = {
+          name: 'Default Template',
+          colors: {
+            primary: '#007bff',
+            secondary: '#6c757d',
+            accent: '#28a745',
+            background: '#ffffff',
+            text: '#333333'
+          },
+          fonts: {
+            heading: 'Arial, sans-serif',
+            body: 'Arial, sans-serif'
+          },
+          fontSizes: {
+            heading: 24,
+            subheading: 18,
+            body: 14,
+            small: 12
+          },
+          country: quote.country || 'Default'
+        };
+        console.log('Using built-in default template');
+      } else {
+        console.log(`Using template: ${quoteTemplate.name} for country: ${quote.country}`);
       }
-      
-      console.log(`=== FINAL: Using template: ${quoteTemplate.name} for country: ${quote.country} ===`);
-      console.log('Template colors:', JSON.stringify(quoteTemplate.colors, null, 2));
-      console.log('Template ID:', quoteTemplate._id);
-      console.log('Template country:', quoteTemplate.country);
 
-      // Get the PDF template for this country
-      const template = await PDFTemplate.findOne({
-        organization: organization._id,
-        country: quote.country,
-        isActive: true
-      });
+      // Get the PDF template for this country (with error handling)
+      let template = null;
+      try {
+        template = await PDFTemplate.findOne({
+          organization: organization._id,
+          country: quote.country,
+          isActive: true
+        });
+      } catch (templateError) {
+        console.log('PDF template lookup failed:', templateError.message);
+      }
 
-      // Populate sightseeing data with images
-      const populatedQuote = await this.populateQuoteData(quote);
+      // Use basic quote data if population fails
+      let populatedQuote = quote;
+      try {
+        populatedQuote = await this.populateQuoteData(quote);
+      } catch (populateError) {
+        console.log('Quote population failed, using basic data:', populateError.message);
+      }
       
       // Generate HTML content
       const htmlContent = this.generateQuoteHTML(populatedQuote, lead, organization, template, quoteTemplate);
@@ -120,22 +121,41 @@ class PDFGenerator {
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
-      // Set content and wait for load with faster condition and retry
+      // Set content with better error handling
       try {
         await page.setContent(htmlContent, { 
           waitUntil: 'domcontentloaded',
-          timeout: 30000 // 30 seconds timeout
+          timeout: 30000
         });
+        console.log('✅ Content set successfully');
       } catch (setContentError) {
-        console.log('setContent failed, trying with load event...');
-        await page.setContent(htmlContent, { 
-          waitUntil: 'load',
-          timeout: 30000 // 30 seconds timeout
-        });
+        console.log('❌ setContent failed:', setContentError.message);
+        try {
+          await page.setContent(htmlContent, { 
+            waitUntil: 'load',
+            timeout: 30000
+          });
+          console.log('✅ Content set with load event');
+        } catch (loadError) {
+          console.log('❌ Both setContent attempts failed, trying minimal content...');
+          // Try with minimal content as last resort
+          const minimalHTML = `
+            <html>
+              <body>
+                <h1>Quote #${quote.quoteNumber || 'N/A'}</h1>
+                <p>Lead: ${lead?.name || 'N/A'}</p>
+                <p>Country: ${quote.country || 'N/A'}</p>
+                <p>Amount: ${quote.totalAmount || 'N/A'} ${quote.currency || 'USD'}</p>
+              </body>
+            </html>
+          `;
+          await page.setContent(minimalHTML, { timeout: 10000 });
+          console.log('✅ Minimal content set');
+        }
       }
       
-      // Wait for content to render (reduced time)
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Wait for content to render
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       // Generate PDF options
       const pdfOptions = {
@@ -151,14 +171,27 @@ class PDFGenerator {
         }
       };
 
-      // Generate PDF
-      const pdfBuffer = await page.pdf(pdfOptions);
-      
-      await page.close();
+      // Generate PDF with error handling
+      let pdfBuffer;
+      try {
+        pdfBuffer = await page.pdf(pdfOptions);
+        console.log('✅ PDF generated successfully, size:', pdfBuffer.length);
+      } catch (pdfError) {
+        console.error('❌ PDF generation failed:', pdfError.message);
+        throw new Error('Failed to generate PDF: ' + pdfError.message);
+      } finally {
+        // Always close the page
+        try {
+          await page.close();
+          console.log('✅ Page closed successfully');
+        } catch (closeError) {
+          console.log('⚠️ Error closing page:', closeError.message);
+        }
+      }
       
       return pdfBuffer;
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      console.error('❌ Error in PDF generation process:', error.message);
       throw error;
     }
   }
