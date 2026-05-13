@@ -37,7 +37,7 @@ const QuoteTemplateManager = () => {
       console.log('Fetching templates for country:', selectedCountry);
       
       // Get all templates to extract available countries
-      const allResponse = await api.get('/api/quote-templates', {
+      const allResponse = await api.get('/quote-templates', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       console.log('All templates:', allResponse.data);
@@ -48,7 +48,7 @@ const QuoteTemplateManager = () => {
       setAvailableCountries(countries.length > 1 ? countries : ['Default', 'Dubai', 'India', 'USA', 'UK', 'Canada', 'Australia', 'UAE', 'Singapore', 'Malaysia', 'Thailand', 'Europe']);
       
       // Get templates for selected country
-      const response = await api.get('/api/quote-templates', {
+      const response = await api.get('/quote-templates', {
         params: { country: selectedCountry },
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
@@ -66,7 +66,7 @@ const QuoteTemplateManager = () => {
       console.log('Fetching template for country:', selectedCountry);
       
       // First, try to get templates for the selected country
-      const templatesResponse = await api.get('/api/quote-templates', {
+      const templatesResponse = await api.get('/quote-templates', {
         params: { country: selectedCountry },
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
@@ -81,7 +81,7 @@ const QuoteTemplateManager = () => {
       } else {
         // If no templates for this country, get the default template
         console.log('No templates found for country, getting default');
-        const response = await api.get('/api/quote-templates/default', {
+        const response = await api.get('/quote-templates/default', {
           params: { country: selectedCountry },
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });

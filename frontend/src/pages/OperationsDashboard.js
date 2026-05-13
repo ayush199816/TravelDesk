@@ -77,7 +77,7 @@ const OperationsDashboard = () => {
 
   const fetchLeads = useCallback(async () => {
     try {
-      const response = await api.get(`/api/leads?organization=${user.organization._id}`);
+      const response = await api.get(`/leads?organization=${user.organization._id}`);
       setLeads(response.data);
       setFilteredLeads(response.data);
     } catch (error) {
@@ -467,7 +467,7 @@ const OperationsDashboard = () => {
 
   const fetchSalesUsers = useCallback(async () => {
     try {
-      const response = await api.get(`/api/leads/users/sales?organization=${user.organization._id}`);
+      const response = await api.get(`/leads/users/sales?organization=${user.organization._id}`);
       setSalesUsers(response.data);
     } catch (error) {
       console.error('Error fetching sales users:', error);
@@ -476,7 +476,7 @@ const OperationsDashboard = () => {
 
   const fetchSightseeings = useCallback(async () => {
     try {
-      const response = await api.get(`/api/sightseeings?organization=${user.organization._id}`);
+      const response = await api.get(`/sightseeings?organization=${user.organization._id}`);
       setSightseeings(response.data);
     } catch (error) {
       console.error('Error fetching sightseeings:', error);
@@ -485,7 +485,7 @@ const OperationsDashboard = () => {
 
   const fetchTransfers = useCallback(async () => {
     try {
-      const response = await api.get(`/api/transfers?organization=${user.organization._id}`);
+      const response = await api.get(`/transfers?organization=${user.organization._id}`);
       setTransfers(response.data);
     } catch (error) {
       console.error('Error fetching transfers:', error);
@@ -494,7 +494,7 @@ const OperationsDashboard = () => {
 
   const fetchHotels = useCallback(async () => {
     try {
-      const response = await api.get(`/api/hotels?organization=${user.organization._id}`);
+      const response = await api.get(`/hotels?organization=${user.organization._id}`);
       setHotels(response.data);
     } catch (error) {
       console.error('Error fetching hotels:', error);
@@ -503,7 +503,7 @@ const OperationsDashboard = () => {
 
   const fetchQuotes = useCallback(async () => {
     try {
-      const response = await api.get(`/api/quotes?organization=${user.organization._id}`);
+      const response = await api.get(`/quotes?organization=${user.organization._id}`);
       setQuotes(response.data);
     } catch (error) {
       console.error('Error fetching quotes:', error);
@@ -512,12 +512,12 @@ const OperationsDashboard = () => {
 
   const fetchOrganizationData = useCallback(async () => {
     try {
-      const response = await api.get(`/api/organizations/${user.organization._id}`);
+      const response = await api.get(`/organizations/${user.organization._id}`);
       setOrganizationData(response.data);
       
       // Fetch lead statuses
       try {
-        const statusesResponse = await api.get(`/api/leads/statuses?organization=${user.organization._id}`);
+        const statusesResponse = await api.get(`/leads/statuses?organization=${user.organization._id}`);
         setLeadStatuses(statusesResponse.data);
         console.log('Lead statuses fetched:', statusesResponse.data);
       } catch (statusError) {

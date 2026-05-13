@@ -33,7 +33,7 @@ const SimpleTemplateManager = ({ user }) => {
   const fetchPredefinedTemplates = async () => {
     try {
       console.log('Fetching predefined templates...');
-      const response = await api.get('/api/predefined-templates');
+      const response = await api.get('/predefined-templates');
       console.log('Predefined templates response:', response.data);
       setPredefinedTemplates(response.data);
     } catch (error) {
@@ -45,7 +45,7 @@ const SimpleTemplateManager = ({ user }) => {
   const fetchCountryTemplates = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/pdf-templates', {
+      const response = await api.get('/pdf-templates', {
         params: { organization: user.organization._id }
       });
       console.log('Fetched templates:', response.data);
@@ -328,7 +328,7 @@ const SimpleTemplateManager = ({ user }) => {
           setLoading(true);
           setError('');
           
-          const response = await api.get(`/api/pdf-generator/preview/${template.country}`);
+          const response = await api.get(`/pdf-generator/preview/${template.country}`);
           setHtmlContent(response.data);
         } catch (err) {
           console.error('Error fetching preview:', err);

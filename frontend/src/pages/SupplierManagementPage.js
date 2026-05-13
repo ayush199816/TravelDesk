@@ -43,7 +43,7 @@ const SupplierManagementPage = () => {
       if (filter.type) params.append('type', filter.type);
       if (filter.status) params.append('status', filter.status);
       
-      const response = await api.get(`/api/suppliers?${params}`, {
+      const response = await api.get(`/suppliers?${params}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setSuppliers(response.data);

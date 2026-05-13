@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const loginMainAdmin = async (username, password) => {
-    const res = await api.post('/api/auth/main-admin/login', { username, password });
+    const res = await api.post('/auth/main-admin/login', { username, password });
     localStorage.setItem('token', res.data.token);
     setUser({ username });
     setUserType('mainAdmin');
@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const loginUser = async (email, password) => {
-    const res = await api.post('/api/auth/login', { email, password });
+    const res = await api.post('/auth/login', { email, password });
     localStorage.setItem('token', res.data.token);
     setUser(res.data.user);
     setUserType('user');

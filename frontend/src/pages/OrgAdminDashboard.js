@@ -34,7 +34,7 @@ const OrgAdminDashboard = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await api.get('/api/auth/users');
+      const res = await api.get('/auth/users');
       setUsers(res.data);
     } catch (err) {
       console.error('Error fetching users');
@@ -50,12 +50,12 @@ const OrgAdminDashboard = () => {
       console.log('User organization ID:', user?.organization?._id);
       console.log('Fetching organization data for:', user.organization._id);
       
-      const response = await api.get(`/api/organizations/${user.organization._id}`);
+      const response = await api.get(`/organizations/${user.organization._id}`);
       setOrganizationData(response.data);
       console.log('Organization data fetched:', response.data);
       
       // Fetch lead statuses
-      const statusesResponse = await api.get(`/api/organizations/${user.organization._id}/lead-statuses`);
+      const statusesResponse = await api.get(`/organizations/${user.organization._id}/lead-statuses`);
       setLeadStatuses(statusesResponse.data);
       console.log('Lead statuses fetched:', statusesResponse.data);
       console.log('=== END FETCH DEBUG ===');
