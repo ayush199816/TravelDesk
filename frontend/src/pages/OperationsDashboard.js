@@ -458,32 +458,7 @@ const OperationsDashboard = () => {
     return quoteStats;
   }, [quotes]);
 
-  const calculateLeadProgress = useCallback((lead) => {
-    let progressLevel = 1; // Default: Lead created
-    
-    // Check if quote created (Level 2)
-    if (lead.quoteStatus === 'sent' || lead.quoteStatus === 'accepted') {
-      progressLevel = 2;
-    }
-    
-    // Check if booking confirmed (Level 3)
-    if (lead.status === 'booking_confirmed') {
-      progressLevel = 3;
-    }
-    
-    // In real implementation, this would check invoice payment status
-    if (Math.random() > 0.5) progressLevel = 3; // Random for demo
-    
-    // Check if suppliers paid (Level 4) - simplified
-    if (Math.random() > 0.7) progressLevel = 4; // Random for demo
-    
-    return {
-      ...lead,
-      progressLevel,
-      progressPercentage: (progressLevel / 4) * 100
-    };
-  }, [leads, sightseeings, transfers, hotels]);
-
+  
   // Update filtered leads when leads or filters change
   useEffect(() => {
     applyFilters();
