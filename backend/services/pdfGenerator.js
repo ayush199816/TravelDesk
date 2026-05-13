@@ -1,6 +1,6 @@
 // Set Puppeteer cache directory for Render
 if (process.env.RENDER) {
-  process.env.PUPPETEER_CACHE_DIR = '/opt/render/.cache/puppeteer';
+  process.env.PUPPETEER_CACHE_DIR = '/opt/render/project/chrome';
 }
 
 const puppeteer = require('puppeteer');
@@ -61,7 +61,7 @@ class PDFGenerator {
         if (!browserFound) {
           console.log('❌ No system browser found, trying Puppeteer default...');
           // Use the exact path where Chrome was installed during build
-          const chromePath = '/opt/render/.cache/puppeteer/chrome/linux-148.0.7778.97/chrome-linux64/chrome';
+          const chromePath = '/opt/render/project/chrome/chrome/linux-148.0.7778.97/chrome-linux64/chrome';
           const fs = require('fs');
           
           if (fs.existsSync(chromePath)) {
@@ -70,7 +70,7 @@ class PDFGenerator {
           } else {
             console.log('❌ Puppeteer Chrome not found at:', chromePath);
             // Try to find the latest Chrome version
-            const cacheDir = '/opt/render/.cache/puppeteer/chrome';
+            const cacheDir = '/opt/render/project/chrome/chrome';
             try {
               const versions = fs.readdirSync(cacheDir);
               if (versions.length > 0) {
