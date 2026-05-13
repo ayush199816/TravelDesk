@@ -19,7 +19,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "build": "mkdir -p /opt/render/project/chrome && apt-get update && apt-get install -y chromium-browser || echo 'Chromium installation failed, will use Puppeteer bundled Chrome' && PUPPETEER_CACHE_DIR=/opt/render/project/chrome npx puppeteer browsers install chrome && echo 'Backend build complete'"
+    "build": "mkdir -p /opt/render/project/chrome && apt-get update && apt-get install -y chromium-browser || echo 'Chromium installation failed, will use Puppeteer bundled Chrome' && chmod -R +x node_modules/.bin && PUPPETEER_CACHE_DIR=/opt/render/project/chrome node node_modules/puppeteer/install.mjs && echo 'Backend build complete'"
   },
   "keywords": [],
   "author": "",
