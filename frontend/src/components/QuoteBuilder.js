@@ -26,9 +26,9 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
     'AED': 3.67
   });
 
-  const getExchangeRate = (currency) => {
-    return exchangeRates[currency] || 1;
-  };
+  // const getExchangeRate = (currency) => {
+  //   return exchangeRates[currency] || 1;
+  // };
 
   // Load real-time exchange rates on component mount
   useEffect(() => {
@@ -385,7 +385,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
         currency: lead.currency || 'USD'
       }));
     }
-  }, [quote, lead, user.organization._id]);
+  }, [quote, lead, user.organization?._id, user.organization?.currency]);
   
   const addSightseeingToDay = (dayIndex, sightseeing, childRate) => {
     setQuoteData(prev => {

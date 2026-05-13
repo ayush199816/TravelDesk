@@ -106,4 +106,5 @@ class CurrencyService {
   }
 }
 
-export default new CurrencyService();
+const currencyService = new CurrencyService();
+export default currencyService;

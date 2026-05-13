@@ -33,7 +33,7 @@ const OperationsDashboard = () => {
   const [organizationData, setOrganizationData] = useState(null);
   const [leadStatuses, setLeadStatuses] = useState([]);
   const [selectedAnalyticsCountry, setSelectedAnalyticsCountry] = useState('all');
-  const [upcomingTrips, setUpcomingTrips] = useState([]);
+  // const [upcomingTrips, setUpcomingTrips] = useState([]);
   const [quotes, setQuotes] = useState([]);
   const [showSightseeingForm, setShowSightseeingForm] = useState(false);
   const [showTransferForm, setShowTransferForm] = useState(false);
@@ -458,40 +458,30 @@ const OperationsDashboard = () => {
     return quoteStats;
   }, [quotes]);
 
-  // Calculate upcoming trips progress
-  const calculateUpcomingTrips = useCallback(() => {
-    const now = new Date();
-    const oneMonthLater = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
+  const calculateLeadProgress = useCallback((lead) => {
+    let progressLevel = 1; // Default: Lead created
     
-    const convertedLeads = leads.filter(lead => {
-      return lead.status === 'converted' && 
-             new Date(lead.dateOfTravel) >= now && 
-             new Date(lead.dateOfTravel) <= oneMonthLater;
-    });
-
-    return convertedLeads.map(lead => {
-      // Calculate progress level (1-4)
-      let progressLevel = 1; // Level 1: Invoice generated
-      
-      // Check if services are assigned (Level 2)
-      const hasServices = sightseeings.some(s => s.leadId === lead._id) ||
-                         transfers.some(t => t.leadId === lead._id) ||
-                         hotels.some(h => h.leadId === lead._id);
-      if (hasServices) progressLevel = 2;
-      
-      // Check if payments received (Level 3) - simplified
-      // In real implementation, this would check invoice payment status
-      if (Math.random() > 0.5) progressLevel = 3; // Random for demo
-      
-      // Check if suppliers paid (Level 4) - simplified
-      if (Math.random() > 0.7) progressLevel = 4; // Random for demo
-      
-      return {
-        ...lead,
-        progressLevel,
-        progressPercentage: (progressLevel / 4) * 100
-      };
-    });
+    // Check if quote created (Level 2)
+    if (lead.quoteStatus === 'sent' || lead.quoteStatus === 'accepted') {
+      progressLevel = 2;
+    }
+    
+    // Check if booking confirmed (Level 3)
+    if (lead.status === 'booking_confirmed') {
+      progressLevel = 3;
+    }
+    
+    // In real implementation, this would check invoice payment status
+    if (Math.random() > 0.5) progressLevel = 3; // Random for demo
+    
+    // Check if suppliers paid (Level 4) - simplified
+    if (Math.random() > 0.7) progressLevel = 4; // Random for demo
+    
+    return {
+      ...lead,
+      progressLevel,
+      progressPercentage: (progressLevel / 4) * 100
+    };
   }, [leads, sightseeings, transfers, hotels]);
 
   // Update filtered leads when leads or filters change
@@ -562,7 +552,7 @@ const OperationsDashboard = () => {
     } catch (error) {
       console.error('Error fetching organization data:', error);
     }
-  }, [user.organization._id, user.role]);
+  }, [user.organization._id]);
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
@@ -1673,7 +1663,7 @@ const styles = {
             const allowedRoles = ['organization_admin', 'manager', 'operations'];
             const canAccessSuppliers = allowedRoles.includes(userRole);
             
-            const userObject = user ? { id: user._id, name: user.name, role: user.role } : null
+            // const userObject = user ? { id: user._id, name: user.name, role: user.role } : null
             
             return canAccessSuppliers;
           })() && (
@@ -1756,7 +1746,7 @@ const styles = {
               {(() => {
                 const countryStats = calculateCountryAnalytics();
                 const supplierStats = calculateSupplierAnalytics();
-                const upcomingTrips = calculateUpcomingTrips();
+                // const upcomingTrips = calculateUpcomingTrips();
                 const quoteStats = analyzeQuoteSupplierAssignments();
                 const countries = Object.keys(countryStats);
                 
