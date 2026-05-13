@@ -6,8 +6,11 @@ const auth = require('../middleware/auth');
 // Get all predefined templates
 router.get('/', async (req, res) => {
   try {
+    console.log('Fetching predefined templates from database...');
     const templates = await PredefinedTemplate.find({ isActive: true })
       .sort({ category: 1, name: 1 });
+    console.log('Found templates:', templates.length);
+    console.log('Template names:', templates.map(t => t.name));
     res.json(templates);
   } catch (error) {
     console.error('Error fetching predefined templates:', error);
