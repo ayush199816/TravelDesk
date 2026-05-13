@@ -60,8 +60,31 @@ class PDFGenerator {
         
         if (!browserFound) {
           console.log('❌ No system browser found, trying Puppeteer default...');
-          // Remove executablePath to let Puppeteer use its bundled Chrome
-          delete puppeteerOptions.executablePath;
+          // Use the exact path where Chrome was installed during build
+          const chromePath = '/opt/render/.cache/puppeteer/chrome/linux-148.0.7778.97/chrome-linux64/chrome';
+          const fs = require('fs');
+          
+          if (fs.existsSync(chromePath)) {
+            puppeteerOptions.executablePath = chromePath;
+            console.log('✅ Found Puppeteer Chrome at:', chromePath);
+          } else {
+            console.log('❌ Puppeteer Chrome not found at:', chromePath);
+            // Try to find the latest Chrome version
+            const cacheDir = '/opt/render/.cache/puppeteer/chrome';
+            try {
+              const versions = fs.readdirSync(cacheDir);
+              if (versions.length > 0) {
+                const latestVersion = versions.sort().pop(); // Get the latest version
+                const latestChromePath = `${cacheDir}/${latestVersion}/chrome-linux64/chrome`;
+                if (fs.existsSync(latestChromePath)) {
+                  puppeteerOptions.executablePath = latestChromePath;
+                  console.log('✅ Found latest Puppeteer Chrome at:', latestChromePath);
+                }
+              }
+            } catch (err) {
+              console.log('❌ Error finding Chrome versions:', err.message);
+            }
+          }
         }
       }
       
