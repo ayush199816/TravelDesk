@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import api from '../api/axios';
 
 const SupplierDetailsPage = () => {
   const { supplierId } = useParams();
@@ -12,20 +13,8 @@ const SupplierDetailsPage = () => {
 
   const fetchSupplierDetails = useCallback(async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/suppliers/${supplierId}/details`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setSupplier(data);
-      } else {
-        setError('Failed to fetch supplier details');
-      }
+      const response = await api.get(`/suppliers/${supplierId}/details`);
+      setSupplier(response.data);
     } catch (err) {
       setError('Error fetching supplier details');
     } finally {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 
@@ -45,16 +45,16 @@ const CalendarPage = () => {
     try {
       setLoading(true);
       const [invoicesResponse, leadsResponse, quotesResponse, supplierAssignmentsResponse] = await Promise.all([
-        axios.get('/api/invoices', {
+        api.get('/api/invoices', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         }),
-        axios.get(`/api/leads?organization=${user.organization._id}`, {
+        api.get(`/api/leads?organization=${user.organization._id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         }),
-        axios.get(`/api/quotes?organization=${user.organization._id}`, {
+        api.get(`/api/quotes?organization=${user.organization._id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         }),
-        axios.get('/api/supplier-assignments', {
+        api.get('/api/supplier-assignments', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         })
       ]);
@@ -77,13 +77,13 @@ const CalendarPage = () => {
       }
       if (supplierAssignmentsResponse.data.length > 0) {
         console.log('Sample supplier assignment:', supplierAssignmentsResponse.data[0]);
-        console.log('All supplier assignments:', supplierAssignmentsResponse.data.map(a => ({
+        console.log('All supplier assignments:', Array.isArray(supplierAssignmentsResponse.data) ? supplierAssignmentsResponse.data.map(a => ({
           quoteNumber: a.quote?.quoteNumber,
           activityType: a.activityType,
           activityName: a.activityName,
           supplierName: a.supplier?.name,
           paymentStatus: a.paymentStatus
-        })));
+        })) : []);
       }
       console.log('=== END DATA FETCHING DEBUG ===');
 
