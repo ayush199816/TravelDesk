@@ -77,7 +77,7 @@ A comprehensive travel management platform built with the MERN stack.
 
 ### Backend (.env)
 ```
-MONGODB_URI=
+MONGO_URI=
 JWT_SECRET=your-super-secret-jwt-key-here
 CLOUDINARY_CLOUD_NAME=your-cloud-name
 CLOUDINARY_API_KEY=your-api-key
