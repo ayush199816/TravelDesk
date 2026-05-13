@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
 import { AuthContext } from '../contexts/AuthContext';
 
 const MainAdminDashboard = () => {
@@ -28,10 +28,12 @@ const MainAdminDashboard = () => {
 
   const fetchOrganizations = async () => {
     try {
-      const res = await axios.get('/api/auth/organizations');
-      setOrganizations(res.data);
+      const res = await api.get('/api/auth/organizations');
+      console.log('Organizations response:', res.data);
+      setOrganizations(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      console.error('Error fetching organizations');
+      console.error('Error fetching organizations:', err);
+      setOrganizations([]);
     }
   };
 
@@ -42,7 +44,7 @@ const MainAdminDashboard = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/auth/organizations', { name, logo, address, phone, adminUsername, adminPassword });
+      await api.post('/api/auth/organizations', { name, logo, address, phone, adminUsername, adminPassword });
       alert('Organization created');
       fetchOrganizations();
     } catch (err) {
@@ -185,7 +187,7 @@ const MainAdminDashboard = () => {
           </tr>
         </thead>
         <tbody>
-          {organizations.map(org => (
+          {Array.isArray(organizations) && organizations.map(org => (
             <tr key={org._id}>
               <td style={styles.orgsTd}>{org.name}</td>
               <td style={styles.orgsTd}>{org.address}</td>
