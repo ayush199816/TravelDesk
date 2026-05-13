@@ -16,6 +16,6 @@
     }
   ],
   "env": {
-    "REACT_APP_API_URL": "https://traveldesk-backend.onrender.com"
+    "REACT_APP_API_URL": "https://traveldesk-yxkp.onrender.com"
   }
 }
