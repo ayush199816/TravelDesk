@@ -32,7 +32,9 @@ const SimpleTemplateManager = ({ user }) => {
 
   const fetchPredefinedTemplates = async () => {
     try {
+      console.log('Fetching predefined templates...');
       const response = await api.get('/api/predefined-templates');
+      console.log('Predefined templates response:', response.data);
       setPredefinedTemplates(response.data);
     } catch (error) {
       console.error('Error fetching predefined templates:', error);
