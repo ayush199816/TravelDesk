@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 
 const InvoiceCreationFormSimple = ({ quote, onInvoiceCreated, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -74,9 +74,7 @@ const InvoiceCreationFormSimple = ({ quote, onInvoiceCreated, onCancel }) => {
     setSuccess('');
 
     try {
-      const response = await axios.post('/api/invoices', formData, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      const response = await api.post('/invoices', formData);
 
       setSuccess('Invoice created successfully!');
       if (onInvoiceCreated) {
