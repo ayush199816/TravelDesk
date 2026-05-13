@@ -28,27 +28,14 @@ const SupplierDetailsPage = () => {
 
   const markPaymentAsPaid = async (paymentId) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/supplier-assignments/${paymentId}/mark-paid`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          paymentReference: 'Manual Payment',
-          notes: 'Marked as paid from supplier details page'
-        })
+      await api.patch(`/supplier-assignments/${paymentId}/mark-paid`, {
+        paymentReference: 'Manual Payment',
+        notes: 'Marked as paid from supplier details page'
       });
 
-      if (response.ok) {
-        // Refresh supplier details to show updated payment status
-        fetchSupplierDetails();
-        alert('Payment marked as paid successfully!');
-      } else {
-        const errorData = await response.json();
-        alert('Failed to mark payment as paid: ' + (errorData.message || 'Unknown error'));
-      }
+      // Refresh supplier details to show updated payment status
+      fetchSupplierDetails();
+      alert('Payment marked as paid successfully!');
     } catch (err) {
       alert('Error marking payment as paid: ' + err.message);
     }
