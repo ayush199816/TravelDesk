@@ -28,7 +28,7 @@ const MainAdminDashboard = () => {
 
   const fetchOrganizations = async () => {
     try {
-      const res = await api.get('/api/auth/organizations');
+      const res = await api.get('/auth/organizations');
       console.log('Organizations response:', res.data);
       setOrganizations(Array.isArray(res.data) ? res.data : []);
     } catch (err) {

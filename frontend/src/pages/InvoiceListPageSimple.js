@@ -30,7 +30,7 @@ const InvoiceListPageSimple = () => {
 
   const fetchInvoices = async () => {
     try {
-      const response = await api.get('/api/invoices', {
+      const response = await api.get('/invoices', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setInvoices(response.data);
@@ -119,7 +119,7 @@ const InvoiceListPageSimple = () => {
 
   const handleDownloadPDF = async (invoiceId, invoiceNumber) => {
     try {
-      const response = await api.get(`/api/invoices/${invoiceId}/pdf`, {
+      const response = await api.get(`/invoices/${invoiceId}/pdf`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         responseType: 'blob'
       });

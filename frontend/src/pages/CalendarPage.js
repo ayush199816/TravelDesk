@@ -45,16 +45,16 @@ const CalendarPage = () => {
     try {
       setLoading(true);
       const [invoicesResponse, leadsResponse, quotesResponse, supplierAssignmentsResponse] = await Promise.all([
-        api.get('/api/invoices', {
+        api.get('/invoices', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         }),
-        api.get(`/api/leads?organization=${user.organization._id}`, {
+        api.get(`/leads?organization=${user.organization._id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         }),
-        api.get(`/api/quotes?organization=${user.organization._id}`, {
+        api.get(`/quotes?organization=${user.organization._id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         }),
-        api.get('/api/supplier-assignments', {
+        api.get('/supplier-assignments', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         })
       ]);

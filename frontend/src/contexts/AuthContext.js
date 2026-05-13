@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      api.get('/api/auth/me')
+      api.get('/auth/me')
         .then(res => {
           if (res.data.role) {
             setUser(res.data);
