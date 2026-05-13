@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
 
 const SupplierManagementPage = () => {
   const navigate = useNavigate();
@@ -43,7 +43,7 @@ const SupplierManagementPage = () => {
       if (filter.type) params.append('type', filter.type);
       if (filter.status) params.append('status', filter.status);
       
-      const response = await axios.get(`/api/suppliers?${params}`, {
+      const response = await api.get(`/api/suppliers?${params}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setSuppliers(response.data);
@@ -81,11 +81,11 @@ const SupplierManagementPage = () => {
     e.preventDefault();
     try {
       if (editingSupplier) {
-        await axios.put(`/api/suppliers/${editingSupplier._id}`, formData, {
+        await api.put(`/api/suppliers/${editingSupplier._id}`, formData, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
       } else {
-        await axios.post('/api/suppliers', formData, {
+        await api.post('/api/suppliers', formData, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
       }
@@ -111,7 +111,7 @@ const SupplierManagementPage = () => {
     }
     
     try {
-      await axios.delete(`/api/suppliers/${supplierId}`, {
+      await api.delete(`/api/suppliers/${supplierId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       fetchSuppliers();
@@ -399,7 +399,7 @@ const SupplierManagementPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredSuppliers.map((supplier) => (
+                {Array.isArray(filteredSuppliers) && filteredSuppliers.map((supplier) => (
                   <tr key={supplier._id} style={{ borderBottom: '1px solid #dee2e6' }}>
                     <td style={{ padding: '15px' }}>
                       <strong 
