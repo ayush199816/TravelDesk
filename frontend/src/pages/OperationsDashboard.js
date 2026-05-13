@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
-import axios from 'axios';
+import api from '../api/axios';
 
 const OperationsDashboard = () => {
   const { user, logout } = useContext(AuthContext);
@@ -77,7 +77,7 @@ const OperationsDashboard = () => {
 
   const fetchLeads = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/leads?organization=${user.organization._id}`);
+      const response = await api.get(`/api/leads?organization=${user.organization._id}`);
       setLeads(response.data);
       setFilteredLeads(response.data);
     } catch (error) {
@@ -467,7 +467,7 @@ const OperationsDashboard = () => {
 
   const fetchSalesUsers = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/leads/users/sales?organization=${user.organization._id}`);
+      const response = await api.get(`/api/leads/users/sales?organization=${user.organization._id}`);
       setSalesUsers(response.data);
     } catch (error) {
       console.error('Error fetching sales users:', error);
@@ -476,7 +476,7 @@ const OperationsDashboard = () => {
 
   const fetchSightseeings = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/sightseeings?organization=${user.organization._id}`);
+      const response = await api.get(`/api/sightseeings?organization=${user.organization._id}`);
       setSightseeings(response.data);
     } catch (error) {
       console.error('Error fetching sightseeings:', error);
@@ -485,7 +485,7 @@ const OperationsDashboard = () => {
 
   const fetchTransfers = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/transfers?organization=${user.organization._id}`);
+      const response = await api.get(`/api/transfers?organization=${user.organization._id}`);
       setTransfers(response.data);
     } catch (error) {
       console.error('Error fetching transfers:', error);
@@ -494,7 +494,7 @@ const OperationsDashboard = () => {
 
   const fetchHotels = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/hotels?organization=${user.organization._id}`);
+      const response = await api.get(`/api/hotels?organization=${user.organization._id}`);
       setHotels(response.data);
     } catch (error) {
       console.error('Error fetching hotels:', error);
@@ -503,7 +503,7 @@ const OperationsDashboard = () => {
 
   const fetchQuotes = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/quotes?organization=${user.organization._id}`);
+      const response = await api.get(`/api/quotes?organization=${user.organization._id}`);
       setQuotes(response.data);
     } catch (error) {
       console.error('Error fetching quotes:', error);
@@ -512,12 +512,12 @@ const OperationsDashboard = () => {
 
   const fetchOrganizationData = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/organizations/${user.organization._id}`);
+      const response = await api.get(`/api/organizations/${user.organization._id}`);
       setOrganizationData(response.data);
       
       // Fetch lead statuses
       try {
-        const statusesResponse = await axios.get(`/api/leads/statuses?organization=${user.organization._id}`);
+        const statusesResponse = await api.get(`/api/leads/statuses?organization=${user.organization._id}`);
         setLeadStatuses(statusesResponse.data);
         console.log('Lead statuses fetched:', statusesResponse.data);
       } catch (statusError) {
@@ -540,7 +540,7 @@ const OperationsDashboard = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     try {
-      const maxLeadNumber = leads.length > 0 
+      const maxLeadNumber = Array.isArray(leads) && leads.length > 0 
         ? Math.max(...leads.map(lead => parseInt(lead.leadNumber.split('-')[1]) || 0), 0)
         : 0;
       const nextLeadNumber = `LN-${String(maxLeadNumber + 1).padStart(4, '0')}`;
@@ -554,7 +554,7 @@ const OperationsDashboard = () => {
       if (!formData.assignedTo) {
         delete leadData.assignedTo;
       }
-      await axios.post('/api/leads', leadData);
+      await api.post('/api/leads', leadData);
       fetchLeads();
       setShowAddForm(false);
       setFormData({
@@ -609,7 +609,7 @@ const OperationsDashboard = () => {
         ...formData,
         tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
       };
-      await axios.put(`/api/leads/${editingLead._id}`, leadData);
+      await api.put(`/api/leads/${editingLead._id}`, leadData);
       fetchLeads();
       setShowEditForm(false);
       setEditingLead(null);
@@ -657,7 +657,7 @@ const OperationsDashboard = () => {
   const handleDeleteLead = async (leadId) => {
     if (window.confirm('Are you sure you want to delete this lead?')) {
       try {
-        await axios.delete(`/api/leads/${leadId}`);
+        await api.delete(`/api/leads/${leadId}`);
         fetchLeads();
       } catch (error) {
         console.error('Error deleting lead:', error);
@@ -936,11 +936,11 @@ const OperationsDashboard = () => {
       console.log('Frontend - Sending hotel with images:', hotelImages.length);
       
       if (editingHotel) {
-        await axios.put(`/api/hotels/${editingHotel._id}`, formData, {
+        await api.put(`/api/hotels/${editingHotel._id}`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       } else {
-        await axios.post('/api/hotels', formData, {
+        await api.post('/api/hotels', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       }
@@ -991,7 +991,7 @@ const OperationsDashboard = () => {
   const deleteHotel = async (id) => {
     if (window.confirm('Are you sure you want to delete this hotel?')) {
       try {
-        await axios.delete(`/api/hotels/${id}`);
+        await api.delete(`/api/hotels/${id}`);
         fetchHotels();
       } catch (error) {
         console.error('Error deleting hotel:', error);
@@ -1025,7 +1025,7 @@ const OperationsDashboard = () => {
 
   const updateLeadStatus = async (leadId, newStatus) => {
     try {
-      await axios.put(`/api/leads/${leadId}`, { status: newStatus });
+      await api.put(`/api/leads/${leadId}`, { status: newStatus });
       fetchLeads();
     } catch (error) {
       console.error('Error updating lead status:', error);
@@ -1058,11 +1058,11 @@ const OperationsDashboard = () => {
       console.log('Frontend - Sending sightseeing with images:', sightseeingImages.length);
       
       if (editingSightseeing) {
-        await axios.put(`/api/sightseeings/${editingSightseeing._id}`, formData, {
+        await api.put(`/api/sightseeings/${editingSightseeing._id}`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       } else {
-        await axios.post('/api/sightseeings', formData, {
+        await api.post('/api/sightseeings', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       }
@@ -1097,9 +1097,9 @@ const OperationsDashboard = () => {
       };
       
       if (editingTransfer) {
-        await axios.put(`/api/transfers/${editingTransfer._id}`, data);
+        await api.put(`/api/transfers/${editingTransfer._id}`, data);
       } else {
-        await axios.post('/api/transfers', data);
+        await api.post('/api/transfers', data);
       }
       
       fetchTransfers();
@@ -1125,7 +1125,7 @@ const OperationsDashboard = () => {
   const deleteSightseeing = async (id) => {
     if (window.confirm('Are you sure you want to delete this sightseeing?')) {
       try {
-        await axios.delete(`/api/sightseeings/${id}`);
+        await api.delete(`/api/sightseeings/${id}`);
         fetchSightseeings();
       } catch (error) {
         console.error('Error deleting sightseeing:', error);
@@ -1136,7 +1136,7 @@ const OperationsDashboard = () => {
   const deleteTransfer = async (id) => {
     if (window.confirm('Are you sure you want to delete this transfer?')) {
       try {
-        await axios.delete(`/api/transfers/${id}`);
+        await api.delete(`/api/transfers/${id}`);
         fetchTransfers();
       } catch (error) {
         console.error('Error deleting transfer:', error);
@@ -1707,7 +1707,7 @@ const styles = {
                   >
                     <option value="all">All Countries</option>
                     {(() => {
-                      const countries = [...new Set(leads.map(lead => lead.travelToCountry || 'Not Specified'))].sort();
+                      const countries = [...new Set(Array.isArray(leads) ? leads.map(lead => lead.travelToCountry || 'Not Specified') : [])].sort();
                       return countries.map(country => (
                         <option key={country} value={country}>
                           {country === 'Not Specified' ? 'Unknown' : country}
