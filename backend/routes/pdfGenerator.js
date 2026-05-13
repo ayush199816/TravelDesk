@@ -7,6 +7,49 @@ const Lead = require('../models/Lead');
 
 const pdfGenerator = new PDFGenerator();
 
+// Debug route to check browser availability
+router.get('/debug/browsers', auth, async (req, res) => {
+  try {
+    const fs = require('fs');
+    const { execSync } = require('child_process');
+    
+    const possiblePaths = [
+      '/usr/bin/chromium-browser',
+      '/usr/bin/chromium',
+      '/usr/bin/google-chrome-stable',
+      '/usr/bin/google-chrome',
+      '/snap/bin/chromium',
+      '/usr/local/bin/chromium',
+      '/usr/local/bin/google-chrome'
+    ];
+    
+    const results = [];
+    possiblePaths.forEach(path => {
+      try {
+        if (fs.existsSync(path)) {
+          const version = execSync(`${path} --version`, { encoding: 'utf8' });
+          results.push({ path, status: 'found', version: version.trim() });
+        } else {
+          results.push({ path, status: 'not found' });
+        }
+      } catch (err) {
+        results.push({ path, status: 'error', error: err.message });
+      }
+    });
+    
+    res.json({
+      environment: {
+        NODE_ENV: process.env.NODE_ENV,
+        RENDER: process.env.RENDER,
+        PUPPETEER_CACHE_DIR: process.env.PUPPETEER_CACHE_DIR
+      },
+      browsers: results
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Generate PDF for a quote
 router.get('/quote/:quoteId', auth, async (req, res) => {
   try {
