@@ -36,10 +36,17 @@ const LeadDetailPage = () => {
   const fetchLeadByNumber = useCallback(async () => {
     try {
       setLoading(true);
+      console.log('🔍 Fetching lead:', leadNumber, 'for organization:', user.organization._id);
       const response = await api.get(`/leads/by-number/${leadNumber}?organization=${user.organization._id}`);
+      console.log('📦 Lead response:', response.data);
       setLead(response.data);
       setError(null);
     } catch (error) {
+      console.error('❌ Error fetching lead:', error);
+      console.log('📄 Response data:', error.response?.data);
+      console.log('📄 Response status:', error.response?.status);
+      console.log('📄 Response headers:', error.response?.headers);
+      
       if (error.response?.status === 404) {
         setError('Lead not found');
       } else if (error.response?.status === 403) {
@@ -54,10 +61,14 @@ const LeadDetailPage = () => {
 
   const fetchQuotes = useCallback(async () => {
     try {
+      console.log('🔍 Fetching quotes for lead:', lead?._id);
       const response = await api.get(`/quotes?organization=${user.organization._id}&lead=${lead._id}`);
+      console.log('📦 Quotes response:', response.data);
       setQuotes(response.data);
     } catch (error) {
-      console.error('Error fetching quotes:', error);
+      console.error('❌ Error fetching quotes:', error);
+      console.log('📄 Response data:', error.response?.data);
+      console.log('📄 Response status:', error.response?.status);
     }
   }, [lead?._id, user.organization._id]);
 
@@ -98,9 +109,11 @@ const LeadDetailPage = () => {
       
       const response = await api.get(url);
       console.log('🔍 DEBUG - Recommendations response:', response.data);
-      setRecommendedQuotes(response.data);
+      setRecommendedQuotes(response.data || []);
     } catch (error) {
-      console.error('Error fetching recommended quotes:', error);
+      console.error('❌ Error fetching recommended quotes:', error);
+      console.log('📄 Response data:', error.response?.data);
+      console.log('📄 Response status:', error.response?.status);
       setRecommendedQuotes([]);
     } finally {
       setLoadingRecommendations(false);
