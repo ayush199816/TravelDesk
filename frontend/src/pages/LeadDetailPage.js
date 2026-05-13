@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
-import axios from 'axios';
+import api from '../api/axios';
 import QuoteBuilder from '../components/QuoteBuilder';
 import QuoteInvoiceSectionSimple from '../components/QuoteInvoiceSectionSimple';
 import QuoteSupplierSection from '../components/QuoteSupplierSection';
@@ -36,7 +36,7 @@ const LeadDetailPage = () => {
   const fetchLeadByNumber = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/leads/by-number/${leadNumber}?organization=${user.organization._id}`);
+      const response = await api.get(`/leads/by-number/${leadNumber}?organization=${user.organization._id}`);
       setLead(response.data);
       setError(null);
     } catch (error) {
@@ -54,7 +54,7 @@ const LeadDetailPage = () => {
 
   const fetchQuotes = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/quotes?organization=${user.organization._id}&lead=${lead._id}`);
+      const response = await api.get(`/quotes?organization=${user.organization._id}&lead=${lead._id}`);
       setQuotes(response.data);
     } catch (error) {
       console.error('Error fetching quotes:', error);
@@ -93,10 +93,10 @@ const LeadDetailPage = () => {
         params.append('tags', lead.tags.join(','));
       }
       
-      const url = `/api/quotes/recommendations?${params.toString()}`;
+      const url = `/quotes/recommendations?${params.toString()}`;
       console.log('🔍 DEBUG - Request URL:', url);
       
-      const response = await axios.get(url);
+      const response = await api.get(url);
       console.log('🔍 DEBUG - Recommendations response:', response.data);
       setRecommendedQuotes(response.data);
     } catch (error) {
@@ -109,7 +109,7 @@ const LeadDetailPage = () => {
 
   const fetchInvoices = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/invoices/lead/${lead._id}?organization=${user.organization._id}`);
+      const response = await api.get(`/invoices/lead/${lead._id}?organization=${user.organization._id}`);
       setInvoices(response.data);
     } catch (error) {
       console.error('Error fetching invoices:', error);
@@ -152,7 +152,7 @@ const LeadDetailPage = () => {
       return;
     }
     try {
-      await axios.delete(`/api/quotes/${quoteId}`);
+      await api.delete(`/quotes/${quoteId}`);
       setQuotes(quotes.filter(q => q._id !== quoteId));
     } catch (error) {
       console.error('Error deleting quote:', error);
@@ -205,7 +205,7 @@ const LeadDetailPage = () => {
         createdBy: user._id // Add createdBy field
       };
 
-      const response = await axios.post('/api/quotes', newQuoteData);
+      const response = await api.post('/quotes', newQuoteData);
       const savedQuote = response.data;
       
       // Add to quotes list
