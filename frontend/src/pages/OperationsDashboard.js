@@ -263,17 +263,26 @@ const OperationsDashboard = () => {
     // Helper function to check if an item has supplier assignment
     const hasSupplierAssignment = (quoteId, activityType, activityName) => {
       const assignments = supplierAssignments.filter(assignment => 
-        assignment.quote === quoteId && 
+        assignment.quote._id === quoteId && 
         assignment.activityType === activityType
       );
+      
+      console.log('🔍 DEBUG - Checking assignments for quote:', quoteId, 'type:', activityType, 'name:', activityName);
+      console.log('🔍 DEBUG - Found assignments:', assignments.length);
       
       // Check if any assignment matches the activity name
       return assignments.some(assignment => {
         if (assignment.assignedItems && assignment.assignedItems.length > 0) {
-          return assignment.assignedItems.some(item => 
-            item.includes(activityName) || 
-            activityName.includes(item)
-          );
+          const hasMatch = assignment.assignedItems.some(item => {
+            const itemName = item.name || item;
+            console.log('🔍 DEBUG - Comparing:', itemName, 'with', activityName);
+            return itemName.includes(activityName) || 
+                   activityName.includes(itemName) ||
+                   (itemName.includes('Day 1:') && activityName.includes(itemName.split('Day 1: ')[1])) ||
+                   (activityName.includes('Day 1:') && itemName.includes(activityName.split('Day 1: ')[1]));
+          });
+          console.log('🔍 DEBUG - Assignment has match:', hasMatch);
+          return hasMatch;
         }
         return assignment.activityName === activityName;
       });
