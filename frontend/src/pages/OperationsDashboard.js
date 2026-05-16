@@ -592,10 +592,17 @@ const OperationsDashboard = () => {
   }, [fetchOrganizationData]);
 
   useEffect(() => {
-    if (activeView === 'leads') {
-      fetchLeads();
-      fetchSalesUsers();
-    } else if (activeView === 'sightseeings') {
+    // Always fetch leads and sales users for analytics
+    fetchLeads();
+    fetchSalesUsers();
+    
+    // Always fetch supplier data for analytics
+    fetchSightseeings();
+    fetchTransfers();
+    fetchHotels();
+    
+    // Also fetch specific view data when needed
+    if (activeView === 'sightseeings') {
       fetchSightseeings();
     } else if (activeView === 'transfers') {
       fetchTransfers();
