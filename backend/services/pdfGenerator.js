@@ -430,26 +430,26 @@ class PDFGenerator {
         table {
           font-family: '${styles.table.font}', Arial, sans-serif;
           font-size: ${Math.min(styles.table.size, 14)}px;
-          color: ${quoteTemplate.table.textColor};
-          background-color: ${quoteTemplate.table.backgroundColor};
+          color: ${quoteTemplate.table?.textColor || '#333333'};
+          background-color: ${quoteTemplate.table?.backgroundColor || '#ffffff'};
           border-collapse: collapse;
           width: 100%;
           margin: 15px 0;
-          border-radius: ${quoteTemplate.table.borderRadius}px;
+          border-radius: ${quoteTemplate.table?.borderRadius || 8}px;
           overflow: hidden;
         }
         
         th, td {
-          border: 1px solid ${quoteTemplate.borders.table};
-          padding: ${quoteTemplate.table.padding};
+          border: 1px solid ${quoteTemplate.borders?.table || '#dee2e6'};
+          padding: ${quoteTemplate.table?.padding || '8px'};
           text-align: left;
         }
         
         th {
-          background-color: ${quoteTemplate.table.headerBackgroundColor};
-          color: ${quoteTemplate.table.headerTextColor};
+          background-color: ${quoteTemplate.table?.headerBackgroundColor || '#f8f9fa'};
+          color: ${quoteTemplate.table?.headerTextColor || '#333333'};
           font-weight: bold;
-          font-size: ${Math.min(styles.table.size, quoteTemplate.table.headerFontSize)}px;
+          font-size: ${Math.min(styles.table.size, quoteTemplate.table?.headerFontSize || 14)}px;
         }
         
         .total-price {
@@ -559,26 +559,26 @@ class PDFGenerator {
         table {
           font-family: '${styles.table.font}', Arial, sans-serif;
           font-size: ${Math.min(styles.table.size, 14)}px;
-          color: ${quoteTemplate.table.textColor};
-          background-color: ${quoteTemplate.table.backgroundColor};
+          color: ${quoteTemplate.table?.textColor || '#333333'};
+          background-color: ${quoteTemplate.table?.backgroundColor || '#ffffff'};
           border-collapse: collapse;
           width: 100%;
           margin: 15px 0;
-          border-radius: ${quoteTemplate.table.borderRadius}px;
+          border-radius: ${quoteTemplate.table?.borderRadius || 8}px;
           overflow: hidden;
         }
         
         th, td {
-          border: 1px solid ${quoteTemplate.borders.table};
-          padding: ${quoteTemplate.table.padding};
+          border: 1px solid ${quoteTemplate.borders?.table || '#dee2e6'};
+          padding: ${quoteTemplate.table?.padding || '8px'};
           text-align: left;
         }
         
         th {
-          background-color: ${quoteTemplate.table.headerBackgroundColor};
-          color: ${quoteTemplate.table.headerTextColor};
+          background-color: ${quoteTemplate.table?.headerBackgroundColor || '#f8f9fa'};
+          color: ${quoteTemplate.table?.headerTextColor || '#333333'};
           font-weight: bold;
-          font-size: ${Math.min(styles.table.size, quoteTemplate.table.headerFontSize)}px;
+          font-size: ${Math.min(styles.table.size, quoteTemplate.table?.headerFontSize || 14)}px;
         }
         
         .total-price {
@@ -832,6 +832,74 @@ class PDFGenerator {
               `;
             }).join('');
           })()}
+        </div>
+      </div>
+    ` : ''}
+    
+    <!-- Flight Details -->
+    ${quote.flights && quote.flights.length > 0 ? `
+      <div class="page middle-page page-break">
+        <div class="content-wrapper">
+          <h1 style="color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.header}; font-size: ${quoteTemplate.fontSizes.header}px;">Flight Details</h1>
+          
+          <div style="background-color: ${quoteTemplate.backgrounds.activity}; border-radius: 8px; border: 1px solid ${quoteTemplate.borders.activity}; overflow: hidden; box-shadow: 0 2px 6px ${quoteTemplate.shadows?.activity === 'transparent' ? 'transparent' : `${quoteTemplate.shadows?.activity || '#000000'}${Math.round((quoteTemplate.shadows?.activityOpacity || 0.05) * 255).toString(16).padStart(2, '0')}`};">
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background-color: ${quoteTemplate.colors.primary}20;">
+                  <th style="padding: 12px; text-align: left; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header};">Airline</th>
+                  <th style="padding: 12px; text-align: left; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header};">Flight No.</th>
+                  <th style="padding: 12px; text-align: left; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header};">From</th>
+                  <th style="padding: 12px; text-align: left; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header};">To</th>
+                  <th style="padding: 12px; text-align: left; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header};">Departure</th>
+                  <th style="padding: 12px; text-align: left; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header};">Arrival</th>
+                  <th style="padding: 12px; text-align: right; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header};">Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${quote.flights.map((flight, index) => `
+                  <tr style="${index % 2 === 0 ? `background-color: ${quoteTemplate.colors.background};` : ''} border-bottom: 1px solid ${quoteTemplate.borders.activity};">
+                    <td style="padding: 12px; color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.body};">
+                      <div style="font-weight: bold; margin-bottom: 2px;">${flight.airline}</div>
+                      ${flight.pnr ? `<div style="font-size: 11px; color: ${quoteTemplate.colors.muted};">PNR: ${flight.pnr}</div>` : ''}
+                    </td>
+                    <td style="padding: 12px; color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.body}; font-weight: bold;">
+                      ${flight.flightNumber}
+                    </td>
+                    <td style="padding: 12px; color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.body};">
+                      ${flight.departureCity}
+                    </td>
+                    <td style="padding: 12px; color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.body};">
+                      ${flight.arrivalCity}
+                    </td>
+                    <td style="padding: 12px; color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.body};">
+                      <div style="font-weight: bold;">${flight.departureTime}</div>
+                      <div style="font-size: 11px; color: ${quoteTemplate.colors.muted};">${new Date(flight.departureDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                    </td>
+                    <td style="padding: 12px; color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.body};">
+                      <div style="font-weight: bold;">${flight.arrivalTime}</div>
+                      <div style="font-size: 11px; color: ${quoteTemplate.colors.muted};">${new Date(flight.arrivalDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                    </td>
+                    <td style="padding: 12px; text-align: right; color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.body}; font-weight: bold;">
+                      ${quote.currency || 'USD'} ${flight.price.toLocaleString('en-IN')}
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+          
+          ${quote.flights.length > 0 ? `
+            <div style="margin-top: 20px; padding: 15px; background-color: ${quoteTemplate.colors.primary}15; border-radius: 8px; border-left: 4px solid ${quoteTemplate.colors.primary};">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 16px; color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.body};">
+                  <strong>Total Flight Cost:</strong> ${quote.flights.length} flight${quote.flights.length > 1 ? 's' : ''}
+                </div>
+                <div style="font-size: 18px; font-weight: bold; color: ${quoteTemplate.colors.primary}; font-family: ${quoteTemplate.fonts.header};">
+                  ${quote.currency || 'USD'} ${quote.flights.reduce((sum, flight) => sum + flight.price, 0).toLocaleString('en-IN')}
+                </div>
+              </div>
+            </div>
+          ` : ''}
         </div>
       </div>
     ` : ''}
