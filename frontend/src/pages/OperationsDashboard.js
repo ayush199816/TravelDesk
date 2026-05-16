@@ -411,98 +411,6 @@ const OperationsDashboard = () => {
     return supplierStats;
   }, [sightseeings, transfers, hotels, quotes, supplierAssignments]);
 
-  // Analyze quote supplier assignments
-  const analyzeQuoteSupplierAssignments = useCallback(() => {
-    const quoteStats = {
-      convertedQuotes: 0,
-      totalQuotes: 0,
-      quotesWithSuppliers: 0,
-      quotesWithoutSuppliers: 0,
-      activitiesWithSuppliers: 0,
-      activitiesWithoutSuppliers: 0
-    };
-
-    quotes.forEach(quote => {
-      quoteStats.totalQuotes++;
-      
-      // Check if quote is converted (has associated lead)
-      if (quote.leadId && quote.lead) {
-        quoteStats.convertedQuotes++;
-      }
-      
-      // Check activities within quotes
-      if (quote.activities && quote.activities.length > 0) {
-        let quoteHasSupplier = false;
-        quote.activities.forEach(activity => {
-          const hasSupplier = activity.supplier || 
-                           activity.assignedSupplier || 
-                           activity.supplierId ||
-                           activity.supplierName ||
-                           (activity.assignedItems && activity.assignedItems.length > 0) ||
-                           (activity.items && activity.items.length > 0);
-          
-          if (hasSupplier) {
-            quoteStats.activitiesWithSuppliers++;
-            quoteHasSupplier = true;
-          }
-        });
-        
-        if (quoteHasSupplier) {
-          quoteStats.quotesWithSuppliers++;
-        } else {
-          quoteStats.quotesWithoutSuppliers++;
-          quoteStats.activitiesWithoutSuppliers += quote.activities ? quote.activities.length : 0;
-        }
-      }
-      
-      // Check transfers within quotes
-      if (quote.transfers && quote.transfers.length > 0) {
-        let quoteHasSupplier = false;
-        quote.transfers.forEach(transfer => {
-          const hasSupplier = transfer.supplier || 
-                           transfer.assignedSupplier || 
-                           transfer.supplierId ||
-                           transfer.supplierName ||
-                           (transfer.assignedItems && transfer.assignedItems.length > 0) ||
-                           (transfer.items && transfer.items.length > 0);
-          
-          if (hasSupplier) {
-            quoteStats.quotesWithSuppliers++;
-            quoteHasSupplier = true;
-          }
-        });
-        
-        if (!quoteHasSupplier) {
-          quoteStats.quotesWithoutSuppliers++;
-        }
-      }
-      
-      // Check hotels within quotes
-      if (quote.hotels && quote.hotels.length > 0) {
-        let quoteHasSupplier = false;
-        quote.hotels.forEach(hotel => {
-          const hasSupplier = hotel.supplier || 
-                           hotel.assignedSupplier || 
-                           hotel.supplierId ||
-                           hotel.supplierName ||
-                           (hotel.assignedItems && hotel.assignedItems.length > 0) ||
-                           (hotel.items && hotel.items.length > 0);
-          
-          if (hasSupplier) {
-            quoteStats.quotesWithSuppliers++;
-            quoteHasSupplier = true;
-          }
-        });
-        
-        if (!quoteHasSupplier) {
-          quoteStats.quotesWithoutSuppliers++;
-        }
-      }
-    });
-
-    return quoteStats;
-  }, [quotes]);
-
   
   // Update filtered leads when leads or filters change
   useEffect(() => {
@@ -1784,7 +1692,6 @@ const styles = {
                 const countryStats = calculateCountryAnalytics();
                 const supplierStats = calculateSupplierAnalytics();
                 // const upcomingTrips = calculateUpcomingTrips();
-                const quoteStats = analyzeQuoteSupplierAssignments();
                 const countries = Object.keys(countryStats);
                 
                 return (
@@ -1892,56 +1799,8 @@ const styles = {
                       )}
                     </div>
 
-                    {/* Second Row - Quote and Supplier Analytics Side by Side */}
-                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px'}}>
-                      {/* Quote Supplier Analytics */}
-                      <div style={{
-                        backgroundColor: '#ffffff',
-                        border: '1px solid #e3e6f0',
-                        borderRadius: '12px',
-                        padding: '24px',
-                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07)'
-                      }}>
-                        <h4 style={{margin: '0 0 20px 0', color: '#2c3e50', fontSize: '18px', fontWeight: '700'}}>
-                          📋 Quote Supplier Analytics
-                        </h4>
-                        <div style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
-                        <div style={{
-                          backgroundColor: '#f8f9fa',
-                          border: '1px solid #dee2e6',
-                          borderRadius: '8px',
-                          padding: '20px',
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                        }}>
-                          <h5 style={{margin: '0 0 15px 0', color: '#495057', fontSize: '16px', fontWeight: '600'}}>
-                            📊 Quote Statistics
-                          </h5>
-                          
-                          <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px'}}>
-                            <div style={{textAlign: 'center', padding: '15px', backgroundColor: '#e3f2fd', borderRadius: '6px'}}>
-                              <div style={{fontSize: '24px', fontWeight: '700', color: '#1976d2'}}>
-                                {quoteStats.totalQuotes}
-                              </div>
-                              <div style={{fontSize: '12px', color: '#666', marginTop: '5px'}}>
-                                Total Quotes
-                              </div>
-                            </div>
-                            
-                            <div style={{textAlign: 'center', padding: '15px', backgroundColor: '#f3e5f5', borderRadius: '6px'}}>
-                              <div style={{fontSize: '24px', fontWeight: '700', color: '#7b1fa2'}}>
-                                {quoteStats.convertedQuotes}
-                              </div>
-                              <div style={{fontSize: '12px', color: '#666', marginTop: '5px'}}>
-                                Converted Quotes
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                      {/* Supplier Assignment Analytics */}
-                      <div style={{
+                    {/* Supplier Assignment Analytics */}
+                    <div style={{
                         backgroundColor: '#ffffff',
                         border: '1px solid #e3e6f0',
                         borderRadius: '12px',
@@ -1991,10 +1850,9 @@ const styles = {
                             </div>
                           </div>
                         ))}
+                        </div>
                       </div>
                     </div>
-                    </div>
-                  </div>
                 );
               })()}
             </div>
