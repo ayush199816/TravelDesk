@@ -23,7 +23,6 @@ const QuoteTemplateManager = () => {
     'Australia',
     'Austria',
     'Azerbaijan',
-    'Bali',
     'Bahamas',
     'Bahrain',
     'Bangladesh',
@@ -255,7 +254,6 @@ const QuoteTemplateManager = () => {
         'Australia',
         'Austria',
         'Azerbaijan',
-        'Bali',
         'Bahamas',
         'Bahrain',
         'Bangladesh',
@@ -450,6 +448,203 @@ const QuoteTemplateManager = () => {
       console.log('Extracted countries:', existingCountries);
       console.log('Final countries list:', finalCountries);
       setAvailableCountries(finalCountries);
+        'Default',
+        'Afghanistan',
+        'Albania',
+        'Algeria',
+        'Andorra',
+        'Angola',
+        'Antigua and Barbuda',
+        'Argentina',
+        'Armenia',
+        'Australia',
+        'Austria',
+        'Azerbaijan',
+        'Bahamas',
+        'Bahrain',
+        'Bangladesh',
+        'Barbados',
+        'Belarus',
+        'Belgium',
+        'Belize',
+        'Benin',
+        'Bhutan',
+        'Bolivia',
+        'Bosnia and Herzegovina',
+        'Botswana',
+        'Brazil',
+        'Brunei',
+        'Bulgaria',
+        'Burkina Faso',
+        'Burundi',
+        'Cabo Verde',
+        'Cambodia',
+        'Cameroon',
+        'Canada',
+        'Central African Republic',
+        'Chad',
+        'Chile',
+        'China',
+        'Colombia',
+        'Comoros',
+        'Congo (Congo-Brazzaville)',
+        'Costa Rica',
+        'Croatia',
+        'Cuba',
+        'Cyprus',
+        'Czechia (Czech Republic)',
+        'Denmark',
+        'Djibouti',
+        'Dominica',
+        'Dominican Republic',
+        'Dubai',
+        'Ecuador',
+        'Egypt',
+        'El Salvador',
+        'Equatorial Guinea',
+        'Eritrea',
+        'Estonia',
+        'Eswatini (fmr. Swaziland)',
+        'Ethiopia',
+        'Europe',
+        'Fiji',
+        'Finland',
+        'France',
+        'Gabon',
+        'Gambia',
+        'Georgia',
+        'Germany',
+        'Ghana',
+        'Greece',
+        'Grenada',
+        'Guatemala',
+        'Guinea',
+        'Guinea-Bissau',
+        'Guyana',
+        'Haiti',
+        'Holy See',
+        'Honduras',
+        'Hungary',
+        'Iceland',
+        'India',
+        'Indonesia',
+        'Iran',
+        'Iraq',
+        'Ireland',
+        'Israel',
+        'Italy',
+        'Jamaica',
+        'Japan',
+        'Jordan',
+        'Kazakhstan',
+        'Kenya',
+        'Kiribati',
+        'Kuwait',
+        'Kyrgyzstan',
+        'Laos',
+        'Latvia',
+        'Lebanon',
+        'Lesotho',
+        'Liberia',
+        'Libya',
+        'Liechtenstein',
+        'Lithuania',
+        'Luxembourg',
+        'Madagascar',
+        'Malawi',
+        'Malaysia',
+        'Maldives',
+        'Mali',
+        'Malta',
+        'Marshall Islands',
+        'Mauritania',
+        'Mauritius',
+        'Mexico',
+        'Micronesia',
+        'Moldova',
+        'Monaco',
+        'Mongolia',
+        'Montenegro',
+        'Morocco',
+        'Mozambique',
+        'Myanmar (formerly Burma)',
+        'Namibia',
+        'Nauru',
+        'Nepal',
+        'Netherlands',
+        'New Zealand',
+        'Nicaragua',
+        'Niger',
+        'Nigeria',
+        'North Korea',
+        'North Macedonia',
+        'Norway',
+        'Oman',
+        'Pakistan',
+        'Palau',
+        'Palestine State',
+        'Panama',
+        'Papua New Guinea',
+        'Paraguay',
+        'Peru',
+        'Philippines',
+        'Poland',
+        'Portugal',
+        'Qatar',
+        'Romania',
+        'Russia',
+        'Rwanda',
+        'Saint Kitts and Nevis',
+        'Saint Lucia',
+        'Saint Vincent and the Grenadines',
+        'Samoa',
+        'San Marino',
+        'Sao Tome and Principe',
+        'Saudi Arabia',
+        'Senegal',
+        'Serbia',
+        'Seychelles',
+        'Sierra Leone',
+        'Singapore',
+        'Slovakia',
+        'Slovenia',
+        'Solomon Islands',
+        'Somalia',
+        'South Africa',
+        'South Korea',
+        'South Sudan',
+        'Spain',
+        'Sri Lanka',
+        'Sudan',
+        'Suriname',
+        'Sweden',
+        'Switzerland',
+        'Syria',
+        'Tajikistan',
+        'Tanzania',
+        'Thailand',
+        'Timor-Leste',
+        'Togo',
+        'Tonga',
+        'Trinidad and Tobago',
+        'Tunisia',
+        'Turkey',
+        'Turkmenistan',
+        'Tuvalu',
+        'Uganda',
+        'UAE',
+        'UK',
+        'Ukraine',
+        'Uruguay',
+        'USA',
+        'Uzbekistan',
+        'Vanuatu',
+        'Venezuela',
+        'Vietnam',
+        'Yemen',
+        'Zambia',
+        'Zimbabwe'
+      ]);
       
       // Get templates for selected country
       const response = await api.get('/quote-templates', {
@@ -474,7 +669,6 @@ const QuoteTemplateManager = () => {
         'Australia',
         'Austria',
         'Azerbaijan',
-        'Bali',
         'Bahamas',
         'Bahrain',
         'Bangladesh',
@@ -1255,6 +1449,255 @@ const QuoteTemplateManager = () => {
                     </label>
                   </div>
                 </div>
+
+                <div style={{ gridColumn: '1 / -1', borderTop: '1px solid #ddd', paddingTop: '20px', marginTop: '20px' }}>
+                  <h4 style={{ marginBottom: '15px', color: '#333' }}>Background Borders</h4>
+                </div>
+
+                <div>
+                  <label>Activity Border Color:</label>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <input 
+                      type="color" 
+                      value={currentTemplate.borders.activity === 'transparent' ? '#e9ecef' : (currentTemplate.borders.activity || '#e9ecef')}
+                      onChange={(e) => updateTemplate('borders.activity', e.target.value)}
+                      style={{ width: '100px', height: '40px' }}
+                      disabled={currentTemplate.borders.activity === 'transparent'}
+                    />
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={currentTemplate.borders.activity === 'transparent'}
+                        onChange={(e) => updateTemplate('borders.activity', e.target.checked ? 'transparent' : (currentTemplate.borders.activity || '#e9ecef'))}
+                      />
+                      Transparent
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label>Payment Border Color:</label>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <input 
+                      type="color" 
+                      value={currentTemplate.borders.payment === 'transparent' ? 'rgba(102, 126, 234, 0.3)' : (currentTemplate.borders.payment || 'rgba(102, 126, 234, 0.3)')}
+                      onChange={(e) => updateTemplate('borders.payment', e.target.value)}
+                      style={{ width: '100px', height: '40px' }}
+                      disabled={currentTemplate.borders.payment === 'transparent'}
+                    />
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={currentTemplate.borders.payment === 'transparent'}
+                        onChange={(e) => updateTemplate('borders.payment', e.target.checked ? 'transparent' : (currentTemplate.borders.payment || 'rgba(102, 126, 234, 0.3)'))}
+                      />
+                      Transparent
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label>Next Steps Border Color:</label>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <input 
+                      type="color" 
+                      value={currentTemplate.borders.nextSteps === 'transparent' ? 'rgba(102, 126, 234, 0.2)' : (currentTemplate.borders.nextSteps || 'rgba(102, 126, 234, 0.2)')}
+                      onChange={(e) => updateTemplate('borders.nextSteps', e.target.value)}
+                      style={{ width: '100px', height: '40px' }}
+                      disabled={currentTemplate.borders.nextSteps === 'transparent'}
+                    />
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={currentTemplate.borders.nextSteps === 'transparent'}
+                        onChange={(e) => updateTemplate('borders.nextSteps', e.target.checked ? 'transparent' : (currentTemplate.borders.nextSteps || 'rgba(102, 126, 234, 0.2)'))}
+                      />
+                      Transparent
+                    </label>
+                  </div>
+                </div>
+
+                <div style={{ gridColumn: '1 / -1', borderTop: '1px solid #ddd', paddingTop: '20px', marginTop: '20px' }}>
+                  <h4 style={{ marginBottom: '15px', color: '#333' }}>Background Shadows</h4>
+                </div>
+
+                <div>
+                  <label>Activity Shadow Color:</label>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <input 
+                      type="color" 
+                      value={currentTemplate.shadows?.activity === 'transparent' ? '#000000' : (currentTemplate.shadows?.activity || '#000000')}
+                      onChange={(e) => updateTemplate('shadows.activity', e.target.value)}
+                      style={{ width: '100px', height: '40px' }}
+                      disabled={currentTemplate.shadows?.activity === 'transparent'}
+                    />
+                    <input 
+                      type="range" 
+                      min="0"
+                      max="100"
+                      value={currentTemplate.shadows?.activityOpacity !== undefined ? (currentTemplate.shadows.activityOpacity * 100) : 5}
+                      onChange={(e) => updateTemplate('shadows.activityOpacity', e.target.value / 100)}
+                      style={{ flex: 1 }}
+                      disabled={currentTemplate.shadows?.activity === 'transparent'}
+                    />
+                    <span style={{ fontSize: '12px', minWidth: '35px' }}>
+                      {Math.round((currentTemplate.shadows?.activityOpacity !== undefined ? currentTemplate.shadows.activityOpacity : 0.05) * 100)}%
+                    </span>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={currentTemplate.shadows?.activity === 'transparent'}
+                        onChange={(e) => updateTemplate('shadows.activity', e.target.checked ? 'transparent' : (currentTemplate.shadows?.activity || '#000000'))}
+                      />
+                      Transparent
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label>Payment Shadow Color:</label>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <input 
+                      type="color" 
+                      value={currentTemplate.shadows?.payment === 'transparent' ? '#000000' : (currentTemplate.shadows?.payment || '#000000')}
+                      onChange={(e) => updateTemplate('shadows.payment', e.target.value)}
+                      style={{ width: '100px', height: '40px' }}
+                      disabled={currentTemplate.shadows?.payment === 'transparent'}
+                    />
+                    <input 
+                      type="range" 
+                      min="0"
+                      max="100"
+                      value={currentTemplate.shadows?.paymentOpacity !== undefined ? (currentTemplate.shadows.paymentOpacity * 100) : 10}
+                      onChange={(e) => updateTemplate('shadows.paymentOpacity', e.target.value / 100)}
+                      style={{ flex: 1 }}
+                      disabled={currentTemplate.shadows?.payment === 'transparent'}
+                    />
+                    <span style={{ fontSize: '12px', minWidth: '35px' }}>
+                      {Math.round((currentTemplate.shadows?.paymentOpacity !== undefined ? currentTemplate.shadows.paymentOpacity : 0.1) * 100)}%
+                    </span>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={currentTemplate.shadows?.payment === 'transparent'}
+                        onChange={(e) => updateTemplate('shadows.payment', e.target.checked ? 'transparent' : (currentTemplate.shadows?.payment || '#000000'))}
+                      />
+                      Transparent
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label>Next Steps Shadow Color:</label>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <input 
+                      type="color" 
+                      value={currentTemplate.shadows?.nextSteps === 'transparent' ? '#000000' : (currentTemplate.shadows?.nextSteps || '#000000')}
+                      onChange={(e) => updateTemplate('shadows.nextSteps', e.target.value)}
+                      style={{ width: '100px', height: '40px' }}
+                      disabled={currentTemplate.shadows?.nextSteps === 'transparent'}
+                    />
+                    <input 
+                      type="range" 
+                      min="0"
+                      max="100"
+                      value={currentTemplate.shadows?.nextStepsOpacity !== undefined ? (currentTemplate.shadows.nextStepsOpacity * 100) : 5}
+                      onChange={(e) => updateTemplate('shadows.nextStepsOpacity', e.target.value / 100)}
+                      style={{ flex: 1 }}
+                      disabled={currentTemplate.shadows?.nextSteps === 'transparent'}
+                    />
+                    <span style={{ fontSize: '12px', minWidth: '35px' }}>
+                      {Math.round((currentTemplate.shadows?.nextStepsOpacity !== undefined ? currentTemplate.shadows.nextStepsOpacity : 0.05) * 100)}%
+                    </span>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={currentTemplate.shadows?.nextSteps === 'transparent'}
+                        onChange={(e) => updateTemplate('shadows.nextSteps', e.target.checked ? 'transparent' : (currentTemplate.shadows?.nextSteps || '#000000'))}
+                      />
+                      Transparent
+                    </label>
+                  </div>
+                </div>
+
+                <div style={{ gridColumn: '1 / -1', borderTop: '1px solid #ddd', paddingTop: '20px', marginTop: '20px' }}>
+                  <h4 style={{ marginBottom: '15px', color: '#333' }}>Package Introduction Box</h4>
+                </div>
+
+                <div>
+                  <label>Package Box Background:</label>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <input 
+                      type="color" 
+                      value={currentTemplate.backgrounds?.package === 'transparent' ? '#f8f9fa' : (currentTemplate.backgrounds?.package || '#f8f9fa')}
+                      onChange={(e) => updateTemplate('backgrounds.package', e.target.value)}
+                      style={{ width: '100px', height: '40px' }}
+                      disabled={currentTemplate.backgrounds?.package === 'transparent'}
+                    />
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={currentTemplate.backgrounds?.package === 'transparent'}
+                        onChange={(e) => updateTemplate('backgrounds.package', e.target.checked ? 'transparent' : (currentTemplate.backgrounds?.package || '#f8f9fa'))}
+                      />
+                      Transparent
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label>Package Box Border Color:</label>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <input 
+                      type="color" 
+                      value={currentTemplate.borders?.package === 'transparent' ? '#e9ecef' : (currentTemplate.borders?.package || '#e9ecef')}
+                      onChange={(e) => updateTemplate('borders.package', e.target.value)}
+                      style={{ width: '100px', height: '40px' }}
+                      disabled={currentTemplate.borders?.package === 'transparent'}
+                    />
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={currentTemplate.borders?.package === 'transparent'}
+                        onChange={(e) => updateTemplate('borders.package', e.target.checked ? 'transparent' : (currentTemplate.borders?.package || '#e9ecef'))}
+                      />
+                      Transparent
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label>Package Box Shadow Color:</label>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <input 
+                      type="color" 
+                      value={currentTemplate.shadows?.package === 'transparent' ? '#000000' : (currentTemplate.shadows?.package || '#000000')}
+                      onChange={(e) => updateTemplate('shadows.package', e.target.value)}
+                      style={{ width: '100px', height: '40px' }}
+                      disabled={currentTemplate.shadows?.package === 'transparent'}
+                    />
+                    <input 
+                      type="range" 
+                      min="0"
+                      max="100"
+                      value={currentTemplate.shadows?.packageOpacity !== undefined ? (currentTemplate.shadows.packageOpacity * 100) : 10}
+                      onChange={(e) => updateTemplate('shadows.packageOpacity', e.target.value / 100)}
+                      style={{ flex: 1 }}
+                      disabled={currentTemplate.shadows?.package === 'transparent'}
+                    />
+                    <span style={{ fontSize: '12px', minWidth: '35px' }}>
+                      {Math.round((currentTemplate.shadows?.packageOpacity !== undefined ? currentTemplate.shadows.packageOpacity : 0.1) * 100)}%
+                    </span>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={currentTemplate.shadows?.package === 'transparent'}
+                        onChange={(e) => updateTemplate('shadows.package', e.target.checked ? 'transparent' : (currentTemplate.shadows?.package || '#000000'))}
+                      />
+                      Transparent
+                    </label>
+                  </div>
+                </div>
               </>
             )}
 
@@ -1420,6 +1863,271 @@ const QuoteTemplateManager = () => {
                     style={{ width: '100%', padding: '8px' }}
                   />
                 </div>
+                
+                <div>
+                  <label>Title Font:</label>
+                  <select 
+                    value={currentTemplate.hotel?.titleFont || 'Arial, sans-serif'}
+                    onChange={(e) => updateTemplate('hotel.titleFont', e.target.value)}
+                    style={{ width: '100%', padding: '8px' }}
+                  >
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="'Helvetica Neue', Arial, sans-serif">Helvetica</option>
+                    <option value="Georgia, serif">Georgia</option>
+                    <option value="'Times New Roman', serif">Times New Roman</option>
+                    <option value="'Courier New', monospace">Courier New</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label>Title Font Size (px):</label>
+                  <input 
+                    type="number" 
+                    min="12"
+                    max="32"
+                    value={currentTemplate.hotel?.titleFontSize || 18}
+                    onChange={(e) => updateTemplate('hotel.titleFontSize', parseInt(e.target.value))}
+                    style={{ width: '100%', padding: '8px' }}
+                  />
+                </div>
+                
+                <div>
+                  <label>Title Color:</label>
+                  <input 
+                    type="color" 
+                    value={currentTemplate.hotel?.titleColor || '#333333'}
+                    onChange={(e) => updateTemplate('hotel.titleColor', e.target.value)}
+                    style={{ width: '100%', height: '40px' }}
+                  />
+                </div>
+                
+                <div>
+                  <label>Body Font:</label>
+                  <select 
+                    value={currentTemplate.hotel?.bodyFont || 'Arial, sans-serif'}
+                    onChange={(e) => updateTemplate('hotel.bodyFont', e.target.value)}
+                    style={{ width: '100%', padding: '8px' }}
+                  >
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="'Helvetica Neue', Arial, sans-serif">Helvetica</option>
+                    <option value="Georgia, serif">Georgia</option>
+                    <option value="'Times New Roman', serif">Times New Roman</option>
+                    <option value="'Courier New', monospace">Courier New</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label>Body Font Size (px):</label>
+                  <input 
+                    type="number" 
+                    min="10"
+                    max="20"
+                    value={currentTemplate.hotel?.bodyFontSize || 14}
+                    onChange={(e) => updateTemplate('hotel.bodyFontSize', parseInt(e.target.value))}
+                    style={{ width: '100%', padding: '8px' }}
+                  />
+                </div>
+                
+                <div>
+                  <label>Body Color:</label>
+                  <input 
+                    type="color" 
+                    value={currentTemplate.hotel?.bodyColor || '#666666'}
+                    onChange={(e) => updateTemplate('hotel.bodyColor', e.target.value)}
+                    style={{ width: '100%', height: '40px' }}
+                  />
+                </div>
+                
+                <div>
+                  <label>Image Width (px):</label>
+                  <input 
+                    type="number" 
+                    min="50"
+                    max="300"
+                    value={currentTemplate.hotel?.imageWidth || 120}
+                    onChange={(e) => updateTemplate('hotel.imageWidth', parseInt(e.target.value))}
+                    style={{ width: '100%', padding: '8px' }}
+                  />
+                </div>
+                
+                <div>
+                  <label>Image Height (px):</label>
+                  <input 
+                    type="number" 
+                    min="50"
+                    max="300"
+                    value={currentTemplate.hotel?.imageHeight || 120}
+                    onChange={(e) => updateTemplate('hotel.imageHeight', parseInt(e.target.value))}
+                    style={{ width: '100%', padding: '8px' }}
+                  />
+                </div>
+                
+                <div>
+                  <label>Image Border Radius (px):</label>
+                  <input 
+                    type="number" 
+                    min="0"
+                    max="50"
+                    value={currentTemplate.hotel?.imageBorderRadius || 8}
+                    onChange={(e) => updateTemplate('hotel.imageBorderRadius', parseInt(e.target.value))}
+                    style={{ width: '100%', padding: '8px' }}
+                  />
+                </div>
+                
+                <div style={{ gridColumn: '1 / -1', borderTop: '1px solid #ddd', paddingTop: '20px', marginTop: '20px' }}>
+                  <h4 style={{ marginBottom: '15px', color: '#333' }}>Night Box Settings</h4>
+                </div>
+                
+                <div>
+                  <label>Show Night Box:</label>
+                  <select 
+                    value={currentTemplate.hotel?.nightBox?.showNightBox !== false}
+                    onChange={(e) => updateTemplate('hotel.nightBox.showNightBox', e.target.value === 'true')}
+                    style={{ width: '100%', padding: '8px' }}
+                  >
+                    <option value="true">Show Night Box</option>
+                    <option value="false">Hide Night Box</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label>Night Box Background Color:</label>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <input 
+                      type="color" 
+                      value={currentTemplate.hotel?.nightBox?.backgroundColor === 'transparent' ? '#ffffff' : (currentTemplate.hotel?.nightBox?.backgroundColor || '#ffffff')}
+                      onChange={(e) => updateTemplate('hotel.nightBox.backgroundColor', e.target.value)}
+                      style={{ width: '100px', height: '40px' }}
+                      disabled={currentTemplate.hotel?.nightBox?.backgroundColor === 'transparent'}
+                    />
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={currentTemplate.hotel?.nightBox?.backgroundColor === 'transparent'}
+                        onChange={(e) => updateTemplate('hotel.nightBox.backgroundColor', e.target.checked ? 'transparent' : (currentTemplate.hotel?.nightBox?.backgroundColor || '#ffffff'))}
+                      />
+                      Transparent
+                    </label>
+                  </div>
+                </div>
+                
+                <div>
+                  <label>Night Box Border Color:</label>
+                  <input 
+                    type="color" 
+                    value={currentTemplate.hotel?.nightBox?.borderColor || '#dee2e6'}
+                    onChange={(e) => updateTemplate('hotel.nightBox.borderColor', e.target.value)}
+                    style={{ width: '100%', height: '40px' }}
+                  />
+                </div>
+                
+                <div>
+                  <label>Night Box Border Width (px):</label>
+                  <input 
+                    type="number" 
+                    min="0"
+                    max="5"
+                    value={currentTemplate.hotel?.nightBox?.borderWidth || 1}
+                    onChange={(e) => updateTemplate('hotel.nightBox.borderWidth', parseInt(e.target.value))}
+                    style={{ width: '100%', padding: '8px' }}
+                  />
+                </div>
+                
+                <div>
+                  <label>Night Box Border Radius (px):</label>
+                  <input 
+                    type="number" 
+                    min="0"
+                    max="20"
+                    value={currentTemplate.hotel?.nightBox?.borderRadius || 6}
+                    onChange={(e) => updateTemplate('hotel.nightBox.borderRadius', parseInt(e.target.value))}
+                    style={{ width: '100%', padding: '8px' }}
+                  />
+                </div>
+                
+                <div>
+                  <label>Night Box Title Font:</label>
+                  <select 
+                    value={currentTemplate.hotel?.nightBox?.titleFont || 'Arial, sans-serif'}
+                    onChange={(e) => updateTemplate('hotel.nightBox.titleFont', e.target.value)}
+                    style={{ width: '100%', padding: '8px' }}
+                  >
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="'Helvetica Neue', Arial, sans-serif">Helvetica</option>
+                    <option value="Georgia, serif">Georgia</option>
+                    <option value="'Times New Roman', serif">Times New Roman</option>
+                    <option value="'Courier New', monospace">Courier New</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label>Night Box Title Font Size (px):</label>
+                  <input 
+                    type="number" 
+                    min="10"
+                    max="24"
+                    value={currentTemplate.hotel?.nightBox?.titleFontSize || 14}
+                    onChange={(e) => updateTemplate('hotel.nightBox.titleFontSize', parseInt(e.target.value))}
+                    style={{ width: '100%', padding: '8px' }}
+                  />
+                </div>
+                
+                <div>
+                  <label>Night Box Title Color:</label>
+                  <input 
+                    type="color" 
+                    value={currentTemplate.hotel?.nightBox?.titleColor || '#495057'}
+                    onChange={(e) => updateTemplate('hotel.nightBox.titleColor', e.target.value)}
+                    style={{ width: '100%', height: '40px' }}
+                  />
+                </div>
+                
+                <div>
+                  <label>Night Box Body Font:</label>
+                  <select 
+                    value={currentTemplate.hotel?.nightBox?.bodyFont || 'Arial, sans-serif'}
+                    onChange={(e) => updateTemplate('hotel.nightBox.bodyFont', e.target.value)}
+                    style={{ width: '100%', padding: '8px' }}
+                  >
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="'Helvetica Neue', Arial, sans-serif">Helvetica</option>
+                    <option value="Georgia, serif">Georgia</option>
+                    <option value="'Times New Roman', serif">Times New Roman</option>
+                    <option value="'Courier New', monospace">Courier New</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label>Night Box Body Font Size (px):</label>
+                  <input 
+                    type="number" 
+                    min="8"
+                    max="18"
+                    value={currentTemplate.hotel?.nightBox?.bodyFontSize || 12}
+                    onChange={(e) => updateTemplate('hotel.nightBox.bodyFontSize', parseInt(e.target.value))}
+                    style={{ width: '100%', padding: '8px' }}
+                  />
+                </div>
+                
+                <div>
+                  <label>Night Box Body Color:</label>
+                  <input 
+                    type="color" 
+                    value={currentTemplate.hotel?.nightBox?.bodyColor || '#6c757d'}
+                    onChange={(e) => updateTemplate('hotel.nightBox.bodyColor', e.target.value)}
+                    style={{ width: '100%', height: '40px' }}
+                  />
+                </div>
+                
+                <div>
+                  <label>Night Box Highlight Color:</label>
+                  <input 
+                    type="color" 
+                    value={currentTemplate.hotel?.nightBox?.highlightColor || '#007bff'}
+                    onChange={(e) => updateTemplate('hotel.nightBox.highlightColor', e.target.value)}
+                    style={{ width: '100%', height: '40px' }}
+                  />
+                </div>
               </>
             )}
 
@@ -1470,6 +2178,20 @@ const QuoteTemplateManager = () => {
                     style={{ width: '100%', padding: '8px' }}
                   />
                 </div>
+                {Array.isArray(currentTemplate?.messages?.nextSteps) && currentTemplate.messages.nextSteps.map((step, index) => (
+                  <div key={index} style={{ gridColumn: '1 / -1' }}>
+                    <label>Next Step {index + 1}:</label>
+                    <textarea 
+                      value={step}
+                      onChange={(e) => {
+                        const newSteps = [...currentTemplate.messages.nextSteps];
+                        newSteps[index] = e.target.value;
+                        updateTemplate('messages.nextSteps', newSteps);
+                      }}
+                      style={{ width: '100%', padding: '8px', minHeight: '60px' }}
+                    />
+                  </div>
+                ))}
               </>
             )}
 
@@ -1480,8 +2202,8 @@ const QuoteTemplateManager = () => {
                   <input 
                     type="number" 
                     min="1"
-                    max="10"
-                    value={currentTemplate.layout?.activitiesPerPage || 2}
+                    max="4"
+                    value={currentTemplate.layout.activitiesPerPage}
                     onChange={(e) => updateTemplate('layout.activitiesPerPage', parseInt(e.target.value))}
                     style={{ width: '100%', padding: '8px' }}
                   />
@@ -1489,37 +2211,24 @@ const QuoteTemplateManager = () => {
                 <div>
                   <label>Show Images:</label>
                   <select 
-                    value={currentTemplate.layout?.showImages !== false}
+                    value={currentTemplate.layout.showImages}
                     onChange={(e) => updateTemplate('layout.showImages', e.target.value === 'true')}
                     style={{ width: '100%', padding: '8px' }}
                   >
-                    <option value="true">Show Images</option>
-                    <option value="false">Hide Images</option>
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
                   </select>
                 </div>
                 <div>
-                  <label>Image Size:</label>
-                  <select 
-                    value={currentTemplate.layout?.imageSize || 'medium'}
-                    onChange={(e) => updateTemplate('layout.imageSize', e.target.value)}
+                  <label>Image Height (px):</label>
+                  <input 
+                    type="number" 
+                    min="100"
+                    max="400"
+                    value={currentTemplate.layout.imageHeight}
+                    onChange={(e) => updateTemplate('layout.imageHeight', parseInt(e.target.value))}
                     style={{ width: '100%', padding: '8px' }}
-                  >
-                    <option value="small">Small</option>
-                    <option value="medium">Medium</option>
-                    <option value="large">Large</option>
-                  </select>
-                </div>
-                <div>
-                  <label>Layout Style:</label>
-                  <select 
-                    value={currentTemplate.layout?.style || 'grid'}
-                    onChange={(e) => updateTemplate('layout.style', e.target.value)}
-                    style={{ width: '100%', padding: '8px' }}
-                  >
-                    <option value="grid">Grid</option>
-                    <option value="list">List</option>
-                    <option value="cards">Cards</option>
-                  </select>
+                  />
                 </div>
               </>
             )}

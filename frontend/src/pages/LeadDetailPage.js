@@ -266,39 +266,43 @@ const LeadDetailPage = () => {
     message += `Price (${quote.currency}):
 `;
     
-    // Add flight breakdown if flights exist
-    if (quote.flights && quote.flights.length > 0) {
-      const flightTotal = quote.flights.reduce((sum, flight) => sum + (flight.price || 0), 0);
-      const totalPassengers = quote.adultPax + (quote.childPax * 0.7); // Child counts as 0.7 adult
-      const flightPerPerson = totalPassengers > 0 ? Math.round(flightTotal / totalPassengers) : 0;
-      const flightPerChild = Math.round(flightPerPerson * 0.7);
-      
-      message += `* ${flightPerPerson.toLocaleString()} / Person (Flights) x ${quote.adultPax} Pax
-`;
-      if (quote.childPax > 0) {
-        message += `* ${flightPerChild.toLocaleString()} / Child (Flights) x ${quote.childPax} Child
-`;
-      }
+    // Calculate pricing breakdown
+    const flightTotal = quote.flights ? quote.flights.reduce((sum, flight) => sum + (flight.price || 0), 0) : 0;
+    const packageTotal = totalAmount - flightTotal - (quote.taxAmount || 0) - (quote.tcsAmount || 0);
+    
+    // Show Flight Price
+    if (flightTotal > 0) {
+      message += `* Flight Price: ${flightTotal.toLocaleString()} ${quote.currency}\n`;
     }
     
-    // Add package price (without flights) - using corrected calculation
-    const packageTotal = totalAmount - (quote.flights ? quote.flights.reduce((sum, flight) => sum + (flight.price || 0), 0) : 0);
-    const totalPassengers = quote.adultPax + (quote.childPax * 0.7); // Child counts as 0.7 adult
-    const packagePerPerson = totalPassengers > 0 ? Math.round(packageTotal / totalPassengers) : 0;
-    const packagePerChild = Math.round(packagePerPerson * 0.7);
+    // Show Package Price
+    if (packageTotal > 0) {
+      message += `* Package Price: ${packageTotal.toLocaleString()} ${quote.currency}\n`;
+    }
     
-    message += `* ${packagePerPerson.toLocaleString()} / Person (Package) x ${quote.adultPax} Pax
-`;
+    // Show Tax Amount separately
+    if (quote.taxAmount > 0) {
+      message += `* Tax (${quote.taxRate}%): ${quote.taxAmount.toLocaleString()} ${quote.currency}\n`;
+    }
+    
+    // Show TCS if enabled
+    if (quote.tcsAmount > 0) {
+      message += `* TCS (2.5%): ${quote.tcsAmount.toLocaleString()} ${quote.currency}\n`;
+    }
+    
+    // Calculate per-person totals
+    const totalPerAdult = quote.adultPax > 0 ? totalAmount / quote.adultPax : 0;
+    const totalPerChild = quote.childPax > 0 ? totalPerAdult * 0.7 : 0; // Child pays 70% of adult price
+    
+    // Show per-person pricing
+    if (quote.adultPax > 0) {
+      message += `\n* ${Math.round(totalPerAdult).toLocaleString()} / Person (Total) x ${quote.adultPax} Pax\n`;
+    }
     if (quote.childPax > 0) {
-      message += `* ${packagePerChild.toLocaleString()} / Child (Package) x ${quote.childPax} Child
-`;
+      message += `* ${Math.round(totalPerChild).toLocaleString()} / Child (Total) x ${quote.childPax} Child\n`;
     }
     
-    message += `Total: ${totalAmount.toLocaleString()} /-`;
-    
-    if (quote.taxRate > 0) {
-      message += ` (inc. Tax ${quote.taxRate}%)`;
-    }
+    message += `\nTotal: ${totalAmount.toLocaleString()} ${quote.currency} /-`;
     message += `
 
 `;

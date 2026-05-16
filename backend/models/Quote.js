@@ -83,9 +83,12 @@ const quoteSchema = new mongoose.Schema({
     departureCity: { type: String, required: true },
     departureDate: { type: Date, required: true },
     departureTime: { type: String, required: true },
+    departureAirport: { type: String }, // Airport code (e.g., BOM, JFK)
     arrivalCity: { type: String, required: true },
     arrivalDate: { type: Date, required: true },
     arrivalTime: { type: String, required: true },
+    arrivalAirport: { type: String }, // Airport code (e.g., LHR, DXB)
+    baggage: { type: String, default: '20 kg' }, // Baggage allowance
     price: { type: Number, required: true }
   }],
   
@@ -95,7 +98,10 @@ const quoteSchema = new mongoose.Schema({
   markupValue: { type: Number, default: 0 },
   markupAmount: { type: Number, default: 0 },
   taxRate: { type: Number, default: 0 }, // Tax percentage
+  taxCalculationType: { type: String, enum: ['markup', 'total'], default: 'markup' }, // Tax calculation base
   taxAmount: { type: Number, default: 0 },
+  tcsEnabled: { type: Boolean, default: false }, // TCS 2.5% enabled
+  tcsAmount: { type: Number, default: 0 }, // TCS amount
   total: { type: Number, required: true },
   currency: { type: String, default: 'USD' },
   

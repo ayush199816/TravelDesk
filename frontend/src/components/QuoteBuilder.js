@@ -56,6 +56,8 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
     markupType: 'percentage',
     markupValue: 0,
     taxRate: 0,
+    taxCalculationType: 'markup', // 'markup' or 'total'
+    tcsEnabled: false, // TCS 2.5% checkbox
     currency: user.organization?.currency || 'USD',
     hotels: [], // Separate hotels array
     flights: [] // Flights array
@@ -217,9 +219,9 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
   }, [quote, fetchAvailableServices]);
   
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setQuoteData(prev => {
-      const newData = { ...prev, [name]: value };
+      const newData = { ...prev, [name]: type === 'checkbox' ? checked : value };
       
       // If currency changed, reconvert all existing rates
       if (name === 'currency' && prev.currency !== value) {
@@ -315,7 +317,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
       setTempHotelData(prev => ({ ...prev, country: quoteData.country }));
     }
   }, [quoteData.country]);
-  
+
   // Initialize form with quote data when editing (run after services are fetched)
   useEffect(() => {
     if (quote) {
@@ -330,6 +332,8 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
         markupType: quote.markupType || 'percentage',
         markupValue: quote.markupValue || 0,
         taxRate: quote.taxRate || 0,
+        taxCalculationType: quote.taxCalculationType || 'markup',
+        tcsEnabled: quote.tcsEnabled || false,
         currency: quote.currency || user.organization?.currency || 'USD',
         hotels: quote.hotels || [],
         flights: quote.flights ? quote.flights.map(flight => ({
@@ -774,8 +778,21 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
       ? subtotal * (markupValue / 100) 
       : markupValue;
     const markupSubtotal = subtotal + markupAmount;
-    const taxAmount = markupSubtotal * (taxRate / 100);
-    const total = markupSubtotal + taxAmount;
+    
+    // Calculate tax based on tax calculation type
+    let taxAmount = 0;
+    if (quoteData.taxCalculationType === 'markup') {
+      // Tax on markup only
+      taxAmount = markupAmount * (taxRate / 100);
+    } else {
+      // Tax on subtotal + markup
+      taxAmount = markupSubtotal * (taxRate / 100);
+    }
+    
+    // Calculate TCS (2.5%) if enabled
+    const tcsAmount = quoteData.tcsEnabled ? markupSubtotal * 0.025 : 0;
+    
+    const total = markupSubtotal + taxAmount + tcsAmount;
     
     return {
       sightseeingTotal: isNaN(sightseeingTotal) ? 0 : sightseeingTotal,
@@ -784,7 +801,8 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
       flightTotal: isNaN(flightTotal) ? 0 : flightTotal,
       subtotal: isNaN(subtotal) ? 0 : subtotal,
       markupAmount: isNaN(markupAmount) ? 0 : markupAmount, 
-      taxAmount: isNaN(taxAmount) ? 0 : taxAmount, 
+      taxAmount: isNaN(taxAmount) ? 0 : taxAmount,
+      tcsAmount: isNaN(tcsAmount) ? 0 : tcsAmount,
       total: isNaN(total) ? 0 : total 
     };
   };
@@ -1474,7 +1492,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                     <label style={{display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold'}}>Airline *</label>
                     <input
                       type="text"
-                      value={flight.airline}
+                      value={flight.airline || ''}
                       onChange={(e) => updateFlight(index, 'airline', e.target.value)}
                       style={{padding: '6px', border: '1px solid #ddd', borderRadius: '4px', width: '100%'}}
                       placeholder="e.g., Emirates, Qatar Airways"
@@ -1485,7 +1503,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                     <label style={{display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold'}}>Flight Number *</label>
                     <input
                       type="text"
-                      value={flight.flightNumber}
+                      value={flight.flightNumber || ''}
                       onChange={(e) => updateFlight(index, 'flightNumber', e.target.value)}
                       style={{padding: '6px', border: '1px solid #ddd', borderRadius: '4px', width: '100%'}}
                       placeholder="e.g., EK234"
@@ -1496,7 +1514,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                     <label style={{display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold'}}>PNR (Optional)</label>
                     <input
                       type="text"
-                      value={flight.pnr}
+                      value={flight.pnr || ''}
                       onChange={(e) => updateFlight(index, 'pnr', e.target.value)}
                       style={{padding: '6px', border: '1px solid #ddd', borderRadius: '4px', width: '100%'}}
                       placeholder="e.g., ABC123"
@@ -1507,7 +1525,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                     <label style={{display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold'}}>Price *</label>
                     <input
                       type="number"
-                      value={flight.price}
+                      value={flight.price || 0}
                       onChange={(e) => updateFlight(index, 'price', parseFloat(e.target.value) || 0)}
                       style={{padding: '6px', border: '1px solid #ddd', borderRadius: '4px', width: '100%'}}
                       placeholder="0.00"
@@ -1522,7 +1540,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                     <label style={{display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold'}}>Departure City *</label>
                     <input
                       type="text"
-                      value={flight.departureCity}
+                      value={flight.departureCity || ''}
                       onChange={(e) => updateFlight(index, 'departureCity', e.target.value)}
                       style={{padding: '6px', border: '1px solid #ddd', borderRadius: '4px', width: '100%'}}
                       placeholder="e.g., New York"
@@ -1533,7 +1551,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                     <label style={{display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold'}}>Departure Date *</label>
                     <input
                       type="date"
-                      value={flight.departureDate}
+                      value={flight.departureDate || ''}
                       onChange={(e) => updateFlight(index, 'departureDate', e.target.value)}
                       style={{padding: '6px', border: '1px solid #ddd', borderRadius: '4px', width: '100%'}}
                     />
@@ -1543,7 +1561,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                     <label style={{display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold'}}>Departure Time *</label>
                     <input
                       type="time"
-                      value={flight.departureTime}
+                      value={flight.departureTime || ''}
                       onChange={(e) => updateFlight(index, 'departureTime', e.target.value)}
                       style={{padding: '6px', border: '1px solid #ddd', borderRadius: '4px', width: '100%'}}
                     />
@@ -1555,7 +1573,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                     <label style={{display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold'}}>Arrival City *</label>
                     <input
                       type="text"
-                      value={flight.arrivalCity}
+                      value={flight.arrivalCity || ''}
                       onChange={(e) => updateFlight(index, 'arrivalCity', e.target.value)}
                       style={{padding: '6px', border: '1px solid #ddd', borderRadius: '4px', width: '100%'}}
                       placeholder="e.g., London"
@@ -1566,7 +1584,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                     <label style={{display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold'}}>Arrival Date *</label>
                     <input
                       type="date"
-                      value={flight.arrivalDate}
+                      value={flight.arrivalDate || ''}
                       onChange={(e) => updateFlight(index, 'arrivalDate', e.target.value)}
                       style={{padding: '6px', border: '1px solid #ddd', borderRadius: '4px', width: '100%'}}
                     />
@@ -1576,9 +1594,44 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                     <label style={{display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold'}}>Arrival Time *</label>
                     <input
                       type="time"
-                      value={flight.arrivalTime}
+                      value={flight.arrivalTime || ''}
                       onChange={(e) => updateFlight(index, 'arrivalTime', e.target.value)}
                       style={{padding: '6px', border: '1px solid #ddd', borderRadius: '4px', width: '100%'}}
+                    />
+                  </div>
+                </div>
+                
+                <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginTop: '15px'}}>
+                  <div>
+                    <label style={{display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold'}}>Baggage Allowance *</label>
+                    <input
+                      type="text"
+                      value={flight.baggage || '20 kg'}
+                      onChange={(e) => updateFlight(index, 'baggage', e.target.value)}
+                      style={{padding: '6px', border: '1px solid #ddd', borderRadius: '4px', width: '100%'}}
+                      placeholder="e.g., 20 kg, 30 kg + 7 kg hand carry"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label style={{display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold'}}>Departure Airport Code</label>
+                    <input
+                      type="text"
+                      value={flight.departureAirport || ''}
+                      onChange={(e) => updateFlight(index, 'departureAirport', e.target.value)}
+                      style={{padding: '6px', border: '1px solid #ddd', borderRadius: '4px', width: '100%'}}
+                      placeholder="e.g., BOM, JFK"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label style={{display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold'}}>Arrival Airport Code</label>
+                    <input
+                      type="text"
+                      value={flight.arrivalAirport || ''}
+                      onChange={(e) => updateFlight(index, 'arrivalAirport', e.target.value)}
+                      style={{padding: '6px', border: '1px solid #ddd', borderRadius: '4px', width: '100%'}}
+                      placeholder="e.g., LHR, DXB"
                     />
                   </div>
                 </div>
@@ -1978,6 +2031,30 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                   placeholder="e.g., 5 for 5%"
                 />
               </div>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Tax Calculation On</label>
+                <select
+                  name="taxCalculationType"
+                  value={quoteData.taxCalculationType || 'markup'}
+                  onChange={handleInputChange}
+                  style={styles.input}
+                >
+                  <option value="markup">Markup Only</option>
+                  <option value="total">Subtotal + Markup</option>
+                </select>
+              </div>
+              <div style={styles.formGroup}>
+                <div style={{display: 'flex', alignItems: 'center', gap: '10px', marginTop: '25px'}}>
+                  <input
+                    type="checkbox"
+                    name="tcsEnabled"
+                    checked={quoteData.tcsEnabled || false}
+                    onChange={handleInputChange}
+                    style={{width: '18px', height: '18px'}}
+                  />
+                  <label style={{margin: 0, fontSize: '14px', cursor: 'pointer'}}>Add TCS 2.5%</label>
+                </div>
+              </div>
             </div>
           </div>
           
@@ -2066,6 +2143,19 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                   +{quoteData.currency} {(totals.taxAmount || 0).toFixed(2)}
                 </div>
               </div>
+              {totals.tcsAmount > 0 && (
+                <div style={{
+                  backgroundColor: 'white',
+                  padding: '15px',
+                  borderRadius: '6px',
+                  border: '1px solid #dee2e6'
+                }}>
+                  <div style={{fontSize: '12px', color: '#6c757d', marginBottom: '5px'}}>TCS (2.5%)</div>
+                  <div style={{fontSize: '18px', fontWeight: 'bold', color: '#fd7e14'}}>
+                    +{quoteData.currency} {(totals.tcsAmount || 0).toFixed(2)}
+                  </div>
+                </div>
+              )}
               <div style={{
                 backgroundColor: '#007bff',
                 color: 'white',

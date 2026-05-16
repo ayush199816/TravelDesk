@@ -16,9 +16,19 @@ class PDFGenerator {
   }
 
   async initBrowser() {
-    if (!this.browser) {
+    if (!this.browser || !this.browser.isConnected()) {
+      // Close existing browser if it exists but is disconnected
+      if (this.browser && !this.browser.isConnected()) {
+        try {
+          await this.browser.close();
+        } catch (err) {
+          console.log('Error closing disconnected browser:', err.message);
+        }
+        this.browser = null;
+      }
+      
       const puppeteerOptions = {
-        headless: true,
+        headless: 'new', // Use new headless mode
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
@@ -26,7 +36,6 @@ class PDFGenerator {
           '--disable-accelerated-2d-canvas',
           '--no-first-run',
           '--no-zygote',
-          '--single-process',
           '--disable-gpu',
           '--disable-background-timer-throttling',
           '--disable-backgrounding-occluded-windows',
@@ -34,8 +43,11 @@ class PDFGenerator {
           '--disable-features=TranslateUI',
           '--disable-ipc-flooding-protection',
           '--memory-pressure-off',
-          '--max_old_space_size=4096'
-        ]
+          '--max_old_space_size=4096',
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor'
+        ],
+        timeout: 60000 // 60 seconds timeout
       };
       
       // For Render environment, detect available browsers
@@ -103,15 +115,45 @@ class PDFGenerator {
 
   async closeBrowser() {
     if (this.browser) {
-      await this.browser.close();
-      this.browser = null;
+      try {
+        // Check if browser is still connected before closing
+        if (this.browser.isConnected()) {
+          await this.browser.close();
+          console.log('✅ Browser closed successfully');
+        } else {
+          console.log('⚠️ Browser already disconnected');
+        }
+      } catch (error) {
+        console.log('⚠️ Error closing browser:', error.message);
+      } finally {
+        this.browser = null;
+      }
     }
   }
 
   async generateQuotePDF(quote, lead, organization) {
-    try {
-      await this.initBrowser();
-      const page = await this.browser.newPage();
+    const maxRetries = 3;
+    let lastError = null;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      let page = null;
+      let browserRestarted = false;
+      
+      try {
+        console.log(`🔄 PDF generation attempt ${attempt}/${maxRetries}`);
+        
+        // Ensure browser is connected
+        await this.initBrowser();
+        
+        // Check if browser is still connected
+        if (!this.browser || !this.browser.isConnected()) {
+          console.log('Browser disconnected, restarting...');
+          await this.closeBrowser();
+          await this.initBrowser();
+          browserRestarted = true;
+        }
+        
+        page = await this.browser.newPage();
       
       // Set page timeouts for better handling of large content
       page.setDefaultTimeout(60000); // 60 seconds
@@ -263,18 +305,60 @@ class PDFGenerator {
         throw new Error('Failed to generate PDF: ' + pdfError.message);
       } finally {
         // Always close the page
-        try {
-          await page.close();
-          console.log('✅ Page closed successfully');
-        } catch (closeError) {
-          console.log('⚠️ Error closing page:', closeError.message);
+        if (page) {
+          try {
+            await page.close();
+            console.log('✅ Page closed successfully');
+          } catch (closeError) {
+            console.log('⚠️ Error closing page:', closeError.message);
+          }
+        }
+        
+        // If browser was restarted due to connection issues, close it to prevent memory leaks
+        if (browserRestarted) {
+          try {
+            await this.closeBrowser();
+            console.log('✅ Browser closed after restart');
+          } catch (closeError) {
+            console.log('⚠️ Error closing browser after restart:', closeError.message);
+          }
         }
       }
       
-      return pdfBuffer;
-    } catch (error) {
-      console.error('❌ Error in PDF generation process:', error.message);
-      throw error;
+      return pdfBuffer; // Success - exit retry loop
+        
+      } catch (error) {
+        lastError = error;
+        console.error(`❌ Attempt ${attempt} failed:`, error.message);
+        
+        // Clean up resources on failure
+        if (page) {
+          try {
+            await page.close();
+          } catch (closeError) {
+            console.log('⚠️ Error closing page after failure:', closeError.message);
+          }
+        }
+        
+        if (browserRestarted) {
+          try {
+            await this.closeBrowser();
+          } catch (closeError) {
+            console.log('⚠️ Error closing browser after failure:', closeError.message);
+          }
+        }
+        
+        // If this is the last attempt, throw the error
+        if (attempt === maxRetries) {
+          console.error('❌ All retry attempts failed');
+          throw new Error(`PDF generation failed after ${maxRetries} attempts: ${lastError.message}`);
+        }
+        
+        // Wait before retrying (exponential backoff)
+        const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+        console.log(`⏳ Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
     }
   }
 
@@ -840,52 +924,144 @@ class PDFGenerator {
     ${quote.flights && quote.flights.length > 0 ? `
       <div class="page middle-page page-break">
         <div class="content-wrapper">
-          <h1 style="color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.header}; font-size: ${quoteTemplate.fontSizes.header}px;">Flight Details</h1>
+          <h1 style="color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.header}; font-size: ${quoteTemplate.fontSizes.header}px;">FLIGHTS DETAILS</h1>
           
-          <div style="background-color: ${quoteTemplate.backgrounds.activity}; border-radius: 8px; border: 1px solid ${quoteTemplate.borders.activity}; overflow: hidden; box-shadow: 0 2px 6px ${quoteTemplate.shadows?.activity === 'transparent' ? 'transparent' : `${quoteTemplate.shadows?.activity || '#000000'}${Math.round((quoteTemplate.shadows?.activityOpacity || 0.05) * 255).toString(16).padStart(2, '0')}`};">
-            <table style="width: 100%; border-collapse: collapse;">
-              <thead>
-                <tr style="background-color: ${quoteTemplate.colors.primary}20;">
-                  <th style="padding: 12px; text-align: left; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header};">Airline</th>
-                  <th style="padding: 12px; text-align: left; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header};">Flight No.</th>
-                  <th style="padding: 12px; text-align: left; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header};">From</th>
-                  <th style="padding: 12px; text-align: left; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header};">To</th>
-                  <th style="padding: 12px; text-align: left; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header};">Departure</th>
-                  <th style="padding: 12px; text-align: left; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header};">Arrival</th>
-                  <th style="padding: 12px; text-align: right; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header};">Price</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${quote.flights.map((flight, index) => `
-                  <tr style="${index % 2 === 0 ? `background-color: ${quoteTemplate.colors.background};` : ''} border-bottom: 1px solid ${quoteTemplate.borders.activity};">
-                    <td style="padding: 12px; color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.body};">
-                      <div style="font-weight: bold; margin-bottom: 2px;">${flight.airline}</div>
-                      ${flight.pnr ? `<div style="font-size: 11px; color: ${quoteTemplate.colors.muted};">PNR: ${flight.pnr}</div>` : ''}
-                    </td>
-                    <td style="padding: 12px; color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.body}; font-weight: bold;">
-                      ${flight.flightNumber}
-                    </td>
-                    <td style="padding: 12px; color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.body};">
-                      ${flight.departureCity}
-                    </td>
-                    <td style="padding: 12px; color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.body};">
-                      ${flight.arrivalCity}
-                    </td>
-                    <td style="padding: 12px; color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.body};">
-                      <div style="font-weight: bold;">${flight.departureTime}</div>
-                      <div style="font-size: 11px; color: ${quoteTemplate.colors.muted};">${new Date(flight.departureDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
-                    </td>
-                    <td style="padding: 12px; color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.body};">
-                      <div style="font-weight: bold;">${flight.arrivalTime}</div>
-                      <div style="font-size: 11px; color: ${quoteTemplate.colors.muted};">${new Date(flight.arrivalDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
-                    </td>
-                    <td style="padding: 12px; text-align: right; color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.body}; font-weight: bold;">
-                      ${quote.currency || 'USD'} ${flight.price.toLocaleString('en-IN')}
-                    </td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            ${quote.flights.map((flight, index) => `
+              <!-- ${index === 0 ? 'Onward' : 'Return'} Flight Card -->
+              <div style="
+                background-color: white;
+                border-radius: 12px;
+                border: 1px solid #e0e0e0;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                overflow: hidden;
+                font-family: ${quoteTemplate.fonts.body};
+              ">
+                <!-- Flight Header -->
+                <div style="
+                  background-color: ${quoteTemplate.colors.primary};
+                  color: white;
+                  padding: 12px 20px;
+                  font-size: 16px;
+                  font-weight: bold;
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                ">
+                  <span>${index === 0 ? 'ONWARD' : 'RETURN'}</span>
+                  <span style="font-size: 14px; opacity: 0.9;">
+                    ${flight.airline} ${flight.flightNumber}
+                  </span>
+                </div>
+                
+                <!-- Flight Content -->
+                <div style="padding: 20px;">
+                  <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 30px; align-items: center;">
+                    <!-- Departure -->
+                    <div>
+                      <div style="font-size: 24px; font-weight: bold; color: ${quoteTemplate.colors.text}; margin-bottom: 8px;">
+                        ${flight.departureTime}
+                      </div>
+                      <div style="font-size: 14px; color: ${quoteTemplate.colors.text}; margin-bottom: 4px;">
+                        ${new Date(flight.departureDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                      </div>
+                      <div style="font-size: 16px; font-weight: 600; color: ${quoteTemplate.colors.text}; margin-bottom: 4px;">
+                        ${flight.departureCity} (${flight.departureAirport || 'BOM'})
+                      </div>
+                      <div style="font-size: 12px; color: ${quoteTemplate.colors.muted};">
+                        ${flight.departureAirportName || ''}
+                        ${flight.departureTerminal ? `Terminal: ${flight.departureTerminal}` : ''}
+                      </div>
+                    </div>
+                    
+                    <!-- Duration & Baggage -->
+                    <div style="text-align: center;">
+                      <div style="
+                        width: 60px;
+                        height: 2px;
+                        background-color: ${quoteTemplate.colors.primary};
+                        margin: 0 auto 10px;
+                        position: relative;
+                      ">
+                        <div style="
+                          position: absolute;
+                          top: -4px;
+                          left: 50%;
+                          transform: translateX(-50%);
+                          width: 0;
+                          height: 0;
+                          border-left: 6px solid transparent;
+                          border-right: 6px solid transparent;
+                          border-top: 8px solid ${quoteTemplate.colors.primary};
+                        "></div>
+                      </div>
+                      <div style="font-size: 14px; font-weight: 600; color: ${quoteTemplate.colors.text}; margin-bottom: 4px;">
+                        ${(() => {
+                          // Calculate duration from departure to arrival
+                          const departure = new Date(flight.departureDate);
+                          const arrival = new Date(flight.arrivalDate);
+                          
+                          // Extract times
+                          const [depHour, depMin] = flight.departureTime.split(':').map(Number);
+                          const [arrHour, arrMin] = flight.arrivalTime.split(':').map(Number);
+                          
+                          departure.setHours(depHour, depMin, 0, 0);
+                          arrival.setHours(arrHour, arrMin, 0, 0);
+                          
+                          // If arrival is earlier than departure, it's next day
+                          if (arrival < departure) {
+                            arrival.setDate(arrival.getDate() + 1);
+                          }
+                          
+                          const diffMs = arrival - departure;
+                          const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                          const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                          
+                          return `${diffHours} H ${diffMinutes} M`;
+                        })()}
+                      </div>
+                      <div style="font-size: 12px; color: ${quoteTemplate.colors.muted};">
+                        ${flight.baggage || '20 kg'}
+                      </div>
+                    </div>
+                    
+                    <!-- Arrival -->
+                    <div style="text-align: right;">
+                      <div style="font-size: 24px; font-weight: bold; color: ${quoteTemplate.colors.text}; margin-bottom: 8px;">
+                        ${flight.arrivalTime}
+                      </div>
+                      <div style="font-size: 14px; color: ${quoteTemplate.colors.text}; margin-bottom: 4px;">
+                        ${new Date(flight.arrivalDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                      </div>
+                      <div style="font-size: 16px; font-weight: 600; color: ${quoteTemplate.colors.text}; margin-bottom: 4px;">
+                        ${flight.arrivalCity} (${flight.arrivalAirport || 'BKK'})
+                      </div>
+                      <div style="font-size: 12px; color: ${quoteTemplate.colors.muted};">
+                        ${flight.arrivalAirportName || ''}
+                        ${flight.arrivalTerminal ? `Terminal: ${flight.arrivalTerminal}` : ''}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Footer Info -->
+                  <div style="
+                    margin-top: 20px;
+                    padding-top: 15px;
+                    border-top: 1px solid #f0f0f0;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                  ">
+                    <div style="font-size: 12px; color: ${quoteTemplate.colors.muted};">
+                      Operated By: ${flight.operatedBy || flight.airline}
+                    </div>
+                    <div style="font-size: 12px; color: ${quoteTemplate.colors.muted};">
+                      ${flight.pnr ? `PNR: ${flight.pnr}` : ''}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
           </div>
           
           ${quote.flights.length > 0 ? `
