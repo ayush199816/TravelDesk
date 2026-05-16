@@ -344,7 +344,7 @@ const OperationsDashboard = () => {
 
     console.log('🔍 DEBUG - Final supplier stats:', supplierStats);
     return supplierStats;
-  }, [sightseeings, transfers, hotels, quotes, leads]);
+  }, [sightseeings, transfers, hotels, quotes]);
 
   // Analyze quote supplier assignments
   const analyzeQuoteSupplierAssignments = useCallback(() => {
