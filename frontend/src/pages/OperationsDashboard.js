@@ -35,6 +35,7 @@ const OperationsDashboard = () => {
   const [selectedAnalyticsCountry, setSelectedAnalyticsCountry] = useState('all');
   // const [upcomingTrips, setUpcomingTrips] = useState([]);
   const [quotes, setQuotes] = useState([]);
+  const [supplierAssignments, setSupplierAssignments] = useState([]);
   const [showSightseeingForm, setShowSightseeingForm] = useState(false);
   const [showTransferForm, setShowTransferForm] = useState(false);
   const [showHotelForm, setShowHotelForm] = useState(false);
@@ -257,6 +258,26 @@ const OperationsDashboard = () => {
     console.log('🔍 DEBUG - Transfers data:', transfers.slice(0, 2));
     console.log('🔍 DEBUG - Hotels data:', hotels.slice(0, 2));
     console.log('🔍 DEBUG - Quotes data:', quotes.slice(0, 2));
+    console.log('🔍 DEBUG - Supplier assignments data:', supplierAssignments.slice(0, 2));
+
+    // Helper function to check if an item has supplier assignment
+    const hasSupplierAssignment = (quoteId, activityType, activityName) => {
+      const assignments = supplierAssignments.filter(assignment => 
+        assignment.quote === quoteId && 
+        assignment.activityType === activityType
+      );
+      
+      // Check if any assignment matches the activity name
+      return assignments.some(assignment => {
+        if (assignment.assignedItems && assignment.assignedItems.length > 0) {
+          return assignment.assignedItems.some(item => 
+            item.includes(activityName) || 
+            activityName.includes(item)
+          );
+        }
+        return assignment.activityName === activityName;
+      });
+    };
 
     // Calculate from quotes and their supplier assignments
     quotes.forEach(quote => {
@@ -264,12 +285,12 @@ const OperationsDashboard = () => {
       
       // Process activities from quote days
       if (quote.days && quote.days.length > 0) {
-        quote.days.forEach(day => {
+        quote.days.forEach((day, dayIndex) => {
           // Process sightseeings (activities)
           if (day.sightseeings && day.sightseeings.length > 0) {
             day.sightseeings.forEach(sightseeingItem => {
               const activityName = sightseeingItem.sightseeing?.name || 'Unknown Activity';
-              const hasSupplier = sightseeingItem.supplier || sightseeingItem.assignedSupplier;
+              const hasSupplier = hasSupplierAssignment(quote._id, 'sightseeing', activityName);
               
               console.log('🔍 DEBUG - Activity:', activityName, 'hasSupplier:', hasSupplier);
               if (hasSupplier) {
@@ -284,7 +305,7 @@ const OperationsDashboard = () => {
           if (day.transfers && day.transfers.length > 0) {
             day.transfers.forEach(transferItem => {
               const transferName = transferItem.transfer?.name || 'Unknown Transfer';
-              const hasSupplier = transferItem.supplier || transferItem.assignedSupplier;
+              const hasSupplier = hasSupplierAssignment(quote._id, 'transfer', transferName);
               
               console.log('🔍 DEBUG - Transfer:', transferName, 'hasSupplier:', hasSupplier);
               if (hasSupplier) {
@@ -299,7 +320,7 @@ const OperationsDashboard = () => {
           if (day.hotels && day.hotels.length > 0) {
             day.hotels.forEach(hotelItem => {
               const hotelName = hotelItem.hotel?.name || hotelItem.name || 'Unknown Hotel';
-              const hasSupplier = hotelItem.supplier || hotelItem.assignedSupplier;
+              const hasSupplier = hasSupplierAssignment(quote._id, 'hotel', hotelName);
               
               console.log('🔍 DEBUG - Day Hotel:', hotelName, 'hasSupplier:', hasSupplier);
               if (hasSupplier) {
@@ -316,7 +337,7 @@ const OperationsDashboard = () => {
       if (quote.hotels && quote.hotels.length > 0) {
         quote.hotels.forEach(hotelItem => {
           const hotelName = hotelItem.name || 'Unknown Hotel';
-          const hasSupplier = hotelItem.supplier || hotelItem.assignedSupplier;
+          const hasSupplier = hasSupplierAssignment(quote._id, 'hotel', hotelName);
           
           console.log('🔍 DEBUG - Quote Hotel:', hotelName, 'hasSupplier:', hasSupplier);
           if (hasSupplier) {
@@ -330,7 +351,8 @@ const OperationsDashboard = () => {
       // Process quote-level flights
       if (quote.flights && quote.flights.length > 0) {
         quote.flights.forEach(flightItem => {
-          const hasSupplier = flightItem.supplier || flightItem.assignedSupplier;
+          const flightName = flightItem.name || flightItem.flightNumber || 'Unknown Flight';
+          const hasSupplier = hasSupplierAssignment(quote._id, 'flight', flightName);
           
           console.log('🔍 DEBUG - Flight hasSupplier:', hasSupplier);
           if (hasSupplier) {
@@ -344,7 +366,7 @@ const OperationsDashboard = () => {
 
     console.log('🔍 DEBUG - Final supplier stats:', supplierStats);
     return supplierStats;
-  }, [sightseeings, transfers, hotels, quotes]);
+  }, [sightseeings, transfers, hotels, quotes, supplierAssignments]);
 
   // Analyze quote supplier assignments
   const analyzeQuoteSupplierAssignments = useCallback(() => {
@@ -481,6 +503,15 @@ const OperationsDashboard = () => {
     }
   }, [user.organization._id]);
 
+  const fetchSupplierAssignments = useCallback(async () => {
+    try {
+      const response = await api.get('/supplier-assignments');
+      setSupplierAssignments(response.data);
+    } catch (error) {
+      console.error('Error fetching supplier assignments:', error);
+    }
+  }, []);
+
   const fetchQuotes = useCallback(async () => {
     try {
       const response = await api.get(`/quotes?organization=${user.organization._id}`);
@@ -572,6 +603,7 @@ const OperationsDashboard = () => {
     fetchSightseeings();
     fetchTransfers();
     fetchHotels();
+    fetchSupplierAssignments();
     
     // Also fetch specific view data when needed
     if (activeView === 'sightseeings') {
@@ -581,7 +613,7 @@ const OperationsDashboard = () => {
     } else if (activeView === 'hotels') {
       fetchHotels();
     }
-  }, [activeView, fetchLeads, fetchSalesUsers, fetchSightseeings, fetchTransfers, fetchHotels]);
+  }, [activeView, fetchLeads, fetchSalesUsers, fetchSightseeings, fetchTransfers, fetchHotels, fetchSupplierAssignments]);
 
   // Fetch leads for analytics (regardless of active view)
   useEffect(() => {
