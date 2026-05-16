@@ -397,6 +397,8 @@ const OperationsDashboard = () => {
       }
     });
 
+    console.log('🔍 DEBUG - Assigned sightseeing names:', Array.from(assignedSightseeingNames));
+
     // Count sightseeings that are not assigned in any quote
     sightseeings.forEach(sightseeing => {
       if (!assignedSightseeingNames.has(sightseeing.name)) {
