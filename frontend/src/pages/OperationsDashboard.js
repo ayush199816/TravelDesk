@@ -259,6 +259,12 @@ const OperationsDashboard = () => {
     console.log('🔍 DEBUG - Hotels data:', hotels.slice(0, 2));
     console.log('🔍 DEBUG - Quotes data:', quotes.slice(0, 2));
     console.log('🔍 DEBUG - Supplier assignments data:', supplierAssignments.slice(0, 2));
+    
+    // Also check unassigned sightseeings from the general sightseeings list
+    console.log('🔍 DEBUG - All sightseeings count:', sightseeings.length);
+    sightseeings.forEach(sightseeing => {
+      console.log('🔍 DEBUG - Available sightseeing:', sightseeing.name);
+    });
 
     // Helper function to check if an item has supplier assignment
     const hasSupplierAssignment = (quoteId, activityType, activityName) => {
@@ -370,6 +376,32 @@ const OperationsDashboard = () => {
             supplierStats.flights.unassigned++;
           }
         });
+      }
+    });
+
+    // Count unassigned sightseeings from the general sightseeings list
+    const assignedSightseeingNames = new Set();
+    quotes.forEach(quote => {
+      if (quote.days && quote.days.length > 0) {
+        quote.days.forEach(day => {
+          if (day.sightseeings && day.sightseeings.length > 0) {
+            day.sightseeings.forEach(sightseeingItem => {
+              const activityName = sightseeingItem.sightseeing?.name || 'Unknown Activity';
+              const hasSupplier = hasSupplierAssignment(quote._id, 'sightseeing', activityName);
+              if (hasSupplier) {
+                assignedSightseeingNames.add(activityName);
+              }
+            });
+          }
+        });
+      }
+    });
+
+    // Count sightseeings that are not assigned in any quote
+    sightseeings.forEach(sightseeing => {
+      if (!assignedSightseeingNames.has(sightseeing.name)) {
+        supplierStats.activities.unassigned++;
+        console.log('🔍 DEBUG - Unassigned sightseeing:', sightseeing.name);
       }
     });
 
