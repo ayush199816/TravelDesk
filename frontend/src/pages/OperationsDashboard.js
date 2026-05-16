@@ -252,6 +252,11 @@ const OperationsDashboard = () => {
       flights: { assigned: 0, unassigned: 0 }
     };
 
+    // Debug: Log the actual data structure
+    console.log('🔍 DEBUG - Sightseeings data:', sightseeings.slice(0, 2));
+    console.log('🔍 DEBUG - Transfers data:', transfers.slice(0, 2));
+    console.log('🔍 DEBUG - Hotels data:', hotels.slice(0, 2));
+
     // Calculate from sightseeings (activities)
     sightseeings.forEach(sightseeing => {
       // Check if supplier exists (different possible structures)
@@ -262,6 +267,7 @@ const OperationsDashboard = () => {
                        (sightseeing.assignedItems && sightseeing.assignedItems.length > 0) ||
                        (sightseeing.items && sightseeing.items.length > 0);
       
+      console.log('🔍 DEBUG - Sightseeing:', sightseeing.name, 'hasSupplier:', hasSupplier);
       if (hasSupplier) {
         supplierStats.activities.assigned++;
       } else {
@@ -278,6 +284,7 @@ const OperationsDashboard = () => {
                        (transfer.assignedItems && transfer.assignedItems.length > 0) ||
                        (transfer.items && transfer.items.length > 0);
       
+      console.log('🔍 DEBUG - Transfer:', transfer.name, 'hasSupplier:', hasSupplier);
       if (hasSupplier) {
         supplierStats.transfers.assigned++;
       } else {
@@ -363,6 +370,7 @@ const OperationsDashboard = () => {
     supplierStats.flights.assigned = Math.floor(convertedLeads.length * 0.3); // Estimate 30% have flights assigned
     supplierStats.flights.unassigned = convertedLeads.length - supplierStats.flights.assigned;
 
+    console.log('🔍 DEBUG - Final supplier stats:', supplierStats);
     return supplierStats;
   }, [sightseeings, transfers, hotels, quotes, leads]);
 
@@ -1726,18 +1734,44 @@ const styles = {
                 const countries = Object.keys(countryStats);
                 
                 return (
-                  <div style={{display: 'flex', flexDirection: 'column', gap: '30px'}}>
-                    {/* Country-wise Analytics */}
-                    <div>
-                      <h4 style={{margin: '0 0 20px 0', color: '#495057', fontSize: '20px', fontWeight: '600'}}>
+                  <div style={{display: 'flex', flexDirection: 'column', gap: '25px'}}>
+                    {/* Top Row - Country Analytics */}
+                    <div style={{
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e3e6f0',
+                      borderRadius: '12px',
+                      padding: '24px',
+                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07)'
+                    }}>
+                      <h4 style={{margin: '0 0 20px 0', color: '#2c3e50', fontSize: '20px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '10px'}}>
                         📊 Country-wise Analytics
+                        <select
+                          value={selectedAnalyticsCountry}
+                          onChange={(e) => setSelectedAnalyticsCountry(e.target.value)}
+                          style={{
+                            padding: '6px 12px',
+                            border: '1px solid #ddd',
+                            borderRadius: '6px',
+                            fontSize: '14px',
+                            marginLeft: 'auto',
+                            backgroundColor: '#f8f9fa'
+                          }}
+                        >
+                          <option value="all">All Countries</option>
+                          {Object.keys(countryStats).map(country => (
+                            <option key={country} value={country}>
+                              {country === 'All Countries' ? country : country}
+                            </option>
+                          ))}
+                        </select>
                       </h4>
+                      
                       {countries.length === 0 ? (
                         <div style={{textAlign: 'center', padding: '40px', color: '#6c757d', backgroundColor: '#f8f9fa', borderRadius: '8px'}}>
                           <p>No data available for analytics</p>
                         </div>
                       ) : (
-                        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px'}}>
+                        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px'}}>
                           {countries.map(country => (
                             <div key={country} style={{
                               backgroundColor: '#f8f9fa',
@@ -1804,12 +1838,20 @@ const styles = {
                       )}
                     </div>
 
-                    {/* Quote Supplier Analytics */}
-                    <div>
-                      <h4 style={{margin: '0 0 20px 0', color: '#495057', fontSize: '20px', fontWeight: '600'}}>
-                        📋 Quote Supplier Analytics
-                      </h4>
-                      <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px'}}>
+                    {/* Second Row - Quote and Supplier Analytics Side by Side */}
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px'}}>
+                      {/* Quote Supplier Analytics */}
+                      <div style={{
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #e3e6f0',
+                        borderRadius: '12px',
+                        padding: '24px',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07)'
+                      }}>
+                        <h4 style={{margin: '0 0 20px 0', color: '#2c3e50', fontSize: '18px', fontWeight: '700'}}>
+                          📋 Quote Supplier Analytics
+                        </h4>
+                        <div style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
                         <div style={{
                           backgroundColor: '#f8f9fa',
                           border: '1px solid #dee2e6',
@@ -1844,18 +1886,24 @@ const styles = {
                       </div>
                     </div>
 
-                    {/* Supplier Assignment Analytics */}
-                    <div>
-                      <h4 style={{margin: '0 0 20px 0', color: '#495057', fontSize: '20px', fontWeight: '600'}}>
-                        🏢 Supplier Assignment Analytics
-                      </h4>
-                      <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px'}}>
-                        {[
-                          { type: 'Activities', data: supplierStats.activities, icon: '🎯', color: '#2196f3' },
-                          { type: 'Transfers', data: supplierStats.transfers, icon: '🚗', color: '#ff9800' },
-                          { type: 'Hotels', data: supplierStats.hotels, icon: '🏨', color: '#4caf50' },
-                          { type: 'Flights', data: supplierStats.flights, icon: '✈️', color: '#9c27b0' }
-                        ].map(service => (
+                      {/* Supplier Assignment Analytics */}
+                      <div style={{
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #e3e6f0',
+                        borderRadius: '12px',
+                        padding: '24px',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07)'
+                      }}>
+                        <h4 style={{margin: '0 0 20px 0', color: '#2c3e50', fontSize: '18px', fontWeight: '700'}}>
+                          🏢 Supplier Assignment Analytics
+                        </h4>
+                        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
+                          {[
+                            { type: 'Activities', data: supplierStats.activities, icon: '🎯', color: '#2196f3' },
+                            { type: 'Transfers', data: supplierStats.transfers, icon: '🚗', color: '#ff9800' },
+                            { type: 'Hotels', data: supplierStats.hotels, icon: '🏨', color: '#4caf50' },
+                            { type: 'Flights', data: supplierStats.flights, icon: '✈️', color: '#9c27b0' }
+                          ].map(service => (
                           <div key={service.type} style={{
                             backgroundColor: '#f8f9fa',
                             border: '1px solid #dee2e6',
@@ -1890,6 +1938,7 @@ const styles = {
                           </div>
                         ))}
                       </div>
+                    </div>
                     </div>
                   </div>
                 );
