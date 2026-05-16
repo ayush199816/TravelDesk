@@ -256,106 +256,69 @@ const OperationsDashboard = () => {
     console.log('🔍 DEBUG - Sightseeings data:', sightseeings.slice(0, 2));
     console.log('🔍 DEBUG - Transfers data:', transfers.slice(0, 2));
     console.log('🔍 DEBUG - Hotels data:', hotels.slice(0, 2));
+    console.log('🔍 DEBUG - Quotes data:', quotes.slice(0, 2));
 
-    // Calculate from sightseeings (activities)
-    sightseeings.forEach(sightseeing => {
-      // Check if supplier exists (different possible structures)
-      const hasSupplier = sightseeing.supplier || 
-                       sightseeing.assignedSupplier || 
-                       sightseeing.supplierId ||
-                       sightseeing.supplierName ||
-                       (sightseeing.assignedItems && sightseeing.assignedItems.length > 0) ||
-                       (sightseeing.items && sightseeing.items.length > 0);
-      
-      console.log('🔍 DEBUG - Sightseeing:', sightseeing.name, 'hasSupplier:', hasSupplier);
-      if (hasSupplier) {
-        supplierStats.activities.assigned++;
-      } else {
-        supplierStats.activities.unassigned++;
-      }
-    });
-
-    // Calculate from transfers
-    transfers.forEach(transfer => {
-      const hasSupplier = transfer.supplier || 
-                       transfer.assignedSupplier || 
-                       transfer.supplierId ||
-                       transfer.supplierName ||
-                       (transfer.assignedItems && transfer.assignedItems.length > 0) ||
-                       (transfer.items && transfer.items.length > 0);
-      
-      console.log('🔍 DEBUG - Transfer:', transfer.name, 'hasSupplier:', hasSupplier);
-      if (hasSupplier) {
-        supplierStats.transfers.assigned++;
-      } else {
-        supplierStats.transfers.unassigned++;
-      }
-    });
-
-    // Calculate from hotels
-    hotels.forEach(hotel => {
-      const hasSupplier = hotel.supplier || 
-                       hotel.assignedSupplier || 
-                       hotel.supplierId ||
-                       hotel.supplierName ||
-                       (hotel.assignedItems && hotel.assignedItems.length > 0) ||
-                       (hotel.items && hotel.items.length > 0);
-      
-      if (hasSupplier) {
-        supplierStats.hotels.assigned++;
-      } else {
-        supplierStats.hotels.unassigned++;
-      }
-    });
-
-    // Calculate from quotes (activities within quotes)
+    // Calculate from quotes and their supplier assignments
     quotes.forEach(quote => {
-      // Check if activities within quotes have suppliers assigned
-      if (quote.activities && quote.activities.length > 0) {
-        quote.activities.forEach(activity => {
-          const hasSupplier = activity.supplier || 
-                           activity.assignedSupplier || 
-                           activity.supplierId ||
-                           activity.supplierName ||
-                           (activity.assignedItems && activity.assignedItems.length > 0) ||
-                           (activity.items && activity.items.length > 0);
+      console.log('🔍 DEBUG - Processing quote:', quote.quoteNumber);
+      
+      // Process activities from quote days
+      if (quote.days && quote.days.length > 0) {
+        quote.days.forEach(day => {
+          // Process sightseeings (activities)
+          if (day.sightseeings && day.sightseeings.length > 0) {
+            day.sightseeings.forEach(sightseeingItem => {
+              const activityName = sightseeingItem.sightseeing?.name || 'Unknown Activity';
+              const hasSupplier = sightseeingItem.supplier || sightseeingItem.assignedSupplier;
+              
+              console.log('🔍 DEBUG - Activity:', activityName, 'hasSupplier:', hasSupplier);
+              if (hasSupplier) {
+                supplierStats.activities.assigned++;
+              } else {
+                supplierStats.activities.unassigned++;
+              }
+            });
+          }
           
-          if (hasSupplier) {
-            supplierStats.activities.assigned++;
-          } else {
-            supplierStats.activities.unassigned++;
+          // Process transfers
+          if (day.transfers && day.transfers.length > 0) {
+            day.transfers.forEach(transferItem => {
+              const transferName = transferItem.transfer?.name || 'Unknown Transfer';
+              const hasSupplier = transferItem.supplier || transferItem.assignedSupplier;
+              
+              console.log('🔍 DEBUG - Transfer:', transferName, 'hasSupplier:', hasSupplier);
+              if (hasSupplier) {
+                supplierStats.transfers.assigned++;
+              } else {
+                supplierStats.transfers.unassigned++;
+              }
+            });
+          }
+          
+          // Process hotels from day level
+          if (day.hotels && day.hotels.length > 0) {
+            day.hotels.forEach(hotelItem => {
+              const hotelName = hotelItem.hotel?.name || hotelItem.name || 'Unknown Hotel';
+              const hasSupplier = hotelItem.supplier || hotelItem.assignedSupplier;
+              
+              console.log('🔍 DEBUG - Day Hotel:', hotelName, 'hasSupplier:', hasSupplier);
+              if (hasSupplier) {
+                supplierStats.hotels.assigned++;
+              } else {
+                supplierStats.hotels.unassigned++;
+              }
+            });
           }
         });
       }
       
-      // Check if transfers within quotes have suppliers assigned
-      if (quote.transfers && quote.transfers.length > 0) {
-        quote.transfers.forEach(transfer => {
-          const hasSupplier = transfer.supplier || 
-                           transfer.assignedSupplier || 
-                           transfer.supplierId ||
-                           transfer.supplierName ||
-                           (transfer.assignedItems && transfer.assignedItems.length > 0) ||
-                           (transfer.items && transfer.items.length > 0);
-          
-          if (hasSupplier) {
-            supplierStats.transfers.assigned++;
-          } else {
-            supplierStats.transfers.unassigned++;
-          }
-        });
-      }
-      
-      // Check if hotels within quotes have suppliers assigned
+      // Process quote-level hotels
       if (quote.hotels && quote.hotels.length > 0) {
-        quote.hotels.forEach(hotel => {
-          const hasSupplier = hotel.supplier || 
-                           hotel.assignedSupplier || 
-                           hotel.supplierId ||
-                           hotel.supplierName ||
-                           (hotel.assignedItems && hotel.assignedItems.length > 0) ||
-                           (hotel.items && hotel.items.length > 0);
+        quote.hotels.forEach(hotelItem => {
+          const hotelName = hotelItem.name || 'Unknown Hotel';
+          const hasSupplier = hotelItem.supplier || hotelItem.assignedSupplier;
           
+          console.log('🔍 DEBUG - Quote Hotel:', hotelName, 'hasSupplier:', hasSupplier);
           if (hasSupplier) {
             supplierStats.hotels.assigned++;
           } else {
@@ -363,12 +326,21 @@ const OperationsDashboard = () => {
           }
         });
       }
+      
+      // Process quote-level flights
+      if (quote.flights && quote.flights.length > 0) {
+        quote.flights.forEach(flightItem => {
+          const hasSupplier = flightItem.supplier || flightItem.assignedSupplier;
+          
+          console.log('🔍 DEBUG - Flight hasSupplier:', hasSupplier);
+          if (hasSupplier) {
+            supplierStats.flights.assigned++;
+          } else {
+            supplierStats.flights.unassigned++;
+          }
+        });
+      }
     });
-
-    // For flights, we'll estimate based on converted leads (simplified)
-    const convertedLeads = leads.filter(lead => lead.status === 'converted');
-    supplierStats.flights.assigned = Math.floor(convertedLeads.length * 0.3); // Estimate 30% have flights assigned
-    supplierStats.flights.unassigned = convertedLeads.length - supplierStats.flights.assigned;
 
     console.log('🔍 DEBUG - Final supplier stats:', supplierStats);
     return supplierStats;
