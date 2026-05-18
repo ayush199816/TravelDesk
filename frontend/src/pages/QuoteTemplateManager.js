@@ -1164,6 +1164,26 @@ const QuoteTemplateManager = () => {
             {activeTab === 'backgrounds' && (
               <>
                 <div>
+                  <label>Package Background:</label>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <input 
+                      type="color" 
+                      value={currentTemplate.backgrounds.package === 'transparent' ? '#ffffff' : (currentTemplate.backgrounds.package || '#f8f9fa')}
+                      onChange={(e) => updateTemplate('backgrounds.package', e.target.value)}
+                      style={{ width: '100px', height: '40px' }}
+                      disabled={currentTemplate.backgrounds.package === 'transparent'}
+                    />
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={currentTemplate.backgrounds.package === 'transparent'}
+                        onChange={(e) => updateTemplate('backgrounds.package', e.target.checked ? 'transparent' : '#f8f9fa')}
+                      />
+                      Transparent
+                    </label>
+                  </div>
+                </div>
+                <div>
                   <label>Activity Background:</label>
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                     <input 

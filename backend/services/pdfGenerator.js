@@ -537,7 +537,7 @@ class PDFGenerator {
         }
         
         .total-price {
-          background-color: ${quoteTemplate.colors.primary}20;
+          background-color: transparent;
           font-weight: bold;
           font-size: 18px;
           color: ${quoteTemplate.colors.primary};
@@ -666,7 +666,7 @@ class PDFGenerator {
         }
         
         .total-price {
-          background-color: ${quoteTemplate.colors.primary}20;
+          background-color: transparent;
           font-weight: bold;
           font-size: 18px;
           color: ${quoteTemplate.colors.primary};
@@ -697,7 +697,7 @@ class PDFGenerator {
         </div>
         
         <div style="margin: 30px 0; padding: 20px; border: 2px solid ${quoteTemplate.borders?.package === 'transparent' ? 'transparent' : (quoteTemplate.borders?.package || '#e9ecef')}; border-radius: 8px; background-color: ${quoteTemplate.backgrounds?.package === 'transparent' ? 'transparent' : (quoteTemplate.backgrounds?.package || '#f8f9fa')}; box-shadow: 0 4px 12px ${quoteTemplate.shadows?.package === 'transparent' ? 'transparent' : `${quoteTemplate.shadows?.package || '#000000'}${Math.round((quoteTemplate.shadows?.packageOpacity || 0.1) * 255).toString(16).padStart(2, '0')}`};">
-          <table style="width: 100%; border-collapse: collapse;">
+          <table style="width: 100%; border-collapse: collapse; background-color: ${quoteTemplate.backgrounds?.package === 'transparent' ? 'transparent' : (quoteTemplate.backgrounds?.package || '#ffffff')};">
             <tr>
               <td style="padding: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.3); font-weight: bold; width: 40%;">DESTINATION</td>
               <td style="padding: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.3); text-transform: uppercase;">${quote.country}</td>
@@ -1087,7 +1087,7 @@ class PDFGenerator {
         <div style="margin-bottom: 30px;">
           <h2 style="color: ${quoteTemplate.colors.text}; font-size: 24px; font-family: ${quoteTemplate.fonts.header}; margin-bottom: 20px; text-align: center;">Day-wise Summary</h2>
           
-          <div style="background-color: ${quoteTemplate.backgrounds.activity}; border-radius: 8px; border: 1px solid ${quoteTemplate.borders.activity}; overflow: hidden; box-shadow: 0 2px 6px ${quoteTemplate.shadows?.activity === 'transparent' ? 'transparent' : `${quoteTemplate.shadows?.activity || '#000000'}${Math.round((quoteTemplate.shadows?.activityOpacity || 0.05) * 255).toString(16).padStart(2, '0')}`};">
+          <div style="background-color: transparent; border-radius: 8px; border: 1px solid ${quoteTemplate.borders.activity}; overflow: hidden; box-shadow: 0 2px 6px ${quoteTemplate.shadows?.activity === 'transparent' ? 'transparent' : `${quoteTemplate.shadows?.activity || '#000000'}${Math.round((quoteTemplate.shadows?.activityOpacity || 0.05) * 255).toString(16).padStart(2, '0')}`};">
             <table style="width: 100%; border-collapse: collapse;">
               <thead>
                 <tr style="background-color: ${quoteTemplate.colors.primary}20;">
@@ -1139,7 +1139,7 @@ class PDFGenerator {
                   };
                   
                   return `
-                    <tr style="${index % 2 === 0 ? `background-color: ${quoteTemplate.colors.background};` : ''} border-bottom: 1px solid ${quoteTemplate.borders.activity};">
+                    <tr style="border-bottom: 1px solid ${quoteTemplate.borders.activity};">
                       <td style="padding: 12px; text-align: center; color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.body}; vertical-align: top;">
                         <div style="font-size: 16px; font-weight: bold; color: ${quoteTemplate.colors.primary};">Day ${day.dayNumber}</div>
                         <div style="font-size: 11px; color: ${quoteTemplate.colors.muted}; margin-top: 2px;">${new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
@@ -1189,7 +1189,7 @@ class PDFGenerator {
         }
         dayImages = [...new Set(dayImages)];
         
-        const activities = day.sightseeings || [];
+        const activities = [...(day.sightseeings || []), ...(day.transfers || [])];
         
         // Add day header only once per day (on first page of that day)
         const dayHeader = `
@@ -1211,7 +1211,7 @@ class PDFGenerator {
             </div>
             <div style="flex: 1;">
               <div style="font-size: 12px; color: #666; margin-bottom: 5px;">${new Date(day.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
-              <div style="font-size: 16px; line-height: 1.6; color: #333;">
+              <div style="font-size: 16px; line-height: 1.6; color: #333; font-weight: bold;">
                 ${(() => {
                   const dayActivities = [];
                   
@@ -1235,9 +1235,8 @@ class PDFGenerator {
                     // Add transfer if exists
                     if (day.transfers && day.transfers[i]) {
                       const transfer = day.transfers[i];
-                      const fromLocation = transfer.fromLocation || transfer.transfer?.fromLocation || 'Pickup';
-                      const toLocation = transfer.toLocation || transfer.transfer?.toLocation || 'Drop-off';
-                      dayActivities.push(`Transfer (${fromLocation} → ${toLocation})`);
+                      const transferName = transfer.transfer?.name || transfer.name || 'Transfer';
+                      dayActivities.push(transferName);
                     }
                   }
                   
@@ -1255,9 +1254,8 @@ class PDFGenerator {
                   if (day.transfers && day.transfers.length > totalItems) {
                     for (let i = totalItems; i < day.transfers.length; i++) {
                       const transfer = day.transfers[i];
-                      const fromLocation = transfer.fromLocation || transfer.transfer?.fromLocation || 'Pickup';
-                      const toLocation = transfer.toLocation || transfer.transfer?.toLocation || 'Drop-off';
-                      dayActivities.push(`Transfer (${fromLocation} → ${toLocation})`);
+                      const transferName = transfer.transfer?.name || transfer.name || 'Transfer';
+                      dayActivities.push(transferName);
                     }
                   }
                   
@@ -1291,15 +1289,34 @@ class PDFGenerator {
             const isVeryLastPage = dayIndex === quote.days.length - 1 && isLastPageOfThisDay;
             
             const pageContent = pageActivities.map((item, pageIndex) => {
-              const sightseeing = item.sightseeing && typeof item.sightseeing === 'object' 
-                ? item.sightseeing 
-                : { 
-                  name: item.name || `Activity ${globalActivityIndex}`,
-                  description: item.sightseeingDescription || item.description || 'Enjoy this amazing activity.',
-                  duration: item.sightseeingDuration || item.duration || 'Flexible timing',
-                  location: item.sightseeingLocation || item.location || 'To be confirmed',
-                  images: item.images || []
+              // Check if this is a transfer
+              const isTransfer = item.transfer || item.fromLocation || item.toLocation;
+              
+              let activityData;
+              if (isTransfer) {
+                // Handle transfer
+                const transferName = item.transfer?.name || item.name || 'Transfer';
+                const fromLocation = item.fromLocation || item.transfer?.fromLocation || 'Pickup Point';
+                const toLocation = item.toLocation || item.transfer?.toLocation || 'Drop Point';
+                activityData = {
+                  name: transferName,
+                  description: item.transfer?.description || item.description || 'Comfortable transfer between locations',
+                  duration: item.transfer?.duration || item.duration || 'Flexible timing',
+                  location: `${fromLocation} to ${toLocation}`,
+                  images: item.transfer?.images || item.images || []
                 };
+              } else {
+                // Handle sightseeing
+                activityData = item.sightseeing && typeof item.sightseeing === 'object' 
+                  ? item.sightseeing 
+                  : { 
+                    name: item.name || `Activity ${globalActivityIndex}`,
+                    description: item.sightseeingDescription || item.description || 'Enjoy this amazing activity.',
+                    duration: item.sightseeingDuration || item.duration || 'Flexible timing',
+                    location: item.sightseeingLocation || item.location || 'To be confirmed',
+                    images: item.images || []
+                  };
+              }
               
               // Helper function to format passenger count
               const formatPassengerCount = (item) => {
@@ -1335,11 +1352,11 @@ class PDFGenerator {
                         <div style="color: white; font-size: 14px; font-weight: bold;">${dailyActivityIndex}</div>
                       </div>
                       <div style="flex: 1;">
-                        <h3 style="margin: 0 0 6px 0; font-size: ${quoteTemplate.fontSizes.activity}px; color: ${quoteTemplate.colors.text}; font-weight: bold; font-family: ${quoteTemplate.fonts.activity};">${sightseeing.name}</h3>
-                        <p style="margin: 0 0 8px 0; font-size: ${quoteTemplate.fontSizes.description}px; line-height: 1.4; color: ${quoteTemplate.colors.muted}; font-family: ${quoteTemplate.fonts.body};">${sightseeing.description || item.sightseeingDescription || 'Experience this wonderful activity with professional guidance and create lasting memories.'}</p>
+                        <h3 style="margin: 0 0 6px 0; font-size: ${quoteTemplate.fontSizes.activity}px; color: ${quoteTemplate.colors.text}; font-weight: bold; font-family: ${quoteTemplate.fonts.activity};">${activityData.name}</h3>
+                        <p style="margin: 0 0 8px 0; font-size: ${quoteTemplate.fontSizes.description}px; line-height: 1.4; color: ${quoteTemplate.colors.muted}; font-family: ${quoteTemplate.fonts.body};">${activityData.description || 'Experience this wonderful activity with professional guidance and create lasting memories.'}</p>
                         <div style="display: flex; gap: 15px; font-size: ${quoteTemplate.fontSizes.details}px; color: ${quoteTemplate.colors.muted}; padding-top: 6px; border-top: 1px solid ${quoteTemplate.borders.activity}; font-family: ${quoteTemplate.fonts.body};">
-                          <span style="display: flex; align-items: center;">📍 ${sightseeing.location || 'Location TBD'}</span>
-                          <span style="display: flex; align-items: center;">⏱️ ${sightseeing.duration || 'Flexible'}</span>
+                          <span style="display: flex; align-items: center;">📍 ${activityData.location || 'Location TBD'}</span>
+                          <span style="display: flex; align-items: center;">⏱️ ${activityData.duration || 'Flexible'}</span>
                           ${formatPassengerCount(item) ? `<span style="display: flex; align-items: center; background-color: ${quoteTemplate.colors.primary}20; color: ${quoteTemplate.colors.primary}; padding: 2px 6px; border-radius: 4px; font-weight: bold;">👥 ${formatPassengerCount(item)}</span>` : ''}
                         </div>
                       </div>
@@ -1491,7 +1508,7 @@ class PDFGenerator {
               
               // Add total row
               tableRows += `
-                <tr style="font-weight: bold; background-color: ${quoteTemplate.colors.primary}20;">
+                <tr style="font-weight: bold; background-color: transparent;">
                   <td style="padding: 15px; font-size: 18px; color: ${quoteTemplate.colors.text};">Total Amount</td>
                   <td style="padding: 15px; text-align: right; font-size: 18px; color: ${quoteTemplate.colors.text};">${quote.currency || 'USD'} ${totalAmount.toLocaleString('en-IN')}</td>
                 </tr>
