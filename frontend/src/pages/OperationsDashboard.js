@@ -379,34 +379,7 @@ const OperationsDashboard = () => {
       }
     });
 
-    // Count unassigned sightseeings from the general sightseeings list
-    const assignedSightseeingNames = new Set();
-    quotes.forEach(quote => {
-      if (quote.days && quote.days.length > 0) {
-        quote.days.forEach(day => {
-          if (day.sightseeings && day.sightseeings.length > 0) {
-            day.sightseeings.forEach(sightseeingItem => {
-              const activityName = sightseeingItem.sightseeing?.name || 'Unknown Activity';
-              const hasSupplier = hasSupplierAssignment(quote._id, 'sightseeing', activityName);
-              if (hasSupplier) {
-                assignedSightseeingNames.add(activityName);
-              }
-            });
-          }
-        });
-      }
-    });
-
-    console.log('🔍 DEBUG - Assigned sightseeing names:', Array.from(assignedSightseeingNames));
-
-    // Count sightseeings that are not assigned in any quote
-    sightseeings.forEach(sightseeing => {
-      if (!assignedSightseeingNames.has(sightseeing.name)) {
-        supplierStats.activities.unassigned++;
-        console.log('🔍 DEBUG - Unassigned sightseeing:', sightseeing.name);
-      }
-    });
-
+    
     console.log('🔍 DEBUG - Final supplier stats:', supplierStats);
     return supplierStats;
   }, [sightseeings, transfers, hotels, quotes, supplierAssignments]);

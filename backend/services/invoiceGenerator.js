@@ -4,7 +4,7 @@ const generateInvoiceHTML = async (invoiceId) => {
   try {
     // Get invoice with all populated data
     const invoice = await Invoice.findById(invoiceId)
-      .populate('quote', 'quoteNumber country adultPax childPax travelStartDate travelEndDate')
+      .populate('quote', 'quoteNumber country adultPax childPax travelStartDate travelEndDate taxRate sightseeingTotal transferTotal hotelTotal flightTotal subtotal')
       .populate('lead', 'name email phone address leadNumber')
       .populate('createdBy', 'name email')
       .populate('paymentCycles.verifiedBy', 'name email');
@@ -214,7 +214,6 @@ const generateInvoiceHTML = async (invoiceId) => {
           <p><strong>Invoice Number:</strong> ${invoice.invoiceNumber}</p>
           <p><strong>Issue Date:</strong> ${new Date(invoice.issueDate).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
           <p><strong>Due Date:</strong> ${new Date(invoice.dueDate).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-          <p><strong>Status:</strong> <span class="status-${invoice.status}">${invoice.status.toUpperCase()}</span></p>
         </div>
       </div>
       
@@ -238,14 +237,29 @@ const generateInvoiceHTML = async (invoiceId) => {
       </div>
       
       <div class="financial-summary">
+        <!-- Package Cost (includes sightseeing + transfers + hotels + flights) -->
         <div class="financial-row">
-          <span>Package Amount:</span>
-          <span>${invoice.currency} ${invoice.packageAmount.toLocaleString('en-IN')}</span>
+          <span>Package Cost:</span>
+          <span>${invoice.currency} ${(quote.subtotal || 0).toLocaleString('en-IN')}</span>
         </div>
+        ${invoice.markupAmount > 0 ? `
         <div class="financial-row">
-          <span>Tax (2.5%):</span>
+          <span>Service Charge:</span>
+          <span>${invoice.currency} ${invoice.markupAmount.toLocaleString('en-IN')}</span>
+        </div>
+        ` : ''}
+        ${invoice.taxAmount > 0 ? `
+        <div class="financial-row">
+          <span>Tax (${quote.taxRate || 0}%):</span>
           <span>${invoice.currency} ${invoice.taxAmount.toLocaleString('en-IN')}</span>
         </div>
+        ` : ''}
+        ${invoice.tcsAmount > 0 ? `
+        <div class="financial-row">
+          <span>TCS (2.5%):</span>
+          <span>${invoice.currency} ${invoice.tcsAmount.toLocaleString('en-IN')}</span>
+        </div>
+        ` : ''}
         <div class="financial-row total">
           <span>Total Amount:</span>
           <span>${invoice.currency} ${invoice.finalAmount.toLocaleString('en-IN')}</span>

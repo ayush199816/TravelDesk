@@ -789,8 +789,9 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
       taxAmount = markupSubtotal * (taxRate / 100);
     }
     
-    // Calculate TCS (2.5%) if enabled
-    const tcsAmount = quoteData.tcsEnabled ? markupSubtotal * 0.025 : 0;
+    // Calculate TCS (2.5%) if enabled on Subtotal + Markup + Tax
+    const tcsBase = markupSubtotal + taxAmount;
+    const tcsAmount = quoteData.tcsEnabled ? tcsBase * 0.025 : 0;
     
     const total = markupSubtotal + taxAmount + tcsAmount;
     

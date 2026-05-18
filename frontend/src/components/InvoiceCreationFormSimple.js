@@ -18,14 +18,17 @@ const InvoiceCreationFormSimple = ({ quote, onInvoiceCreated, onCancel }) => {
   // Calculate remaining cycle amount
   const calculateRemainingAmount = () => {
     const packageAmount = (quote.subtotal || 0) + (quote.markupAmount || 0);
-    const taxAmount = Math.round(packageAmount * 0.025);
-    const totalAmount = packageAmount + taxAmount;
+    // Use actual tax and TCS amounts from quote
+    const taxAmount = quote.taxAmount || 0;
+    const tcsAmount = quote.tcsAmount || 0;
+    const totalAmount = packageAmount + taxAmount + tcsAmount;
     const remainingAmount = totalAmount - formData.firstCycleAmount;
     const cycleAmount = Math.round(remainingAmount / (formData.totalCycles - 1));
     
     return {
       packageAmount,
       taxAmount,
+      tcsAmount,
       totalAmount,
       remainingAmount,
       cycleAmount
@@ -208,20 +211,34 @@ const InvoiceCreationFormSimple = ({ quote, onInvoiceCreated, onCancel }) => {
           marginBottom: '20px'
         }}>
           <h6 style={{ marginBottom: '15px' }}>Payment Calculation Preview</h6>
-          <div style={{ display: 'flex', gap: '20px' }}>
-            <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: '120px' }}>
               <small style={{ color: '#666' }}>Package Amount</small>
               <div style={{ fontWeight: 'bold' }}>₹{calculations.packageAmount.toLocaleString('en-IN')}</div>
             </div>
-            <div style={{ flex: 1 }}>
-              <small style={{ color: '#666' }}>Tax (2.5%)</small>
-              <div style={{ fontWeight: 'bold' }}>₹{calculations.taxAmount.toLocaleString('en-IN')}</div>
-            </div>
-            <div style={{ flex: 1 }}>
+            {quote.markupAmount > 0 && (
+              <div style={{ flex: 1, minWidth: '120px' }}>
+                <small style={{ color: '#666' }}>Markup Amount</small>
+                <div style={{ fontWeight: 'bold' }}>₹{quote.markupAmount.toLocaleString('en-IN')}</div>
+              </div>
+            )}
+            {calculations.taxAmount > 0 && (
+              <div style={{ flex: 1, minWidth: '120px' }}>
+                <small style={{ color: '#666' }}>Tax ({quote.taxRate || 0}%)</small>
+                <div style={{ fontWeight: 'bold' }}>₹{calculations.taxAmount.toLocaleString('en-IN')}</div>
+              </div>
+            )}
+            {calculations.tcsAmount > 0 && (
+              <div style={{ flex: 1, minWidth: '120px' }}>
+                <small style={{ color: '#666' }}>TCS (2.5%)</small>
+                <div style={{ fontWeight: 'bold' }}>₹{calculations.tcsAmount.toLocaleString('en-IN')}</div>
+              </div>
+            )}
+            <div style={{ flex: 1, minWidth: '120px' }}>
               <small style={{ color: '#666' }}>Total Amount</small>
               <div style={{ fontWeight: 'bold', color: '#007bff' }}>₹{calculations.totalAmount.toLocaleString('en-IN')}</div>
             </div>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, minWidth: '120px' }}>
               <small style={{ color: '#666' }}>Remaining Cycles</small>
               <div style={{ fontWeight: 'bold' }}>₹{calculations.cycleAmount.toLocaleString('en-IN')} each</div>
             </div>

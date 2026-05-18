@@ -93,6 +93,10 @@ const quoteSchema = new mongoose.Schema({
   }],
   
   // Pricing
+  sightseeingTotal: { type: Number, default: 0 },
+  transferTotal: { type: Number, default: 0 },
+  hotelTotal: { type: Number, default: 0 },
+  flightTotal: { type: Number, default: 0 },
   subtotal: { type: Number, required: true },
   markupType: { type: String, enum: ['percentage', 'amount'], default: 'percentage' },
   markupValue: { type: Number, default: 0 },

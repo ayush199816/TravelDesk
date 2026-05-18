@@ -907,8 +907,8 @@ class PDFGenerator {
                     </div>
                     
                     ${stay.hotelImage ? `
-                      <div style="margin-left: 15px; flex-shrink: 0;">
-                        <img src="${stay.hotelImage}" alt="${stay.hotelName}" style="max-width: ${quoteTemplate.hotel?.imageWidth || 120}px; max-height: ${quoteTemplate.hotel?.imageHeight || 80}px; border-radius: ${quoteTemplate.hotel?.imageBorderRadius || 6}px; object-fit: cover; border: 1px solid ${quoteTemplate.hotel?.borderColor || 'rgba(255, 255, 255, 0.3)'};" />
+                      <div style="margin-left: 15px; flex-shrink: 0; height: 100%; display: flex; align-items: center; margin-top: -50px;">
+                        <img src="${stay.hotelImage}" alt="${stay.hotelName}" style="width: ${quoteTemplate.hotel?.imageWidth || 600}px; height: 180px; border-radius: ${quoteTemplate.hotel?.imageBorderRadius || 6}px; object-fit: cover; border: 1px solid ${quoteTemplate.hotel?.borderColor || 'rgba(255, 255, 255, 0.3)'};" />
                       </div>
                     ` : ''}
                   </div>
@@ -1092,8 +1092,8 @@ class PDFGenerator {
               <thead>
                 <tr style="background-color: ${quoteTemplate.colors.primary}20;">
                   <th style="padding: 12px; text-align: center; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header}; width: 15%;">Day</th>
-                  <th style="padding: 12px; text-align: left; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header}; width: 50%;">Activities & Transfers</th>
-                  <th style="padding: 12px; text-align: center; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header}; width: 35%;">Pax & Vehicle</th>
+                  <th style="padding: 12px; text-align: left; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header}; width: 65%;">Activities & Transfers</th>
+                  <th style="padding: 12px; text-align: center; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header}; width: 20%;">Pax</th>
                 </tr>
               </thead>
               <tbody>
@@ -1121,28 +1121,21 @@ class PDFGenerator {
                   const allItems = [...activityNames, ...transferDetails];
                   const itemsText = allItems.length > 0 ? allItems.join(' + ') : 'Free day for leisure';
                   
-                  // Format passenger count with vehicle
-                  const formatPaxAndVehicle = () => {
+                  // Format passenger count only
+                  const formatPaxOnly = () => {
                     const adultPax = quote.adultPax || 0;
                     const childPax = quote.childPax || 0;
                     const hasChildActivity = activities.some(item => item.childPrice > 0 || item.includeChild === true);
                     
                     let paxText = '';
-                    if (adultPax > 0 && childPax > 0 && hasChildActivity) {
-                      paxText = `${adultPax}A+${childPax}C`;
-                    } else if (adultPax > 0) {
+                    if (adultPax > 0) {
                       paxText = `${adultPax}A`;
                     }
-                    
-                    // Get vehicle type from first transfer or activity
-                    let vehicleType = 'Sedan'; // default
-                    if (transfers.length > 0) {
-                      vehicleType = transfers[0].vehicleType || transfers[0].transfer?.vehicleType || 'Sedan';
-                    } else if (activities.length > 0) {
-                      vehicleType = activities[0].vehicleType || 'Sedan';
+                    if (childPax > 0 && hasChildActivity) {
+                      paxText += paxText ? ` + ${childPax}C` : `${childPax}C`;
                     }
                     
-                    return paxText ? `${paxText} (${vehicleType})` : vehicleType;
+                    return paxText || '1A';
                   };
                   
                   return `
@@ -1156,7 +1149,7 @@ class PDFGenerator {
                       </td>
                       <td style="padding: 12px; text-align: center; color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.body}; vertical-align: top;">
                         <span style="background-color: ${quoteTemplate.colors.primary}20; color: ${quoteTemplate.colors.primary}; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px;">
-                          � ${formatPaxAndVehicle()}
+                          ${formatPaxOnly()}
                         </span>
                       </td>
                     </tr>
@@ -1388,41 +1381,123 @@ class PDFGenerator {
           <div style="text-align: center; margin-bottom: 30px;">
             <div style="font-size: 18px; color: ${quoteTemplate.colors.muted}; margin-bottom: 10px; font-family: ${quoteTemplate.fonts.body};">Total Amount</div>
             <div style="font-size: 36px; font-weight: bold; color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.header};">
-              ${(() => {
-                // Calculate package cost: subtotal + markupAmount
-                const packageCost = (quote.subtotal || 0) + (quote.markupAmount || 0);
-                // Calculate tax: 2.5% of package cost
-                const taxAmount = Math.round(packageCost * 0.025);
-                // Calculate total: package cost + tax
-                const totalAmount = packageCost + taxAmount;
-                return `${quote.currency || 'USD'} ${totalAmount.toLocaleString('en-IN')}`;
-              })()}
+              ${quote.currency || 'USD'} ${(quote.total || 0).toLocaleString('en-IN')}
             </div>
           </div>
           
           <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
             ${(() => {
-              // Calculate package cost: subtotal + markupAmount
-              const packageCost = (quote.subtotal || 0) + (quote.markupAmount || 0);
-              // Calculate tax: 2.5% of package cost
-              const taxAmount = Math.round(packageCost * 0.025);
-              // Calculate total: package cost + tax
-              const totalAmount = packageCost + taxAmount;
+              // Calculate flight total from flights array
+              const flightTotal = quote.flights ? quote.flights.reduce((sum, flight) => sum + (flight.price || 0), 0) : 0;
+              // Calculate package cost: sightseeing + transfers + hotels + markup
+              // Use stored values if available, otherwise calculate from quote data
+              let sightseeingTotal = quote.sightseeingTotal || 0;
+              let transferTotal = quote.transferTotal || 0;
+              let hotelTotal = quote.hotelTotal || 0;
               
-              return `
+              // If totals are 0, calculate from quote data (for existing quotes)
+              if (sightseeingTotal === 0 && quote.days && quote.days.length > 0) {
+                sightseeingTotal = 0;
+                transferTotal = 0;
+                hotelTotal = 0;
+                
+                quote.days.forEach(day => {
+                  // Calculate sightseeing
+                  if (day.sightseeings && day.sightseeings.length > 0) {
+                    day.sightseeings.forEach(item => {
+                      const adultCount = item.includeAdult !== false ? (item.adultCount || quote.adultPax) : 0;
+                      const childCount = item.includeChild !== false ? (item.childCount || quote.childPax) : 0;
+                      
+                      if (item.adultRate || item.childRate) {
+                        sightseeingTotal += (item.adultRate * adultCount) + (item.childRate * childCount);
+                      } else if (item.rate) {
+                        sightseeingTotal += item.rate;
+                      }
+                    });
+                  }
+                  
+                  // Calculate transfers
+                  if (day.transfers && day.transfers.length > 0) {
+                    day.transfers.forEach(item => {
+                      if (item.rate) {
+                        transferTotal += item.rate;
+                      }
+                    });
+                  }
+                });
+                
+                // Calculate hotels
+                if (quote.hotels && quote.hotels.length > 0) {
+                  quote.hotels.forEach(hotelItem => {
+                    if (hotelItem.rooms && hotelItem.rooms.length > 0) {
+                      hotelItem.rooms.forEach(room => {
+                        const nights = room.nights || 1;
+                        hotelTotal += room.adultRate * room.numberOfRooms * nights;
+                      });
+                    }
+                  });
+                }
+              }
+              
+              const packageCost = sightseeingTotal + transferTotal + hotelTotal + (quote.markupAmount || 0);
+              
+              // Update quote with calculated flight total for consistency
+              quote.flightTotal = flightTotal;
+              // Use actual tax and TCS amounts from quote
+              const taxAmount = quote.taxAmount || 0;
+              const tcsAmount = quote.tcsAmount || 0;
+              // Total amount from quote
+              const totalAmount = quote.total || 0;
+              
+              let tableRows = '';
+              
+              // Add flight cost if exists
+              if (flightTotal > 0) {
+                tableRows += `
+                  <tr>
+                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">Flight Cost</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; text-align: right;">${quote.currency || 'USD'} ${flightTotal.toLocaleString('en-IN')}</td>
+                  </tr>
+                `;
+              }
+              
+              // Add package cost
+              tableRows += `
                 <tr>
                   <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">Package Cost</td>
                   <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; text-align: right;">${quote.currency || 'USD'} ${packageCost.toLocaleString('en-IN')}</td>
                 </tr>
-                <tr>
-                  <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">Tax (2.5%)</td>
-                  <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; text-align: right;">${quote.currency || 'USD'} ${taxAmount.toLocaleString('en-IN')}</td>
-                </tr>
+              `;
+              
+              // Add tax if exists
+              if (taxAmount > 0) {
+                tableRows += `
+                  <tr>
+                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">Tax (${quote.taxRate || 0}%)</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; text-align: right;">${quote.currency || 'USD'} ${taxAmount.toLocaleString('en-IN')}</td>
+                  </tr>
+                `;
+              }
+              
+              // Add TCS if exists
+              if (tcsAmount > 0) {
+                tableRows += `
+                  <tr>
+                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">TCS (2.5%)</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; text-align: right;">${quote.currency || 'USD'} ${tcsAmount.toLocaleString('en-IN')}</td>
+                  </tr>
+                `;
+              }
+              
+              // Add total row
+              tableRows += `
                 <tr style="font-weight: bold; background-color: ${quoteTemplate.colors.primary}20;">
                   <td style="padding: 15px; font-size: 18px; color: ${quoteTemplate.colors.text};">Total Amount</td>
                   <td style="padding: 15px; text-align: right; font-size: 18px; color: ${quoteTemplate.colors.text};">${quote.currency || 'USD'} ${totalAmount.toLocaleString('en-IN')}</td>
                 </tr>
               `;
+              
+              return tableRows;
             })()}
           </table>
         </div>

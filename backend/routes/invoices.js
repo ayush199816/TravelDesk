@@ -87,8 +87,10 @@ router.post('/', auth, async (req, res) => {
     
     // Calculate amounts
     const packageAmount = (quote.subtotal || 0) + (quote.markupAmount || 0);
-    const taxAmount = Math.round(packageAmount * 0.025);
-    const finalAmount = packageAmount + taxAmount;
+    // Use actual tax and TCS amounts from quote
+    const taxAmount = quote.taxAmount || 0;
+    const tcsAmount = quote.tcsAmount || 0;
+    const finalAmount = packageAmount + taxAmount + tcsAmount;
     const remainingAmount = finalAmount - firstCycleAmount;
     const cycleAmount = Math.round(remainingAmount / (totalCycles - 1));
     
@@ -107,7 +109,9 @@ router.post('/', auth, async (req, res) => {
       guestName: lead.name || 'Guest',
       packageCountry: quote.country || 'Unknown',
       packageAmount: packageAmount || 0,
+      markupAmount: quote.markupAmount || 0,
       taxAmount: taxAmount || 0,
+      tcsAmount: tcsAmount || 0,
       finalAmount: finalAmount || 0,
       currency: quote.currency || 'INR',
       totalCycles: totalCycles || 1,

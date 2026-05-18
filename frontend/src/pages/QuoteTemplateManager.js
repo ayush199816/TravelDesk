@@ -1177,7 +1177,7 @@ const QuoteTemplateManager = () => {
                       <input 
                         type="checkbox" 
                         checked={currentTemplate.backgrounds.activity === 'transparent'}
-                        onChange={(e) => updateTemplate('backgrounds.activity', e.target.checked ? 'transparent' : (currentTemplate.backgrounds.activity || '#f8f9fa'))}
+                        onChange={(e) => updateTemplate('backgrounds.activity', e.target.checked ? 'transparent' : '#f8f9fa')}
                       />
                       Transparent
                     </label>
@@ -1213,7 +1213,7 @@ const QuoteTemplateManager = () => {
                       <input 
                         type="checkbox" 
                         checked={currentTemplate.backgrounds.payment === 'transparent'}
-                        onChange={(e) => updateTemplate('backgrounds.payment', e.target.checked ? 'transparent' : (currentTemplate.backgrounds.payment || 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)'))}
+                        onChange={(e) => updateTemplate('backgrounds.payment', e.target.checked ? 'transparent' : 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)')}
                       />
                       Transparent
                     </label>
@@ -1249,7 +1249,7 @@ const QuoteTemplateManager = () => {
                       <input 
                         type="checkbox" 
                         checked={currentTemplate.backgrounds.nextSteps === 'transparent'}
-                        onChange={(e) => updateTemplate('backgrounds.nextSteps', e.target.checked ? 'transparent' : (currentTemplate.backgrounds.nextSteps || 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)'))}
+                        onChange={(e) => updateTemplate('backgrounds.nextSteps', e.target.checked ? 'transparent' : 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)')}
                       />
                       Transparent
                     </label>
@@ -1369,7 +1369,7 @@ const QuoteTemplateManager = () => {
                       <input 
                         type="checkbox" 
                         checked={currentTemplate.hotel?.backgroundColor === 'transparent'}
-                        onChange={(e) => updateTemplate('hotel.backgroundColor', e.target.checked ? 'transparent' : (currentTemplate.hotel?.backgroundColor || '#f8f9fa'))}
+                        onChange={(e) => updateTemplate('hotel.backgroundColor', e.target.checked ? 'transparent' : '#f8f9fa')}
                       />
                       Transparent
                     </label>
@@ -1390,7 +1390,7 @@ const QuoteTemplateManager = () => {
                       <input 
                         type="checkbox" 
                         checked={currentTemplate.hotel?.borderColor === 'transparent'}
-                        onChange={(e) => updateTemplate('hotel.borderColor', e.target.checked ? 'transparent' : (currentTemplate.hotel?.borderColor || '#e9ecef'))}
+                        onChange={(e) => updateTemplate('hotel.borderColor', e.target.checked ? 'transparent' : '#e9ecef')}
                       />
                       Transparent
                     </label>

@@ -79,9 +79,17 @@ const invoiceSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  markupAmount: {
+    type: Number,
+    default: 0
+  },
   taxAmount: {
     type: Number,
     required: true
+  },
+  tcsAmount: {
+    type: Number,
+    default: 0
   },
   finalAmount: {
     type: Number,
