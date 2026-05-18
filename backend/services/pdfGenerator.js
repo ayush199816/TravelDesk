@@ -1090,10 +1090,10 @@ class PDFGenerator {
           <div style="background-color: transparent; border-radius: 8px; border: 1px solid ${quoteTemplate.borders.activity}; overflow: hidden; box-shadow: 0 2px 6px ${quoteTemplate.shadows?.activity === 'transparent' ? 'transparent' : `${quoteTemplate.shadows?.activity || '#000000'}${Math.round((quoteTemplate.shadows?.activityOpacity || 0.05) * 255).toString(16).padStart(2, '0')}`};">
             <table style="width: 100%; border-collapse: collapse;">
               <thead>
-                <tr style="background-color: ${quoteTemplate.colors.primary}20;">
-                  <th style="padding: 12px; text-align: center; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header}; width: 15%;">Day</th>
-                  <th style="padding: 12px; text-align: left; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header}; width: 65%;">Activities & Transfers</th>
-                  <th style="padding: 12px; text-align: center; color: ${quoteTemplate.colors.primary}; font-weight: bold; font-family: ${quoteTemplate.fonts.header}; width: 20%;">Pax</th>
+                <tr style="background-color: ${quoteTemplate.table?.headerBackgroundColor || '#f8f9fa'};">
+                  <th style="padding: 12px; text-align: center; color: ${quoteTemplate.table?.headerTextColor === 'transparent' || !quoteTemplate.table?.headerTextColor ? '#ffffff' : quoteTemplate.table?.headerTextColor}; font-weight: bold; font-family: ${quoteTemplate.fonts.header}; width: 15%;">Day</th>
+                  <th style="padding: 12px; text-align: left; color: ${quoteTemplate.table?.headerTextColor === 'transparent' || !quoteTemplate.table?.headerTextColor ? '#ffffff' : quoteTemplate.table?.headerTextColor}; font-weight: bold; font-family: ${quoteTemplate.fonts.header}; width: 65%;">Activities & Transfers</th>
+                  <th style="padding: 12px; text-align: center; color: ${quoteTemplate.table?.headerTextColor === 'transparent' || !quoteTemplate.table?.headerTextColor ? '#ffffff' : quoteTemplate.table?.headerTextColor}; font-weight: bold; font-family: ${quoteTemplate.fonts.header}; width: 20%;">Pax</th>
                 </tr>
               </thead>
               <tbody>
@@ -1273,7 +1273,7 @@ class PDFGenerator {
               <div class="content-wrapper">
                 ${dayHeader}
                 <div style="text-align: center; padding: 60px 40px; color: #666;">
-                  <div style="font-size: 64px; margin-bottom: 15px;">🌴</div>
+                  <div style="font-size: 48px; margin-bottom: 15px; font-weight: bold; color: #4CAF50;">☼</div>
                   <div style="font-size: 24px; font-weight: bold; color: #333;">Free Day</div>
                   <div style="font-size: 16px; margin-top: 8px; color: #666;">Relax and explore at your own pace</div>
                 </div>
@@ -1355,9 +1355,9 @@ class PDFGenerator {
                         <h3 style="margin: 0 0 6px 0; font-size: ${quoteTemplate.fontSizes.activity}px; color: ${quoteTemplate.colors.text}; font-weight: bold; font-family: ${quoteTemplate.fonts.activity};">${activityData.name}</h3>
                         <p style="margin: 0 0 8px 0; font-size: ${quoteTemplate.fontSizes.description}px; line-height: 1.4; color: ${quoteTemplate.colors.muted}; font-family: ${quoteTemplate.fonts.body};">${activityData.description || 'Experience this wonderful activity with professional guidance and create lasting memories.'}</p>
                         <div style="display: flex; gap: 15px; font-size: ${quoteTemplate.fontSizes.details}px; color: ${quoteTemplate.colors.muted}; padding-top: 6px; border-top: 1px solid ${quoteTemplate.borders.activity}; font-family: ${quoteTemplate.fonts.body};">
-                          <span style="display: flex; align-items: center;">📍 ${activityData.location || 'Location TBD'}</span>
-                          <span style="display: flex; align-items: center;">⏱️ ${activityData.duration || 'Flexible'}</span>
-                          ${formatPassengerCount(item) ? `<span style="display: flex; align-items: center; background-color: ${quoteTemplate.colors.primary}20; color: ${quoteTemplate.colors.primary}; padding: 2px 6px; border-radius: 4px; font-weight: bold;">👥 ${formatPassengerCount(item)}</span>` : ''}
+                          <span style="display: flex; align-items: center;"><strong>Location:</strong> ${activityData.location || 'Location TBD'}</span>
+                          <span style="display: flex; align-items: center;"><strong>Duration:</strong> ${activityData.duration || 'Flexible'}</span>
+                          ${formatPassengerCount(item) ? `<span style="display: flex; align-items: center; background-color: ${quoteTemplate.colors.primary}20; color: ${quoteTemplate.colors.primary}; padding: 2px 6px; border-radius: 4px; font-weight: bold;"><strong>Pax:</strong> ${formatPassengerCount(item)}</span>` : ''}
                         </div>
                       </div>
                     </div>
