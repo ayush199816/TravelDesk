@@ -897,7 +897,7 @@ class PDFGenerator {
                         ${stay.cityName}
                       </div>
                       ${stay.starRating ? `
-                        <div style="color: #ffd700; margin-bottom: 15px;">
+                        <div style="color: #ffd700; margin-bottom: 15px; font-size: 24px;">
                           ${'★'.repeat(stay.starRating)}${'☆'.repeat(5 - stay.starRating)}
                         </div>
                       ` : ''}
@@ -907,8 +907,8 @@ class PDFGenerator {
                     </div>
                     
                     ${stay.hotelImage ? `
-                      <div style="margin-left: 15px; flex-shrink: 0; height: 100%; display: flex; align-items: center; margin-top: -50px;">
-                        <img src="${stay.hotelImage}" alt="${stay.hotelName}" style="width: ${quoteTemplate.hotel?.imageWidth || 600}px; height: 180px; border-radius: ${quoteTemplate.hotel?.imageBorderRadius || 6}px; object-fit: cover; border: 1px solid ${quoteTemplate.hotel?.borderColor || 'rgba(255, 255, 255, 0.3)'};" />
+                      <div style="margin-left: 15px; flex-shrink: 0; height: 100%; display: flex; align-items: center; margin-top: 10px;">
+                        <img src="${stay.hotelImage}" alt="${stay.hotelName}" style="width: 320px; height: 160px; border-radius: ${quoteTemplate.hotel?.imageBorderRadius || 8}px; object-fit: cover; border: 1px solid ${quoteTemplate.hotel?.borderColor || 'rgba(255, 255, 255, 0.3)'};" />
                       </div>
                     ` : ''}
                   </div>
