@@ -32,6 +32,7 @@ const LeadDetailPage = () => {
   const [invoices, setInvoices] = useState([]);
   const [recommendedQuotes, setRecommendedQuotes] = useState([]);
   const [loadingRecommendations, setLoadingRecommendations] = useState(false);
+  const [downloadingPDF, setDownloadingPDF] = useState(false);
 
   const fetchLeadByNumber = useCallback(async () => {
     try {
@@ -575,6 +576,7 @@ const LeadDetailPage = () => {
 
   const handleDownloadPDF = async (quote, index) => {
     try {
+      setDownloadingPDF(true);
       const response = await api.get(`/pdf-generator/quote/${quote._id}`, {
         responseType: 'blob'
       });
@@ -592,6 +594,8 @@ const LeadDetailPage = () => {
     } catch (error) {
       console.error('Error downloading PDF:', error);
       alert('Error generating PDF. Please try again.');
+    } finally {
+      setDownloadingPDF(false);
     }
   };
 
@@ -1484,8 +1488,9 @@ const LeadDetailPage = () => {
                         onClick={() => handleDownloadPDF(quote, index)}
                         style={{...styles.quoteButton, ...styles.pdfButton}}
                         title="Download PDF"
+                        disabled={downloadingPDF}
                       >
-                        📄
+                        {downloadingPDF ? '⏳' : '📄'}
                       </button>
                       <button 
                         onClick={() => handleEditQuote(quote)}
@@ -1669,6 +1674,35 @@ const LeadDetailPage = () => {
             </div>
           </div>
         )}
+      
+      {/* PDF Download Loading Indicator */}
+      {downloadingPDF && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '30px',
+            borderRadius: '10px',
+            textAlign: 'center',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
+          }}>
+            <div style={{ fontSize: '48px', marginBottom: '15px' }}>⏳</div>
+            <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '10px' }}>Generating PDF...</div>
+            <div style={{ fontSize: '14px', color: '#666' }}>Please wait while we create your quote PDF</div>
+          </div>
+        </div>
+      )}
+      
       </div>
     </div>
   );

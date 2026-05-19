@@ -1126,13 +1126,15 @@ class PDFGenerator {
                     const adultPax = quote.adultPax || 0;
                     const childPax = quote.childPax || 0;
                     const hasChildActivity = activities.some(item => item.childPrice > 0 || item.includeChild === true);
+                    const hasTransfers = transfers && transfers.length > 0;
                     
                     let paxText = '';
                     if (adultPax > 0) {
                       paxText = `${adultPax}A`;
                     }
-                    if (childPax > 0 && hasChildActivity) {
-                      paxText += paxText ? ` + ${childPax}C` : `${childPax}C`;
+                    // Show children if there are child activities OR if there are transfers
+                    if (childPax > 0 && (hasChildActivity || hasTransfers)) {
+                      paxText += paxText ? `+${childPax}C` : `${childPax}C`;
                     }
                     
                     return paxText || '1A';
@@ -1322,9 +1324,14 @@ class PDFGenerator {
               const formatPassengerCount = (item) => {
                 const adultPax = quote.adultPax || 0;
                 const childPax = quote.childPax || 0;
+                const isTransfer = item.transfer || item.fromLocation || item.toLocation;
                 const hasChildActivity = item.childPrice > 0 || item.includeChild === true;
                 
-                if (adultPax > 0 && childPax > 0 && hasChildActivity) {
+                // For transfers, always show both adults and children if they exist
+                // For sightseeings, only show children if the activity includes them
+                if (adultPax > 0 && childPax > 0 && (isTransfer || hasChildActivity)) {
+                  return `${adultPax}A+${childPax}C`;
+                } else if (adultPax > 0 && childPax > 0 && isTransfer) {
                   return `${adultPax}A+${childPax}C`;
                 } else if (adultPax > 0) {
                   return `${adultPax}A`;

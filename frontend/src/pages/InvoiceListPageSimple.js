@@ -15,6 +15,7 @@ const InvoiceListPageSimple = () => {
     utrNumber: ''
   });
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [downloadingInvoice, setDownloadingInvoice] = useState(null);
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -119,12 +120,12 @@ const InvoiceListPageSimple = () => {
 
   const handleDownloadPDF = async (invoiceId, invoiceNumber) => {
     try {
+      setDownloadingInvoice(invoiceId);
       const response = await api.get(`/invoices/${invoiceId}/pdf`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         responseType: 'blob'
       });
 
-      // Create blob link to download
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -135,6 +136,8 @@ const InvoiceListPageSimple = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       setError('Error downloading PDF');
+    } finally {
+      setDownloadingInvoice(null);
     }
   };
 
@@ -483,18 +486,19 @@ const InvoiceListPageSimple = () => {
                         <div style={{ display: 'flex', gap: '5px' }}>
                           <button 
                             onClick={() => handleDownloadPDF(invoice._id, invoice.invoiceNumber)}
+                            disabled={downloadingInvoice === invoice._id}
                             style={{
-                              backgroundColor: '#007bff',
+                              backgroundColor: downloadingInvoice === invoice._id ? '#6c757d' : '#007bff',
                               color: 'white',
                               border: 'none',
                               borderRadius: '4px',
                               padding: '6px 10px',
-                              cursor: 'pointer',
+                              cursor: downloadingInvoice === invoice._id ? 'not-allowed' : 'pointer',
                               fontSize: '12px'
                             }}
                             title="Download PDF"
                           >
-                            📥
+                            {downloadingInvoice === invoice._id ? '⏳' : '📥'}
                           </button>
                           <button 
                             onClick={() => openPaymentModal(invoice)}
@@ -689,6 +693,35 @@ const InvoiceListPageSimple = () => {
           </div>
         </div>
       )}
+      
+      {/* Invoice Download Loading Indicator */}
+      {downloadingInvoice && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '30px',
+            borderRadius: '10px',
+            textAlign: 'center',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
+          }}>
+            <div style={{ fontSize: '48px', marginBottom: '15px' }}>⏳</div>
+            <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '10px' }}>Generating Invoice PDF...</div>
+            <div style={{ fontSize: '14px', color: '#666' }}>Please wait while we create your invoice PDF</div>
+          </div>
+        </div>
+      )}
+      
     </div>
   );
 };
