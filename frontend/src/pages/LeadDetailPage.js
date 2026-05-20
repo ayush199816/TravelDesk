@@ -261,17 +261,56 @@ const LeadDetailPage = () => {
 
 `;
     
-    // Calculate package cost (excluding flights)
+    // Calculate cost breakdown
     const totalAmount = quote.total || 0;
     const subtotal = quote.subtotal || totalAmount;
     const flightTotal = quote.flights ? quote.flights.reduce((sum, flight) => sum + (flight.price || 0), 0) : 0;
-    const packageCost = subtotal - flightTotal; // Package cost excludes flights
+    const taxAmount = quote.taxAmount || 0;
+    const tcsAmount = quote.tcsAmount || 0;
+    const markupAmount = quote.markupAmount || 0;
+    const discountAmount = quote.discountAmount || 0;
+    
+    // Calculate individual components
+    let sightseeingTotal = 0;
+    let transferTotal = 0;
+    let hotelTotal = 0;
+    
+    if (quote.sightseeings) {
+      sightseeingTotal = quote.sightseeings.reduce((sum, item) => sum + (item.price || 0), 0);
+    }
+    if (quote.transfers) {
+      transferTotal = quote.transfers.reduce((sum, item) => sum + (item.price || 0), 0);
+    }
+    if (quote.hotels) {
+      hotelTotal = quote.hotels.reduce((sum, hotel) => {
+        if (hotel.rooms) {
+          return sum + hotel.rooms.reduce((roomSum, room) => roomSum + (room.adultRate || 0), 0);
+        }
+        return sum;
+      }, 0);
+    }
+    
+    // Calculate package cost (Transfer + Sightseeing + Tax + Hotel + Markup - Discount)
+    const packageCost = transferTotal + sightseeingTotal + taxAmount + hotelTotal + markupAmount - discountAmount;
     
     message += `Price (${quote.currency}):
 `;
     
-    // Show only the package cost
+    // Show package cost breakdown
     message += `* Total Package Cost: ${Math.round(packageCost).toLocaleString()} ${quote.currency}\n`;
+    
+    // Show TCS if exists
+    if (tcsAmount > 0) {
+      message += `* TCS (2.5%): ${Math.round(tcsAmount).toLocaleString()} ${quote.currency}\n`;
+    }
+    
+    // Show Flight Cost if exists
+    if (flightTotal > 0) {
+      message += `* Flight Cost: ${Math.round(flightTotal).toLocaleString()} ${quote.currency}\n`;
+    }
+    
+    // Show Total Cost
+    message += `* Total Cost: ${Math.round(totalAmount).toLocaleString()} ${quote.currency}\n`;
     
     // Calculate per-person division based on total cost
     // Children pay 70% of adult rate
@@ -285,8 +324,6 @@ const LeadDetailPage = () => {
     if (quote.childPax > 0) {
       message += `* ${Math.round(totalPerChild).toLocaleString()} / Child (Package) x ${quote.childPax} Child\n`;
     }
-    
-    message += `\nTotal: ${Math.round(totalAmount).toLocaleString()} ${quote.currency} /-`;
     message += `
 
 `;
