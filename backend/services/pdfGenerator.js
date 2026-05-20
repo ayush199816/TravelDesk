@@ -787,137 +787,153 @@ class PDFGenerator {
     
     <!-- Page 3: Accommodation Details -->
     ${quote.hotels && quote.hotels.length > 0 ? `
-      <div class="page middle-page page-break">
-        <div class="content-wrapper">
-          <h1 style="color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.header}; font-size: ${quoteTemplate.fontSizes.header}px;">Accommodation Details</h1>
-          ${(() => {
-            // Group consecutive nights by hotel
-            const hotelStays = [];
+      ${(() => {
+        // Group consecutive nights by hotel
+        const hotelStays = [];
+        
+        quote.hotels.forEach(hotel => {
+          const hotelName = hotel.name || hotel.hotel?.name || 'N/A';
+          const cityName = hotel.city || hotel.hotel?.city || 'N/A';
+          const starRating = hotel.starRating || hotel.hotel?.starRating || 0;
+          // Use images from populated hotel reference first, then from quote data
+          const hotelImage = (hotel.hotel?.images && hotel.hotel.images.length > 0) 
+            ? hotel.hotel.images[0] 
+            : (hotel.images && hotel.images.length > 0 
+              ? hotel.images[0] 
+              : '');
+          
+          const roomsData = hotel.rooms || [];
+          roomsData.forEach(room => {
+            const checkInDate = room.checkIn ? new Date(room.checkIn).toLocaleDateString('en-US', { 
+              day: 'numeric', 
+              month: 'short', 
+              year: 'numeric' 
+            }) : 'N/A';
             
-            quote.hotels.forEach(hotel => {
-              const hotelName = hotel.name || hotel.hotel?.name || 'N/A';
-              const cityName = hotel.city || hotel.hotel?.city || 'N/A';
-              const starRating = hotel.starRating || hotel.hotel?.starRating || 0;
-              // Use images from populated hotel reference first, then from quote data
-              const hotelImage = (hotel.hotel?.images && hotel.hotel.images.length > 0) 
-                ? hotel.hotel.images[0] 
-                : (hotel.images && hotel.images.length > 0 
-                  ? hotel.images[0] 
-                  : '');
-              
-              const roomsData = hotel.rooms || [];
-              roomsData.forEach(room => {
-                const checkInDate = room.checkIn ? new Date(room.checkIn).toLocaleDateString('en-US', { 
-                  day: 'numeric', 
-                  month: 'short', 
-                  year: 'numeric' 
-                }) : 'N/A';
-                
-                const nights = room.nights || 1;
-                
-                hotelStays.push({
-                  hotelName,
-                  cityName,
-                  starRating,
-                  hotelImage,
-                  numberOfRooms: room.numberOfRooms || 1,
-                  roomName: room.roomName || 'Standard Room',
-                  checkInDate,
-                  nights,
-                  checkIn: new Date(room.checkIn)
-                });
-              });
+            const nights = room.nights || 1;
+            
+            hotelStays.push({
+              hotelName,
+              cityName,
+              starRating,
+              hotelImage,
+              numberOfRooms: room.numberOfRooms || 1,
+              roomName: room.roomName || 'Standard Room',
+              checkInDate,
+              nights,
+              checkIn: new Date(room.checkIn)
             });
+          });
+        });
+        
+        // Sort stays by check-in date
+        hotelStays.sort((a, b) => a.checkIn - b.checkIn);
+        
+        // Split hotels into groups of 3 per page
+        const hotelPages = [];
+        for (let i = 0; i < hotelStays.length; i += 3) {
+          hotelPages.push(hotelStays.slice(i, i + 3));
+        }
+        
+        return hotelPages.map((pageHotels, pageIndex) => {
+          const pageContent = [];
+          
+          pageHotels.forEach((stay, index) => {
+            // Generate night boxes using template nightBox settings
+            const nightBoxes = [];
+            const showNightBox = quoteTemplate.hotel?.nightBox?.showNightBox !== false;
             
-            // Sort stays by check-in date
-            hotelStays.sort((a, b) => a.checkIn - b.checkIn);
-            
-            return hotelStays.map((stay, index) => {
-              // Generate night boxes using template nightBox settings
-              const nightBoxes = [];
-              const showNightBox = quoteTemplate.hotel?.nightBox?.showNightBox !== false;
-              
-              if (showNightBox) {
-                for (let i = 1; i <= stay.nights; i++) {
-                  nightBoxes.push(`
-                    <div style="
-                      display: inline-flex;
-                      align-items: center;
-                      justify-content: center;
-                      width: 35px;
-                      height: 35px;
-                      background-color: ${quoteTemplate.hotel?.nightBox?.backgroundColor || '#ffffff'};
-                      border: ${quoteTemplate.hotel?.nightBox?.borderWidth || 1}px solid ${quoteTemplate.hotel?.nightBox?.borderColor || '#dee2e6'};
-                      border-radius: ${quoteTemplate.hotel?.nightBox?.borderRadius || 6}px;
-                      margin-right: 8px;
-                      margin-bottom: 8px;
-                      font-size: ${quoteTemplate.hotel?.nightBox?.titleFontSize || 12}px;
-                      font-weight: bold;
-                      color: ${quoteTemplate.hotel?.nightBox?.titleColor || '#495057'};
-                      font-family: ${quoteTemplate.hotel?.nightBox?.titleFont || 'Arial, sans-serif'};
-                    ">
-                      ${i}N
-                    </div>
-                  `);
-                }
+            if (showNightBox) {
+              for (let i = 1; i <= stay.nights; i++) {
+                nightBoxes.push(`
+                  <div style="
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 35px;
+                    height: 35px;
+                    background-color: ${quoteTemplate.hotel?.nightBox?.backgroundColor || '#ffffff'};
+                    border: ${quoteTemplate.hotel?.nightBox?.borderWidth || 1}px solid ${quoteTemplate.hotel?.nightBox?.borderColor || '#dee2e6'};
+                    border-radius: ${quoteTemplate.hotel?.nightBox?.borderRadius || 6}px;
+                    margin-right: 8px;
+                    margin-bottom: 8px;
+                    font-size: ${quoteTemplate.hotel?.nightBox?.titleFontSize || 12}px;
+                    font-weight: bold;
+                    color: ${quoteTemplate.hotel?.nightBox?.titleColor || '#495057'};
+                    font-family: ${quoteTemplate.hotel?.nightBox?.titleFont || 'Arial, sans-serif'};
+                  ">
+                    ${i}N
+                  </div>
+                `);
               }
-              
-              // Use template hotel box settings
-              const showHotelBox = quoteTemplate.hotel?.showBox !== false;
-              const hotelBoxStyles = showHotelBox ? `
-                padding: 20px;
-                border: ${quoteTemplate.hotel?.borderWidth || 1}px solid ${quoteTemplate.hotel?.borderColor || '#e9ecef'};
-                border-radius: ${quoteTemplate.hotel?.borderRadius || 8}px;
-                background-color: ${quoteTemplate.hotel?.backgroundColor || '#f8f9fa'};
-                margin-bottom: 30px;
-              ` : `
-                margin-bottom: 30px;
-              `;
-              
-              return `
-                <div style="${hotelBoxStyles}">
-                  <!-- Night boxes at the top -->
-                  ${showNightBox && nightBoxes.length > 0 ? `
-                    <div style="display: flex; flex-wrap: wrap; margin-bottom: 15px;">
-                      ${nightBoxes.join('')}
-                    </div>
-                  ` : ''}
-                  
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div style="flex: 1;">
-                      ${stay.checkInDate !== 'N/A' ? `
-                        <div style="font-size: ${quoteTemplate.hotel?.bodyFontSize || 14}px; color: ${quoteTemplate.hotel?.bodyColor || '#666666'}; margin-bottom: 10px; font-family: ${quoteTemplate.hotel?.bodyFont || 'Arial, sans-serif'};">
-                          Check-in: ${stay.checkInDate}
-                        </div>
-                      ` : ''}
-                      <div style="font-size: ${quoteTemplate.hotel?.titleFontSize || 18}px; font-weight: bold; color: ${quoteTemplate.hotel?.titleColor || '#333333'}; margin-bottom: 5px; font-family: ${quoteTemplate.hotel?.titleFont || 'Arial, sans-serif'};">
-                        ${stay.hotelName}
-                      </div>
-                      <div style="font-size: ${quoteTemplate.hotel?.bodyFontSize || 14}px; color: ${quoteTemplate.hotel?.bodyColor || '#666666'}; margin-bottom: 8px; font-family: ${quoteTemplate.hotel?.bodyFont || 'Arial, sans-serif'};">
-                        ${stay.cityName}
-                      </div>
-                      ${stay.starRating ? `
-                        <div style="color: #ffd700; margin-bottom: 15px; font-size: 24px;">
-                          ${'★'.repeat(stay.starRating)}${'☆'.repeat(5 - stay.starRating)}
-                        </div>
-                      ` : ''}
-                      <div style="font-size: ${quoteTemplate.hotel?.bodyFontSize || 14}px; color: ${quoteTemplate.hotel?.bodyColor || '#666666'}; font-family: ${quoteTemplate.hotel?.bodyFont || 'Arial, sans-serif'};">
-                        ${stay.numberOfRooms} × ${stay.roomName}
-                      </div>
-                    </div>
-                    
-                    ${stay.hotelImage ? `
-                      <div style="margin-left: 15px; flex-shrink: 0; height: 100%; display: flex; align-items: center; margin-top: 10px;">
-                        <img src="${stay.hotelImage}" alt="${stay.hotelName}" style="width: 320px; height: 160px; border-radius: ${quoteTemplate.hotel?.imageBorderRadius || 8}px; object-fit: cover; border: 1px solid ${quoteTemplate.hotel?.borderColor || 'rgba(255, 255, 255, 0.3)'};" />
+            }
+            
+            // Use template hotel box settings
+            const showHotelBox = quoteTemplate.hotel?.showBox !== false;
+            const hotelBoxStyles = showHotelBox ? `
+              padding: 20px;
+              border: ${quoteTemplate.hotel?.borderWidth || 1}px solid ${quoteTemplate.hotel?.borderColor || '#e9ecef'};
+              border-radius: ${quoteTemplate.hotel?.borderRadius || 8}px;
+              background-color: ${quoteTemplate.hotel?.backgroundColor || '#f8f9fa'};
+              margin-bottom: 30px;
+            ` : `
+              margin-bottom: 30px;
+            `;
+            
+            pageContent.push(`
+              <div style="${hotelBoxStyles}">
+                <!-- Night boxes at the top -->
+                ${showNightBox && nightBoxes.length > 0 ? `
+                  <div style="display: flex; flex-wrap: wrap; margin-bottom: 15px;">
+                    ${nightBoxes.join('')}
+                  </div>
+                ` : ''}
+                
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                  <div style="flex: 1;">
+                    ${stay.checkInDate !== 'N/A' ? `
+                      <div style="font-size: ${quoteTemplate.hotel?.bodyFontSize || 14}px; color: ${quoteTemplate.hotel?.bodyColor || '#666666'}; margin-bottom: 10px; font-family: ${quoteTemplate.hotel?.bodyFont || 'Arial, sans-serif'};">
+                        Check-in: ${stay.checkInDate}
                       </div>
                     ` : ''}
+                    <div style="font-size: ${quoteTemplate.hotel?.titleFontSize || 18}px; font-weight: bold; color: ${quoteTemplate.hotel?.titleColor || '#333333'}; margin-bottom: 5px; font-family: ${quoteTemplate.hotel?.titleFont || 'Arial, sans-serif'};">
+                      ${stay.hotelName}
+                    </div>
+                    <div style="font-size: ${quoteTemplate.hotel?.bodyFontSize || 14}px; color: ${quoteTemplate.hotel?.bodyColor || '#666666'}; margin-bottom: 8px; font-family: ${quoteTemplate.hotel?.bodyFont || 'Arial, sans-serif'};">
+                      ${stay.cityName}
+                    </div>
+                    ${stay.starRating ? `
+                      <div style="color: #ffd700; margin-bottom: 15px; font-size: 24px;">
+                        ${'★'.repeat(stay.starRating)}${'☆'.repeat(5 - stay.starRating)}
+                      </div>
+                    ` : ''}
+                    <div style="font-size: ${quoteTemplate.hotel?.bodyFontSize || 14}px; color: ${quoteTemplate.hotel?.bodyColor || '#666666'}; font-family: ${quoteTemplate.hotel?.bodyFont || 'Arial, sans-serif'};">
+                      ${stay.numberOfRooms} × ${stay.roomName}
+                    </div>
                   </div>
+                  
+                  ${stay.hotelImage ? `
+                    <div style="margin-left: 15px; flex-shrink: 0; height: 100%; display: flex; align-items: center; margin-top: 10px;">
+                      <img src="${stay.hotelImage}" alt="${stay.hotelName}" style="width: 320px; height: 160px; border-radius: ${quoteTemplate.hotel?.imageBorderRadius || 8}px; object-fit: cover; border: 1px solid ${quoteTemplate.hotel?.borderColor || 'rgba(255, 255, 255, 0.3)'};" />
+                    </div>
+                  ` : ''}
                 </div>
-              `;
-            }).join('');
-          })()}
-        </div>
-      </div>
+              </div>
+            `);
+          });
+          
+          return `
+            <div class="page middle-page ${pageIndex < hotelPages.length - 1 ? 'page-break' : ''}">
+              <div class="content-wrapper">
+                <h1 style="color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.header}; font-size: ${quoteTemplate.fontSizes.header}px;">
+                  Accommodation Details ${hotelPages.length > 1 ? `(Page ${pageIndex + 1}/${hotelPages.length})` : ''}
+                </h1>
+                ${pageContent.join('')}
+              </div>
+            </div>
+          `;
+        }).join('');
+      })()}
     ` : ''}
     
     <!-- Flight Details -->
@@ -1463,7 +1479,7 @@ class PDFGenerator {
                 }
               }
               
-              const packageCost = sightseeingTotal + transferTotal + hotelTotal + (quote.markupAmount || 0);
+              const packageCost = sightseeingTotal + transferTotal + hotelTotal + (quote.markupAmount || 0) - (quote.discountAmount || 0);
               
               // Update quote with calculated flight total for consistency
               quote.flightTotal = flightTotal;

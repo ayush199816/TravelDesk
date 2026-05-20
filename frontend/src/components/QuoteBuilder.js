@@ -55,6 +55,8 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
     notes: '',
     markupType: 'percentage',
     markupValue: 0,
+    discountType: 'percentage',
+    discountValue: 0,
     taxRate: 0,
     taxCalculationType: 'markup', // 'markup' or 'total'
     tcsEnabled: false, // TCS 2.5% checkbox
@@ -331,6 +333,8 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
         notes: quote.notes || '',
         markupType: quote.markupType || 'percentage',
         markupValue: quote.markupValue || 0,
+        discountType: quote.discountType || 'percentage',
+        discountValue: quote.discountValue || 0,
         taxRate: quote.taxRate || 0,
         taxCalculationType: quote.taxCalculationType || 'markup',
         tcsEnabled: quote.tcsEnabled || false,
@@ -554,10 +558,28 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
   // Separate hotel management functions
   const addHotel = (hotel) => {
+    console.log('🏨 Attempting to add hotel:', hotel);
     setQuoteData(prev => {
+      console.log('🏨 Current hotels:', prev.hotels);
+      
       // Check if hotel already exists
-      const existingHotel = prev.hotels.find(h => h.hotel === hotel._id || (h.isTemporary && hotel.isTemporary && h.name === hotel.name));
+      // For regular hotels: check by hotel ID
+      // For temporary hotels: check by database ID (if available) or allow different names
+      const existingHotel = prev.hotels.find(h => {
+        if (hotel.isTemporary && h.isTemporary) {
+          // For temporary hotels, only check if they have the same database ID
+          // This allows multiple temporary hotels with different names
+          return h.hotel === hotel.hotel;
+        } else {
+          // For regular hotels, check by hotel ID
+          return h.hotel === hotel._id;
+        }
+      });
+      
+      console.log('🏨 Existing hotel found:', existingHotel);
+      
       if (existingHotel) {
+        console.log('🏨 Duplicate hotel detected, not adding');
         return prev; // Don't add duplicate
       }
       
@@ -571,6 +593,8 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
         roomCategories: hotel.roomCategories || [],
         images: hotel.images || [] // Include hotel images
       }];
+      
+      console.log('🏨 New hotels array:', newHotels);
       return { ...prev, hotels: newHotels };
     });
   };
@@ -687,9 +711,12 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
         roomCategories: savedHotel.roomCategories
       };
       
+      console.log('🏨 Adding temporary hotel:', tempHotel);
       addHotel(tempHotel);
       setShowTempHotelForm(false);
-      setTempHotelData({
+      
+      // Reset form data completely
+      const resetData = {
         name: '',
         city: '',
         country: quoteData.country,
@@ -700,7 +727,9 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
           currency: quoteData.currency,
           maxOccupancy: 2
         }]
-      });
+      };
+      setTempHotelData(resetData);
+      console.log('🏨 Form reset completed:', resetData);
     } catch (error) {
       console.error('Error saving temporary hotel:', error);
       alert('Error saving temporary hotel: ' + (error.response?.data?.message || error.message));
@@ -773,11 +802,19 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
     
     const subtotal = sightseeingTotal + transferTotal + hotelTotal + flightTotal;
     const markupValue = parseFloat(quoteData.markupValue) || 0;
+    const discountValue = parseFloat(quoteData.discountValue) || 0;
     const taxRate = parseFloat(quoteData.taxRate) || 0;
+    
     const markupAmount = quoteData.markupType === 'percentage' 
       ? subtotal * (markupValue / 100) 
       : markupValue;
-    const markupSubtotal = subtotal + markupAmount;
+    
+    // Calculate discount on subtotal (before markup)
+    const discountAmount = quoteData.discountType === 'percentage' 
+      ? subtotal * (discountValue / 100) 
+      : discountValue;
+    
+    const markupSubtotal = subtotal + markupAmount - discountAmount;
     
     // Calculate tax based on tax calculation type
     let taxAmount = 0;
@@ -785,11 +822,11 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
       // Tax on markup only
       taxAmount = markupAmount * (taxRate / 100);
     } else {
-      // Tax on subtotal + markup
+      // Tax on subtotal + markup - discount
       taxAmount = markupSubtotal * (taxRate / 100);
     }
     
-    // Calculate TCS (2.5%) if enabled on Subtotal + Markup + Tax
+    // Calculate TCS (2.5%) if enabled on Subtotal + Markup - Discount + Tax
     const tcsBase = markupSubtotal + taxAmount;
     const tcsAmount = quoteData.tcsEnabled ? tcsBase * 0.025 : 0;
     
@@ -801,7 +838,8 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
       hotelTotal: isNaN(hotelTotal) ? 0 : hotelTotal,
       flightTotal: isNaN(flightTotal) ? 0 : flightTotal,
       subtotal: isNaN(subtotal) ? 0 : subtotal,
-      markupAmount: isNaN(markupAmount) ? 0 : markupAmount, 
+      markupAmount: isNaN(markupAmount) ? 0 : markupAmount,
+      discountAmount: isNaN(discountAmount) ? 0 : discountAmount,
       taxAmount: isNaN(taxAmount) ? 0 : taxAmount,
       tcsAmount: isNaN(tcsAmount) ? 0 : tcsAmount,
       total: isNaN(total) ? 0 : total 
@@ -2009,6 +2047,44 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
             </div>
           </div>
           
+          {/* Discount Section */}
+          <div style={{
+            backgroundColor: '#fff3cd',
+            padding: '20px',
+            borderRadius: '8px',
+            marginBottom: '20px',
+            border: '1px solid #ffeaa7'
+          }}>
+            <h4 style={{marginBottom: '15px', color: '#856404'}}>Discount Options</h4>
+            <div style={styles.formGrid}>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Discount Type</label>
+                <select
+                  name="discountType"
+                  value={quoteData.discountType}
+                  onChange={handleInputChange}
+                  style={styles.input}
+                >
+                  <option value="percentage">Percentage</option>
+                  <option value="amount">Fixed Amount</option>
+                </select>
+              </div>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Discount Value</label>
+                <input
+                  type="number"
+                  name="discountValue"
+                  value={quoteData.discountValue}
+                  onChange={handleInputChange}
+                  style={styles.input}
+                  min="0"
+                  step="0.01"
+                  placeholder={quoteData.discountType === 'percentage' ? 'e.g., 10 for 10%' : 'e.g., 100'}
+                />
+              </div>
+            </div>
+          </div>
+          
           {/* Tax Section */}
           <div style={{
             backgroundColor: '#f8f9fa',
@@ -2133,6 +2209,19 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                   +{quoteData.currency} {(totals.markupAmount || 0).toFixed(2)}
                 </div>
               </div>
+              {totals.discountAmount > 0 && (
+                <div style={{
+                  backgroundColor: '#fff3cd',
+                  padding: '15px',
+                  borderRadius: '6px',
+                  border: '1px solid #ffeaa7'
+                }}>
+                  <div style={{fontSize: '12px', color: '#856404', marginBottom: '5px'}}>Discount Amount</div>
+                  <div style={{fontSize: '18px', fontWeight: 'bold', color: '#856404'}}>
+                    -{quoteData.currency} {(totals.discountAmount || 0).toFixed(2)}
+                  </div>
+                </div>
+              )}
               <div style={{
                 backgroundColor: 'white',
                 padding: '15px',
