@@ -1560,12 +1560,13 @@ class PDFGenerator {
                 });
               }
               
-              const packageCost = sightseeingTotal + transferTotal + hotelTotal + (quote.markupAmount || 0) - (quote.discountAmount || 0);
+              // Calculate package cost including tax
+              const taxAmount = quote.taxAmount || 0;
+              const packageCost = sightseeingTotal + transferTotal + hotelTotal + (quote.markupAmount || 0) - (quote.discountAmount || 0) + taxAmount;
               
               // Update quote with calculated flight total for consistency
               quote.flightTotal = flightTotal;
-              // Use actual tax and TCS amounts from quote
-              const taxAmount = quote.taxAmount || 0;
+              // Use actual TCS amount from quote
               const tcsAmount = quote.tcsAmount || 0;
               // Total amount from quote
               const totalAmount = quote.total || 0;
@@ -1582,23 +1583,13 @@ class PDFGenerator {
                 `;
               }
               
-              // Add package cost
+              // Add package cost (now includes tax)
               tableRows += `
                 <tr>
-                  <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">Package Cost</td>
+                  <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">Package Cost (Incl. Tax)</td>
                   <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; text-align: right;">${quote.currency || 'USD'} ${packageCost.toLocaleString('en-IN')}</td>
                 </tr>
               `;
-              
-              // Add tax if exists
-              if (taxAmount > 0) {
-                tableRows += `
-                  <tr>
-                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">Tax (${quote.taxRate || 0}%)</td>
-                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; text-align: right;">${quote.currency || 'USD'} ${taxAmount.toLocaleString('en-IN')}</td>
-                  </tr>
-                `;
-              }
               
               // Add TCS if exists
               if (tcsAmount > 0) {

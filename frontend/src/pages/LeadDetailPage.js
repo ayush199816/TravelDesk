@@ -261,49 +261,32 @@ const LeadDetailPage = () => {
 
 `;
     
-    // Calculate total amount
+    // Calculate package cost (excluding flights)
     const totalAmount = quote.total || 0;
+    const subtotal = quote.subtotal || totalAmount;
+    const flightTotal = quote.flights ? quote.flights.reduce((sum, flight) => sum + (flight.price || 0), 0) : 0;
+    const packageCost = subtotal - flightTotal; // Package cost excludes flights
     
     message += `Price (${quote.currency}):
 `;
     
-    // Calculate pricing breakdown
-    const flightTotal = quote.flights ? quote.flights.reduce((sum, flight) => sum + (flight.price || 0), 0) : 0;
-    const packageTotal = totalAmount - flightTotal - (quote.taxAmount || 0) - (quote.tcsAmount || 0);
+    // Show only the package cost
+    message += `* Total Package Cost: ${Math.round(packageCost).toLocaleString()} ${quote.currency}\n`;
     
-    // Show Flight Price
-    if (flightTotal > 0) {
-      message += `* Flight Price: ${flightTotal.toLocaleString()} ${quote.currency}\n`;
-    }
-    
-    // Show Package Price
-    if (packageTotal > 0) {
-      message += `* Package Price: ${packageTotal.toLocaleString()} ${quote.currency}\n`;
-    }
-    
-    // Show Tax Amount separately
-    if (quote.taxAmount > 0) {
-      message += `* Tax (${quote.taxRate}%): ${quote.taxAmount.toLocaleString()} ${quote.currency}\n`;
-    }
-    
-    // Show TCS if enabled
-    if (quote.tcsAmount > 0) {
-      message += `* TCS (2.5%): ${quote.tcsAmount.toLocaleString()} ${quote.currency}\n`;
-    }
-    
-    // Calculate per-person totals
-    const totalPerAdult = quote.adultPax > 0 ? totalAmount / quote.adultPax : 0;
-    const totalPerChild = quote.childPax > 0 ? totalPerAdult * 0.7 : 0; // Child pays 70% of adult price
+    // Calculate per-person division based on total cost
+    // Children pay 70% of adult rate
+    const totalPerAdult = quote.adultPax > 0 ? totalAmount / (quote.adultPax + (quote.childPax * 0.7)) : 0;
+    const totalPerChild = totalPerAdult * 0.7;
     
     // Show per-person pricing
     if (quote.adultPax > 0) {
-      message += `\n* ${Math.round(totalPerAdult).toLocaleString()} / Person (Total) x ${quote.adultPax} Pax\n`;
+      message += `\n* ${Math.round(totalPerAdult).toLocaleString()} / Person (Package) x ${quote.adultPax} Pax\n`;
     }
     if (quote.childPax > 0) {
-      message += `* ${Math.round(totalPerChild).toLocaleString()} / Child (Total) x ${quote.childPax} Child\n`;
+      message += `* ${Math.round(totalPerChild).toLocaleString()} / Child (Package) x ${quote.childPax} Child\n`;
     }
     
-    message += `\nTotal: ${totalAmount.toLocaleString()} ${quote.currency} /-`;
+    message += `\nTotal: ${Math.round(totalAmount).toLocaleString()} ${quote.currency} /-`;
     message += `
 
 `;
