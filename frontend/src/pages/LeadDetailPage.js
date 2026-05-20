@@ -263,7 +263,6 @@ const LeadDetailPage = () => {
     
     // Calculate cost breakdown
     const totalAmount = quote.total || 0;
-    const subtotal = quote.subtotal || totalAmount;
     const flightTotal = quote.flights ? quote.flights.reduce((sum, flight) => sum + (flight.price || 0), 0) : 0;
     const taxAmount = quote.taxAmount || 0;
     const tcsAmount = quote.tcsAmount || 0;
