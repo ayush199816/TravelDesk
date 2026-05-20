@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext, useCallback } from 'react';
 import api from '../api/axios';
 import { AuthContext } from '../contexts/AuthContext';
 import currencyService from '../services/currencyService';
+import SearchableDropdown from './SearchableDropdown';
+import './QuoteBuilder.css';
 
 const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
   const { user } = useContext(AuthContext);
@@ -70,12 +72,8 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
   const [availableHotels, setAvailableHotels] = useState([]);
   const [loading, setLoading] = useState(false);
   
-  // Search states
-  const [sightseeingSearch, setSightseeingSearch] = useState('');
-  const [transferSearch, setTransferSearch] = useState({});
+  // Hotel search state (still needed for hotel section)
   const [hotelSearch, setHotelSearch] = useState('');
-  const [filteredSightseeings, setFilteredSightseeings] = useState([]);
-  const [filteredTransfers, setFilteredTransfers] = useState({});
   const [filteredHotels, setFilteredHotels] = useState([]);
   const [showTempHotelForm, setShowTempHotelForm] = useState(false);
   const [tempHotelData, setTempHotelData] = useState({
@@ -125,42 +123,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
     }
   }, [quoteData.country, quoteData.travelStartDate, quoteData.travelEndDate, user.organization._id]);
 
-  // Filter sightseeings based on search
-  useEffect(() => {
-    if (!sightseeingSearch.trim()) {
-      setFilteredSightseeings(availableSightseeings);
-    } else {
-      const searchLower = sightseeingSearch.toLowerCase();
-      const filtered = availableSightseeings.filter(sightseeing =>
-        sightseeing.name.toLowerCase().includes(searchLower) ||
-        (sightseeing.location && sightseeing.location.toLowerCase().includes(searchLower)) ||
-        (sightseeing.description && sightseeing.description.toLowerCase().includes(searchLower))
-      );
-      setFilteredSightseeings(filtered);
-    }
-  }, [sightseeingSearch, availableSightseeings]);
-
-  // Filter transfers based on search for each day
-  useEffect(() => {
-    const newFilteredTransfers = {};
-    Object.keys(transferSearch).forEach(dayIndex => {
-      const searchTerm = transferSearch[dayIndex];
-      if (!searchTerm.trim()) {
-        newFilteredTransfers[dayIndex] = availableTransfers;
-      } else {
-        const searchLower = searchTerm.toLowerCase();
-        const filtered = availableTransfers.filter(transfer =>
-          transfer.name.toLowerCase().includes(searchLower) ||
-          (transfer.fromLocation && transfer.fromLocation.toLowerCase().includes(searchLower)) ||
-          (transfer.toLocation && transfer.toLocation.toLowerCase().includes(searchLower)) ||
-          (transfer.vehicleType && transfer.vehicleType.toLowerCase().includes(searchLower))
-        );
-        newFilteredTransfers[dayIndex] = filtered;
-      }
-    });
-    setFilteredTransfers(newFilteredTransfers);
-  }, [transferSearch, availableTransfers]);
-
+  
   // Filter hotels based on search
   useEffect(() => {
     if (!hotelSearch.trim()) {
@@ -1733,24 +1696,19 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                       ) : (
                         <div>
                           <div style={{marginBottom: '15px'}}>
-                            {/* Dropdown Search */}
-                            <select
-                              id={`sightseeing-select-${dayIndex}`}
-                              style={{...styles.input, width: '100%', marginBottom: '8px'}}
-                              onChange={(e) => {
-                                const value = e.target.value;
+                            <SearchableDropdown
+                              options={availableSightseeings}
+                              value=""
+                              onChange={(value) => {
                                 if (value) {
-                                  const sightseeing = filteredSightseeings.find(s => s._id === value);
+                                  const sightseeing = availableSightseeings.find(s => s._id === value);
                                   if (sightseeing) {
                                     addSightseeingToDay(dayIndex, sightseeing, sightseeing.childRate || 0);
-                                    setSightseeingSearch('');
                                   }
-                                  e.target.value = '';
                                 }
                               }}
-                            >
-                              <option value="">🔍 Search sightseeings... {sightseeingSearch && `(searching: ${sightseeingSearch})`}</option>
-                              {filteredSightseeings.map(sightseeing => {
+                              placeholder="🔍 Search and select sightseeings..."
+                              optionRenderer={(sightseeing) => {
                                 // Convert rates to quote currency for display
                                 const convertedAdultRate = sightseeing.currency === quoteData.currency ? 
                                   sightseeing.rate : 
@@ -1759,43 +1717,10 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                                   (sightseeing.childRate || 0) : 
                                   Math.round(((sightseeing.childRate || 0) / exchangeRates[sightseeing.currency]) * exchangeRates[quoteData.currency] * 100) / 100;
                                 
-                                return (
-                                  <option key={sightseeing._id} value={sightseeing._id}>
-                                    {sightseeing.name} - Adult: {quoteData.currency} {convertedAdultRate}, Child: {quoteData.currency} {convertedChildRate}
-                                  </option>
-                                );
-                              })}
-                            </select>
-                            
-                            <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
-                              <input
-                                type="text"
-                                placeholder="Type to filter sightseeings..."
-                                value={sightseeingSearch}
-                                onChange={(e) => setSightseeingSearch(e.target.value)}
-                                style={{
-                                  ...styles.input,
-                                  flex: '1'
-                                }}
-                              />
-                              
-                              {sightseeingSearch && (
-                                <button
-                                  type="button"
-                                  onClick={() => setSightseeingSearch('')}
-                                  style={{
-                                    padding: '8px 16px',
-                                    backgroundColor: '#dc3545',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer'
-                                  }}
-                                >
-                                  Clear
-                                </button>
-                              )}
-                            </div>
+                                return `${sightseeing.name} - Adult: ${quoteData.currency} ${convertedAdultRate}, Child: ${quoteData.currency} ${convertedChildRate}`;
+                              }}
+                              style={{width: '100%'}}
+                            />
                           </div>
                           
                           {day.sightseeings.map((item, sightseeingIndex) => {
@@ -1870,75 +1795,28 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                       ) : (
                         <div>
                           <div style={{marginBottom: '15px'}}>
-                            {/* Dropdown Search */}
-                            <select
-                              id={`transfer-select-${dayIndex}`}
-                              style={{...styles.input, width: '100%', marginBottom: '8px'}}
-                              onChange={(e) => {
-                                const value = e.target.value;
+                            <SearchableDropdown
+                              options={availableTransfers}
+                              value=""
+                              onChange={(value) => {
                                 if (value) {
-                                  const transfer = (filteredTransfers[dayIndex] || availableTransfers).find(t => t._id === value);
+                                  const transfer = availableTransfers.find(t => t._id === value);
                                   if (transfer) {
                                     addTransferToDay(dayIndex, transfer);
-                                    setTransferSearch(prev => ({
-                                      ...prev,
-                                      [dayIndex]: ''
-                                    }));
                                   }
-                                  e.target.value = '';
                                 }
                               }}
-                            >
-                              <option value="">🔍 Search transfers... {transferSearch[dayIndex] && `(searching: ${transferSearch[dayIndex]})`}</option>
-                              {(filteredTransfers[dayIndex] || availableTransfers).map(transfer => {
+                              placeholder="🔍 Search and select transfers..."
+                              optionRenderer={(transfer) => {
                                 // Convert rate to quote currency for display
                                 const convertedRate = transfer.currency === quoteData.currency ? 
                                   transfer.rate : 
                                   Math.round((transfer.rate / exchangeRates[transfer.currency]) * exchangeRates[quoteData.currency] * 100) / 100;
                                 
-                                return (
-                                  <option key={transfer._id} value={transfer._id}>
-                                    {transfer.name} - {quoteData.currency} {convertedRate}
-                                  </option>
-                                );
-                              })}
-                            </select>
-                            
-                            <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
-                              <input
-                                type="text"
-                                placeholder="Type to filter transfers..."
-                                value={transferSearch[dayIndex] || ''}
-                                onChange={(e) => setTransferSearch(prev => ({
-                                  ...prev,
-                                  [dayIndex]: e.target.value
-                                }))}
-                                style={{
-                                  ...styles.input,
-                                  flex: '1'
-                                }}
-                              />
-                              
-                              {transferSearch[dayIndex] && (
-                                <button
-                                  type="button"
-                                  onClick={() => setTransferSearch(prev => ({
-                                    ...prev,
-                                    [dayIndex]: ''
-                                  }))}
-                                  style={{
-                                    padding: '8px 16px',
-                                    backgroundColor: '#dc3545',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer'
-                                  }}
-                                >
-                                  Clear
-                                </button>
-                              )}
-                            </div>
+                                return `${transfer.name} - ${quoteData.currency} ${convertedRate}`;
+                              }}
+                              style={{width: '100%'}}
+                            />
                           </div>
                           
                           {day.transfers.map((item, transferIndex) => {
