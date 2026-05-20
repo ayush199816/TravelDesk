@@ -810,7 +810,15 @@ class PDFGenerator {
               year: 'numeric' 
             }) : 'N/A';
             
-            const nights = room.nights || 1;
+            // Calculate nights - use provided value or calculate from check-in/check-out dates
+            let nights = room.nights;
+            if (!nights && room.checkIn && room.checkOut) {
+              const checkIn = new Date(room.checkIn);
+              const checkOut = new Date(room.checkOut);
+              const timeDiff = checkOut.getTime() - checkIn.getTime();
+              nights = Math.ceil(timeDiff / (1000 * 3600 * 24)); // Convert milliseconds to days
+            }
+            nights = nights || 1; // Fallback to 1 if still not calculated
             
             hotelStays.push({
               hotelName,
@@ -829,6 +837,14 @@ class PDFGenerator {
         // Sort stays by check-in date
         hotelStays.sort((a, b) => a.checkIn - b.checkIn);
         
+        // Calculate cumulative night numbers for all hotels
+        let cumulativeNight = 1;
+        hotelStays.forEach(stay => {
+          stay.startNight = cumulativeNight;
+          stay.endNight = cumulativeNight + stay.nights - 1;
+          cumulativeNight += stay.nights;
+        });
+        
         // Split hotels into groups of 3 per page
         const hotelPages = [];
         for (let i = 0; i < hotelStays.length; i += 3) {
@@ -839,12 +855,12 @@ class PDFGenerator {
           const pageContent = [];
           
           pageHotels.forEach((stay, index) => {
-            // Generate night boxes using template nightBox settings
+            // Generate night boxes using template nightBox settings with sequential numbering
             const nightBoxes = [];
             const showNightBox = quoteTemplate.hotel?.nightBox?.showNightBox !== false;
             
             if (showNightBox) {
-              for (let i = 1; i <= stay.nights; i++) {
+              for (let i = stay.startNight; i <= stay.endNight; i++) {
                 nightBoxes.push(`
                   <div style="
                     display: inline-flex;
