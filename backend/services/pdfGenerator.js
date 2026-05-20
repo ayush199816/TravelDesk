@@ -1181,12 +1181,21 @@ class PDFGenerator {
     </div>
     ` : ''}
     
-    <!-- Day-wise Itinerary - Activities flow across pages -->
+    <!-- Day-wise Itinerary - Continuous flow with smart pagination -->
     ${quote.days && quote.days.length > 0 ? (() => {
-      let allDaysContent = [];
+      let allActivities = [];
+      let currentPageContent = [];
+      let currentPageHeight = 0;
+      const maxPageHeight = 750; // Increased max content height per page for better space utilization
+      const pages = [];
       
+      // Track days with activities on current page
+      let daysWithActivitiesOnCurrentPage = 0;
+      
+      // Collect all activities with day headers
       quote.days.forEach((day, dayIndex) => {
         let dailyActivityIndex = 1; // Reset for each day
+        
         // Collect images for this day
         let dayImages = [];
         if (day.sightseeings) {
@@ -1209,10 +1218,13 @@ class PDFGenerator {
         
         const activities = [...(day.sightseeings || []), ...(day.transfers || [])];
         
-        // Add day header only once per day (on first page of that day)
+        // Check if this day has sightseeing activities
+        const hasSightseeingActivities = day.sightseeings && day.sightseeings.length > 0;
+        
+        // Add day header with optimized spacing and day image
         const dayHeader = `
           <!-- Day ${day.dayNumber} Header -->
-          <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
+          <div style="display: flex; align-items: flex-start; margin-bottom: 15px;">
             <div style="
               width: 60px;
               height: 60px;
@@ -1282,134 +1294,187 @@ class PDFGenerator {
               </div>
             </div>
           </div>
+          ${dayImages.length > 0 ? `
+            <div style="margin-bottom: 15px; width: 100%; height: 180px; overflow: hidden; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);">
+              <img src="${dayImages[0]}" alt="Day ${day.dayNumber} Activities" style="width: 100%; height: 100%; object-fit: cover;" />
+            </div>
+          ` : ''}
         `;
         
         if (activities.length === 0) {
-          // Free day - add complete content
-          allDaysContent.push(`
-            <div class="page middle-page page-break">
-              <div class="content-wrapper">
-                ${dayHeader}
-                <div style="text-align: center; padding: 60px 40px; color: #666;">
-                  <div style="font-size: 48px; margin-bottom: 15px; font-weight: bold; color: #4CAF50;">☼</div>
-                  <div style="font-size: 24px; font-weight: bold; color: #333;">Free Day</div>
-                  <div style="font-size: 16px; margin-top: 8px; color: #666;">Relax and explore at your own pace</div>
-                </div>
-              </div>
+          // Free day - check if it fits on current page, otherwise start new page
+          const freeDayContent = `
+            ${dayHeader}
+            <div style="text-align: center; padding: 60px 40px; color: #666;">
+              <div style="font-size: 48px; margin-bottom: 15px; font-weight: bold; color: #4CAF50;">☼</div>
+              <div style="font-size: 24px; font-weight: bold; color: #333;">Free Day</div>
+              <div style="font-size: 16px; margin-top: 8px; color: #666;">Relax and explore at your own pace</div>
             </div>
-          `);
+          `;
+          
+          const estimatedHeight = 180; // Optimized height for free day
+          if (currentPageHeight + estimatedHeight > maxPageHeight && currentPageContent.length > 0) {
+            // Start new page
+            pages.push(currentPageContent.join(''));
+            currentPageContent = [freeDayContent];
+            currentPageHeight = estimatedHeight;
+            // Reset counter for days with activities on new page
+            daysWithActivitiesOnCurrentPage = 0;
+          } else {
+            // Add to current page
+            currentPageContent.push(freeDayContent);
+            currentPageHeight += estimatedHeight;
+            // Free days don't count towards the activities limit
+          }
         } else {
-          // Group activities into pages of 2
-          for (let i = 0; i < activities.length; i += 2) {
-            const pageActivities = activities.slice(i, i + 2);
-            const isFirstPageOfThisDay = i === 0;
-            const isLastPageOfThisDay = i + 2 >= activities.length;
-            const isVeryLastPage = dayIndex === quote.days.length - 1 && isLastPageOfThisDay;
+          // Add day header with simple line separator and optimized spacing
+          const headerHeight = dayImages.length > 0 ? 280 : 90; // Further optimized height: day image (180px) + header (75px)
+          const daySeparator = currentPageContent.length > 0 ? `
+            <div style="margin: 15px 0 15px 0; text-align: center;">
+              <div style="display: inline-block; width: 60%; height: 1px; background: linear-gradient(90deg, transparent, ${quoteTemplate.colors.primary}40, transparent);"></div>
+            </div>
+            ${dayHeader}
+          ` : dayHeader;
+          
+          // Check if we need to start a new page due to 2-day limit for activities
+          const shouldStartNewPageForDayLimit = hasSightseeingActivities && daysWithActivitiesOnCurrentPage >= 2 && currentPageContent.length > 0;
+          
+          if ((currentPageHeight + headerHeight > maxPageHeight || shouldStartNewPageForDayLimit) && currentPageContent.length > 0) {
+            // Start new page for this day
+            pages.push(currentPageContent.join(''));
+            currentPageContent = [dayHeader];
+            currentPageHeight = headerHeight;
+            // Reset counter for days with activities on new page
+            daysWithActivitiesOnCurrentPage = hasSightseeingActivities ? 1 : 0;
+          } else {
+            // Add to current page
+            currentPageContent.push(daySeparator);
+            currentPageHeight += headerHeight;
+            // Increment counter if this day has activities
+            if (hasSightseeingActivities) {
+              daysWithActivitiesOnCurrentPage++;
+            }
+          }
+          
+          // Add activities one by one, checking page height
+          activities.forEach((item) => {
+            // Check if this is a transfer
+            const isTransfer = item.transfer || item.fromLocation || item.toLocation;
             
-            const pageContent = pageActivities.map((item, pageIndex) => {
-              // Check if this is a transfer
-              const isTransfer = item.transfer || item.fromLocation || item.toLocation;
-              
-              let activityData;
-              if (isTransfer) {
-                // Handle transfer
-                const transferName = item.transfer?.name || item.name || 'Transfer';
-                const fromLocation = item.fromLocation || item.transfer?.fromLocation || 'Pickup Point';
-                const toLocation = item.toLocation || item.transfer?.toLocation || 'Drop Point';
-                activityData = {
-                  name: transferName,
-                  description: item.transfer?.description || item.description || 'Comfortable transfer between locations',
-                  duration: item.transfer?.duration || item.duration || 'Flexible timing',
-                  location: `${fromLocation} to ${toLocation}`,
-                  images: item.transfer?.images || item.images || []
-                };
-              } else {
-                // Handle sightseeing
-                activityData = item.sightseeing && typeof item.sightseeing === 'object' 
-                  ? item.sightseeing 
-                  : { 
-                    name: item.name || `Activity ${globalActivityIndex}`,
-                    description: item.sightseeingDescription || item.description || 'Enjoy this amazing activity.',
-                    duration: item.sightseeingDuration || item.duration || 'Flexible timing',
-                    location: item.sightseeingLocation || item.location || 'To be confirmed',
-                    images: item.images || []
-                  };
-              }
-              
-              // Helper function to format passenger count
-              const formatPassengerCount = (item) => {
-                const adultPax = quote.adultPax || 0;
-                const childPax = quote.childPax || 0;
-                const isTransfer = item.transfer || item.fromLocation || item.toLocation;
-                const hasChildActivity = item.childPrice > 0 || item.includeChild === true;
-                
-                // For transfers, always show both adults and children if they exist
-                // For sightseeings, only show children if the activity includes them
-                if (adultPax > 0 && childPax > 0 && (isTransfer || hasChildActivity)) {
-                  return `${adultPax}A+${childPax}C`;
-                } else if (adultPax > 0 && childPax > 0 && isTransfer) {
-                  return `${adultPax}A+${childPax}C`;
-                } else if (adultPax > 0) {
-                  return `${adultPax}A`;
-                } else {
-                  return '';
-                }
+            let activityData;
+            if (isTransfer) {
+              // Handle transfer
+              const transferName = item.transfer?.name || item.name || 'Transfer';
+              const fromLocation = item.fromLocation || item.transfer?.fromLocation || 'Pickup Point';
+              const toLocation = item.toLocation || item.transfer?.toLocation || 'Drop Point';
+              activityData = {
+                name: transferName,
+                description: item.transfer?.description || item.description || 'Comfortable transfer between locations',
+                duration: item.transfer?.duration || item.duration || 'Flexible timing',
+                location: `${fromLocation} to ${toLocation}`,
+                images: item.transfer?.images || item.images || []
               };
+            } else {
+              // Handle sightseeing
+              activityData = item.sightseeing && typeof item.sightseeing === 'object' 
+                ? item.sightseeing 
+                : { 
+                  name: item.name || `Activity ${dailyActivityIndex}`,
+                  description: item.sightseeingDescription || item.description || 'Enjoy this amazing activity.',
+                  duration: item.sightseeingDuration || item.duration || 'Flexible timing',
+                  location: item.sightseeingLocation || item.location || 'To be confirmed',
+                  images: item.images || []
+                };
+            }
+            
+            // Helper function to format passenger count
+            const formatPassengerCount = (item) => {
+              const adultPax = quote.adultPax || 0;
+              const childPax = quote.childPax || 0;
+              const isTransfer = item.transfer || item.fromLocation || item.toLocation;
+              const hasChildActivity = item.childPrice > 0 || item.includeChild === true;
               
-              const activityContent = `
-                <div style="margin-bottom: 20px;">
-                  <div style="padding: 15px; background-color: ${quoteTemplate.backgrounds.activity}; border-radius: 8px; border: 1px solid ${quoteTemplate.borders.activity}; box-shadow: 0 2px 6px ${quoteTemplate.shadows?.activity === 'transparent' ? 'transparent' : `${quoteTemplate.shadows?.activity || '#000000'}${Math.round((quoteTemplate.shadows?.activityOpacity || 0.05) * 255).toString(16).padStart(2, '0')}`};">
-                    <div style="display: flex; align-items: start;">
-                      <div style="
-                        width: 32px;
-                        height: 32px;
-                        background: linear-gradient(135deg, ${quoteTemplate.colors.primary} 0%, ${quoteTemplate.colors.secondary} 100%);
-                        border-radius: 50%;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        margin-right: 12px;
-                        flex-shrink: 0;
-                        box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
-                      ">
-                        <div style="color: white; font-size: 14px; font-weight: bold;">${dailyActivityIndex}</div>
-                      </div>
-                      <div style="flex: 1;">
-                        <h3 style="margin: 0 0 6px 0; font-size: ${quoteTemplate.fontSizes.activity}px; color: ${quoteTemplate.colors.text}; font-weight: bold; font-family: ${quoteTemplate.fonts.activity};">${activityData.name}</h3>
-                        <p style="margin: 0 0 8px 0; font-size: ${quoteTemplate.fontSizes.description}px; line-height: 1.4; color: ${quoteTemplate.colors.muted}; font-family: ${quoteTemplate.fonts.body};">${activityData.description || 'Experience this wonderful activity with professional guidance and create lasting memories.'}</p>
-                        <div style="display: flex; gap: 15px; font-size: ${quoteTemplate.fontSizes.details}px; color: ${quoteTemplate.colors.muted}; padding-top: 6px; border-top: 1px solid ${quoteTemplate.borders.activity}; font-family: ${quoteTemplate.fonts.body};">
-                          <span style="display: flex; align-items: center;"><strong>Location:</strong> ${activityData.location || 'Location TBD'}</span>
-                          <span style="display: flex; align-items: center;"><strong>Duration:</strong> ${activityData.duration || 'Flexible'}</span>
-                          ${formatPassengerCount(item) ? `<span style="display: flex; align-items: center; background-color: ${quoteTemplate.colors.primary}20; color: ${quoteTemplate.colors.primary}; padding: 2px 6px; border-radius: 4px; font-weight: bold;"><strong>Pax:</strong> ${formatPassengerCount(item)}</span>` : ''}
+              // For transfers, always show both adults and children if they exist
+              // For sightseeings, only show children if the activity includes them
+              if (adultPax > 0 && childPax > 0 && (isTransfer || hasChildActivity)) {
+                return `${adultPax}A+${childPax}C`;
+              } else if (adultPax > 0 && childPax > 0 && isTransfer) {
+                return `${adultPax}A+${childPax}C`;
+              } else if (adultPax > 0) {
+                return `${adultPax}A`;
+              } else {
+                return '';
+              }
+            };
+            
+            const activityContent = `
+              <div style="margin-bottom: 15px;">
+                <div style="padding: 12px; background-color: ${quoteTemplate.backgrounds.activity}; border-radius: 8px; border: 1px solid ${quoteTemplate.borders.activity}; box-shadow: 0 2px 6px ${quoteTemplate.shadows?.activity === 'transparent' ? 'transparent' : `${quoteTemplate.shadows?.activity || '#000000'}${Math.round((quoteTemplate.shadows?.activityOpacity || 0.05) * 255).toString(16).padStart(2, '0')}`};">
+                  <div style="display: flex; align-items: start;">
+                    <div style="
+                      width: 32px;
+                      height: 32px;
+                      background: linear-gradient(135deg, ${quoteTemplate.colors.primary} 0%, ${quoteTemplate.colors.secondary} 100%);
+                      border-radius: 50%;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      margin-right: 12px;
+                      flex-shrink: 0;
+                      box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+                    ">
+                      <div style="color: white; font-size: 14px; font-weight: bold;">${dailyActivityIndex}</div>
+                    </div>
+                    <div style="flex: 1;">
+                      <h3 style="margin: 0 0 6px 0; font-size: ${quoteTemplate.fontSizes.activity}px; color: ${quoteTemplate.colors.text}; font-weight: bold; font-family: ${quoteTemplate.fonts.activity};">${activityData.name}</h3>
+                      <p style="margin: 0 0 8px 0; font-size: ${quoteTemplate.fontSizes.description}px; line-height: 1.4; color: ${quoteTemplate.colors.muted}; font-family: ${quoteTemplate.fonts.body};">${activityData.description || 'Experience this wonderful activity with professional guidance and create lasting memories.'}</p>
+                      <div style="display: flex; gap: 15px; font-size: 12px; color: #666; font-family: ${quoteTemplate.fonts.body};">
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                          📍 Location: <strong>${activityData.location}</strong>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                          ⏱️ Duration: <strong>${activityData.duration}</strong>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                          👥 Passengers: <strong>${formatPassengerCount(item)}</strong>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              `;
-              
-              dailyActivityIndex++;
-              return activityContent;
-            }).join('');
-            
-            allDaysContent.push(`
-              <div class="page middle-page ${!isVeryLastPage ? 'page-break' : ''}">
-                <div class="content-wrapper">
-                  ${isFirstPageOfThisDay ? dayHeader : ''}
-                  ${isFirstPageOfThisDay && dayImages.length > 0 ? `
-                    <div style="margin-bottom: 20px; width: 100%; height: 200px; overflow: hidden; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);">
-                      <img src="${dayImages[0]}" alt="Day ${day.dayNumber} Activities" style="width: 100%; height: 100%; object-fit: cover;" />
-                    </div>
-                  ` : ''}
-                  ${pageContent}
-                </div>
               </div>
-            `);
-          }
+            `;
+            
+            const activityHeight = 140; // Tighter height per activity
+            if (currentPageHeight + activityHeight > maxPageHeight && currentPageContent.length > 0) {
+              // Start new page
+              pages.push(currentPageContent.join(''));
+              currentPageContent = [activityContent];
+              currentPageHeight = activityHeight;
+            } else {
+              // Add to current page
+              currentPageContent.push(activityContent);
+              currentPageHeight += activityHeight;
+            }
+            
+            dailyActivityIndex++;
+          });
         }
       });
       
-      return allDaysContent.join('');
+      // Add the last page if it has content
+      if (currentPageContent.length > 0) {
+        pages.push(currentPageContent.join(''));
+      }
+      
+      // Generate HTML for all pages
+      return pages.map((pageContent, pageIndex) => `
+        <div class="page middle-page ${pageIndex < pages.length - 1 ? 'page-break' : ''}">
+          <div class="content-wrapper">
+            ${pageContent}
+          </div>
+        </div>
+      `).join('');
     })() : ''}
     
     <!-- Payment Details Page -->
@@ -1429,7 +1494,7 @@ class PDFGenerator {
             ${(() => {
               // Calculate flight total from flights array
               const flightTotal = quote.flights ? quote.flights.reduce((sum, flight) => sum + (flight.price || 0), 0) : 0;
-              // Calculate package cost: sightseeing + transfers + hotels + markup
+              // Calculate package cost: sightseeing + transfers + hotels + markup - discount
               // Use stored values if available, otherwise calculate from quote data
               let sightseeingTotal = quote.sightseeingTotal || 0;
               let transferTotal = quote.transferTotal || 0;
@@ -1464,19 +1529,19 @@ class PDFGenerator {
                       }
                     });
                   }
+                  
+                  // Calculate hotels from day level
+                  if (day.hotels && day.hotels.length > 0) {
+                    day.hotels.forEach(hotelItem => {
+                      if (hotelItem.rooms && hotelItem.rooms.length > 0) {
+                        hotelItem.rooms.forEach(room => {
+                          const nights = room.nights || 1;
+                          hotelTotal += room.adultRate * room.numberOfRooms * nights;
+                        });
+                      }
+                    });
+                  }
                 });
-                
-                // Calculate hotels
-                if (quote.hotels && quote.hotels.length > 0) {
-                  quote.hotels.forEach(hotelItem => {
-                    if (hotelItem.rooms && hotelItem.rooms.length > 0) {
-                      hotelItem.rooms.forEach(room => {
-                        const nights = room.nights || 1;
-                        hotelTotal += room.adultRate * room.numberOfRooms * nights;
-                      });
-                    }
-                  });
-                }
               }
               
               const packageCost = sightseeingTotal + transferTotal + hotelTotal + (quote.markupAmount || 0) - (quote.discountAmount || 0);
