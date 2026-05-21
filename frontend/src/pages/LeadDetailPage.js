@@ -269,25 +269,36 @@ const LeadDetailPage = () => {
     const markupAmount = quote.markupAmount || 0;
     const discountAmount = quote.discountAmount || 0;
     
-    // Calculate individual components
-    let sightseeingTotal = 0;
-    let transferTotal = 0;
+    // Use stored totals from quote data (same as PDF calculation)
+    let sightseeingTotal = quote.sightseeingTotal || 0;
+    let transferTotal = quote.transferTotal || 0;
     let hotelTotal = 0;
     
-    if (quote.sightseeings) {
-      sightseeingTotal = quote.sightseeings.reduce((sum, item) => sum + (item.price || 0), 0);
-    }
-    if (quote.transfers) {
-      transferTotal = quote.transfers.reduce((sum, item) => sum + (item.price || 0), 0);
-    }
+    // Calculate hotel total manually if not stored
     if (quote.hotels) {
       hotelTotal = quote.hotels.reduce((sum, hotel) => {
         if (hotel.rooms) {
-          return sum + hotel.rooms.reduce((roomSum, room) => roomSum + (room.adultRate || 0), 0);
+          return sum + hotel.rooms.reduce((roomSum, room) => {
+            const nights = room.nights || 1;
+            return roomSum + (room.adultRate || 0) * (room.numberOfRooms || 1) * nights;
+          }, 0);
         }
         return sum;
       }, 0);
     }
+    
+    // Debug logging
+    console.log('WhatsApp Calculation Debug:', {
+      sightseeingTotal,
+      transferTotal,
+      hotelTotal,
+      taxAmount,
+      markupAmount,
+      discountAmount,
+      totalAmount,
+      storedSightseeingTotal: quote.sightseeingTotal,
+      storedTransferTotal: quote.transferTotal
+    });
     
     // Calculate package cost (Transfer + Sightseeing + Tax + Hotel + Markup - Discount)
     const packageCost = transferTotal + sightseeingTotal + taxAmount + hotelTotal + markupAmount - discountAmount;
