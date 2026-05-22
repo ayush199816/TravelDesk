@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { AuthContext } from '../contexts/AuthContext';
+import './ManagerDashboard.css';
 
 const ManagerDashboard = () => {
   const { user, logout } = useContext(AuthContext);
@@ -14,6 +15,8 @@ const ManagerDashboard = () => {
   const [transfers, setTransfers] = useState([]);
   const [hotels, setHotels] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingSightseeings, setLoadingSightseeings] = useState(false);
+  const [loadingTransfers, setLoadingTransfers] = useState(false);
   const [activeView, setActiveView] = useState('overview');
   const [filters, setFilters] = useState({
     status: '',
@@ -111,7 +114,6 @@ const ManagerDashboard = () => {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error downloading analytics report:', error);
       alert('Error downloading report. Please try again.');
     }
   };
@@ -156,7 +158,6 @@ const ManagerDashboard = () => {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error downloading calendar report:', error);
       alert('Error downloading calendar report. Please try again.');
     }
   };
@@ -164,120 +165,56 @@ const ManagerDashboard = () => {
   // Fetch quotes for leads and update with last quoted price
   const fetchQuotesAndUpdateLeads = useCallback(async (leadsData) => {
     try {
-      console.log('🔍 DEBUG - Fetching quotes for leads');
-      
       // Fetch all quotes for the organization
       const quotesResponse = await api.get(`/quotes?organization=${user.organization._id}`);
       const quotes = quotesResponse.data;
       
-      console.log('🔍 DEBUG - Quotes fetched:', quotes.length);
-      
       // Create a map of leadId to latest quote price
       const leadLatestQuote = {};
-      
-      console.log('🔍 DEBUG - Quote data structure:', quotes.slice(0, 2).map(q => ({
-        id: q._id,
-        lead: q.lead,
-        leadNumber: q.leadNumber,
-        totalAmount: q.totalAmount,
-        finalPrice: q.finalPrice,
-        grandTotal: q.grandTotal,
-        price: q.price,
-        amount: q.amount,
-        quoteNumber: q.quoteNumber,
-        createdAt: q.createdAt,
-        allFields: Object.keys(q)
-      })));
       
       quotes.forEach(quote => {
         const leadRef = quote.lead;
         const leadNumber = quote.leadNumber;
-        const quotePrice = quote.totalAmount || 0;
-        
-        console.log('🔍 DEBUG - Processing quote:', {
-          quoteId: quote._id,
-          leadRef: leadRef,
-          leadNumber: leadNumber,
-          price: quotePrice,
-          allQuoteFields: Object.keys(quote),
-          potentialPrices: {
-            total: quote.total,
-            totalAmount: quote.totalAmount,
-            finalPrice: quote.finalPrice,
-            grandTotal: quote.grandTotal,
-            price: quote.price,
-            amount: quote.amount,
-            subtotal: quote.subtotal,
-            basePrice: quote.basePrice
-          },
-          // Look for any field containing "total", "price", "amount", "cost"
-          allPriceRelatedFields: Object.keys(quote).reduce((acc, key) => {
-            const keyLower = key.toLowerCase();
-            if (keyLower.includes('total') || keyLower.includes('price') || 
-                keyLower.includes('amount') || keyLower.includes('cost') ||
-                keyLower.includes('sum') || keyLower.includes('grand')) {
-              acc[key] = quote[key];
-            }
-            return acc;
-          }, {}),
-          // Show nested objects that might contain prices
-          nestedObjects: Object.keys(quote).reduce((acc, key) => {
-            if (typeof quote[key] === 'object' && quote[key] !== null && !Array.isArray(quote[key])) {
-              acc[key] = Object.keys(quote[key]);
-            }
-            return acc;
-          }, {})
-        });
         
         // Try different ways to get the price - prioritize comprehensive totals
         let actualPrice = null;
-        let priceSource = 'none';
         
         // Priority 1: grandTotal (most comprehensive)
         if (quote.grandTotal) {
           actualPrice = quote.grandTotal;
-          priceSource = 'grandTotal';
         }
         // Priority 2: total (main total field)
         else if (quote.total) {
           actualPrice = quote.total;
-          priceSource = 'total';
         }
         // Priority 3: totalAmount 
         else if (quote.totalAmount) {
           actualPrice = quote.totalAmount;
-          priceSource = 'totalAmount';
         }
         // Priority 3: finalPrice
         else if (quote.finalPrice) {
           actualPrice = quote.finalPrice;
-          priceSource = 'finalPrice';
         }
         // Priority 4: price
         else if (quote.price) {
           actualPrice = quote.price;
-          priceSource = 'price';
         }
         // Priority 5: amount
         else if (quote.amount) {
           actualPrice = quote.amount;
-          priceSource = 'amount';
         }
         // Priority 6: subtotal (least comprehensive - used as fallback)
         else if (quote.subtotal) {
           actualPrice = quote.subtotal;
-          priceSource = 'subtotal';
         }
         // Priority 7: basePrice
         else if (quote.basePrice) {
           actualPrice = quote.basePrice;
-          priceSource = 'basePrice';
         }
         
         // If still no price, use 0
         if (!actualPrice) {
           actualPrice = 0;
-          priceSource = 'fallback';
         }
         
         // Try both lead ID and lead number for matching
@@ -299,14 +236,6 @@ const ManagerDashboard = () => {
           }
         }
         
-        console.log('🔍 DEBUG - Quote matching result:', {
-          quoteId: quote._id,
-          matchedLeadId: matchedLeadId,
-          actualPrice: actualPrice,
-          priceSource: priceSource,
-          leadNumber: leadRef?.leadNumber || 'N/A'
-        });
-        
         if (matchedLeadId) {
           // If this lead doesn't have a quote yet, or this quote is newer/later
           if (!leadLatestQuote[matchedLeadId] || 
@@ -319,23 +248,14 @@ const ManagerDashboard = () => {
         }
       });
       
-      console.log('🔍 DEBUG - Lead latest quotes map:', leadLatestQuote);
-      
       // Update leads with last quoted price
       const updatedLeads = leadsData.map(lead => ({
         ...lead,
         lastQuotedPrice: leadLatestQuote[lead._id]?.price || null
       }));
       
-      console.log('🔍 DEBUG - Updated leads with quoted prices:', updatedLeads.map(lead => ({
-        id: lead._id,
-        name: lead.name,
-        lastQuotedPrice: lead.lastQuotedPrice
-      })));
-      
       setLeads(updatedLeads);
     } catch (error) {
-      console.error('Error fetching quotes:', error);
       // Set leads without quoted prices if quotes fetch fails
       setLeads(leadsData);
     }
@@ -344,30 +264,13 @@ const ManagerDashboard = () => {
   // Fetch leads data
   const fetchLeads = useCallback(async () => {
     try {
-      console.log('🔍 DEBUG - Fetching leads for organization:', user.organization._id);
       const response = await api.get(`/leads?organization=${user.organization._id}`, {
       });
-      console.log('🔍 DEBUG - Leads fetched:', response.data.length);
-      console.log('🔍 DEBUG - Leads data sample:', response.data.slice(0, 3).map(lead => ({
-        id: lead._id,
-        name: lead.name,
-        status: lead.status,
-        assignedTo: lead.assignedTo,
-        assignedToType: typeof lead.assignedTo,
-        totalAmount: lead.totalAmount
-      })));
-      
-      console.log('🔍 DEBUG - All leads assignedTo values:', response.data.map(lead => ({
-        id: lead._id,
-        name: lead.name,
-        assignedTo: lead.assignedTo
-      })));
       
       // Fetch quotes and update leads with last quoted price
       await fetchQuotesAndUpdateLeads(response.data || []);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching leads:', error);
       setLeads([]); // Set empty array on error
       setLoading(false);
     }
@@ -376,15 +279,7 @@ const ManagerDashboard = () => {
   // Fetch sales users and lead statuses
   const fetchSalesUsers = useCallback(async () => {
     try {
-      console.log('🔍 DEBUG - Fetching sales users for organization:', user.organization._id);
       const response = await api.get(`/leads/users/sales?organization=${user.organization._id}`);
-      console.log('🔍 DEBUG - Sales users fetched:', response.data.length);
-      console.log('🔍 DEBUG - Sales users data:', response.data.map(user => ({
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      })));
       setSalesUsers(response.data || []);
 
       // Fetch lead statuses - use default statuses if API fails
@@ -392,12 +287,10 @@ const ManagerDashboard = () => {
         const statusesResponse = await api.get(`/leads/statuses`);
         setLeadStatuses(statusesResponse.data || ['new', 'contacted', 'qualified', 'proposal_sent', 'converted', 'booking_confirmed', 'lost']);
       } catch (statusError) {
-        console.log('Using default lead statuses');
         setLeadStatuses(['new', 'contacted', 'qualified', 'proposal_sent', 'converted', 'booking_confirmed', 'lost']);
       }
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching sales users:', error);
       setSalesUsers([]); // Set empty array on error
       setLeadStatuses(['new', 'contacted', 'qualified', 'proposal_sent', 'converted', 'booking_confirmed', 'lost']);
       setLoading(false);
@@ -406,21 +299,27 @@ const ManagerDashboard = () => {
 
   // Fetch sightseeings
   const fetchSightseeings = useCallback(async () => {
+    setLoadingSightseeings(true);
     try {
       const response = await api.get(`/sightseeings?organization=${user.organization._id}`);
       setSightseeings(response.data);
     } catch (error) {
-      console.error('Error fetching sightseeings:', error);
+      setSightseeings([]);
+    } finally {
+      setLoadingSightseeings(false);
     }
   }, [user.organization._id]);
 
   // Fetch transfers
   const fetchTransfers = useCallback(async () => {
+    setLoadingTransfers(true);
     try {
       const response = await api.get(`/transfers?organization=${user.organization._id}`);
       setTransfers(response.data);
     } catch (error) {
-      console.error('Error fetching transfers:', error);
+      setTransfers([]);
+    } finally {
+      setLoadingTransfers(false);
     }
   }, [user.organization._id]);
 
@@ -430,18 +329,13 @@ const ManagerDashboard = () => {
       const response = await api.get(`/hotels?organization=${user.organization._id}`);
       setHotels(response.data);
     } catch (error) {
-      console.error('Error fetching hotels:', error);
+      // Error fetching hotels
     }
   }, [user.organization._id]);
 
   // Calculate dashboard metrics
   const calculateMetrics = useCallback((leadsData, salesUsersData) => {
     if (!leadsData || !salesUsersData) return;
-
-    console.log('🔍 DEBUG - Calculating metrics:', {
-      leadsCount: leadsData.length,
-      salesUsersCount: salesUsersData.length
-    });
 
     // Apply analytics filters
     let filteredLeads = [...leadsData];
@@ -479,10 +373,6 @@ const ManagerDashboard = () => {
 
     // Calculate sales performance
     const salesPerformance = salesUsersData.map(salesUser => {
-      console.log('🔍 DEBUG - Processing sales user:', { 
-        id: salesUser._id, 
-        name: salesUser.name 
-      });
       
       const userLeads = leadsData.filter(lead => {
         let matchesById = false;
@@ -504,27 +394,12 @@ const ManagerDashboard = () => {
         
         return matches;
       });
-      console.log('🔍 DEBUG - User leads:', {
-        userId: salesUser._id,
-        userName: salesUser.name,
-        userLeadsCount: userLeads.length,
-        userLeads: userLeads.map(lead => ({ id: lead._id, status: lead.status, assignedTo: lead.assignedTo, totalAmount: lead.totalAmount }))
-      });
       
       const userConverted = userLeads.filter(lead => 
         lead.status === 'converted' || lead.status === 'booking_confirmed'
       );
-      console.log('🔍 DEBUG - User converted leads:', {
-        userId: salesUser._id,
-        convertedCount: userConverted.length,
-        convertedLeads: userConverted.map(lead => ({ id: lead._id, status: lead.status, totalAmount: lead.totalAmount }))
-      });
       
       const userAmount = userConverted.reduce((sum, lead) => sum + (lead.lastQuotedPrice || lead.totalAmount || 0), 0);
-      console.log('🔍 DEBUG - User total amount:', {
-        userId: salesUser._id,
-        totalAmount: userAmount
-      });
 
       const performance = {
         id: salesUser._id,
@@ -535,7 +410,6 @@ const ManagerDashboard = () => {
         totalAmount: userAmount
       };
       
-      console.log('🔍 DEBUG - Sales performance for user:', performance);
       return performance;
     });
 
@@ -546,7 +420,6 @@ const ManagerDashboard = () => {
       salesPerformance
     };
 
-    console.log('🔍 DEBUG - New metrics calculated:', newMetrics);
     setMetrics(newMetrics);
   }, [analyticsFilters]);
 
@@ -600,7 +473,7 @@ const ManagerDashboard = () => {
         assignedTo: ''
       });
     } catch (error) {
-      console.error('Error creating lead:', error);
+      // Error creating lead
     }
   };
 
@@ -611,7 +484,7 @@ const ManagerDashboard = () => {
         lead._id === leadId ? { ...lead, status: newStatus } : lead
       ));
     } catch (error) {
-      console.error('Error updating lead status:', error);
+      // Error updating lead status
     }
   };
 
@@ -635,7 +508,7 @@ const ManagerDashboard = () => {
         await api.delete(`/leads/${leadId}`);
         setLeads(prev => prev.filter(lead => lead._id !== leadId));
       } catch (error) {
-        console.error('Error deleting lead:', error);
+        // Error deleting lead
       }
     }
   };
@@ -789,8 +662,6 @@ const ManagerDashboard = () => {
   };
 
   useEffect(() => {
-    console.log('🔍 DEBUG - ManagerDashboard useEffect triggered');
-    console.log('🔍 DEBUG - User data:', user);
     if (user && user.organization) {
       // Always fetch leads and sales users for analytics
       fetchLeads();
@@ -807,7 +678,6 @@ const ManagerDashboard = () => {
       
       // Always set loading to false after a short delay to ensure UI shows
       const timeout = setTimeout(() => {
-        console.log('🔍 DEBUG - Loading timeout reached, setting loading to false');
         setLoading(false);
       }, 2000); // 2 seconds timeout
       
@@ -818,7 +688,6 @@ const ManagerDashboard = () => {
   }, [fetchLeads, fetchSalesUsers, fetchSightseeings, fetchTransfers, fetchHotels, fetchQuotesAndUpdateLeads, user, activeView]);
 
   useEffect(() => {
-    console.log('🔍 DEBUG - Data update useEffect:', { leadsLength: leads.length, salesUsersLength: salesUsers.length });
     if (leads.length > 0 && salesUsers.length > 0) {
       calculateMetrics(leads, salesUsers);
     }
@@ -929,133 +798,140 @@ const ManagerDashboard = () => {
   }
 
   return (
-    <div style={styles.container}>
+    <div className="manager-dashboard">
       {/* Header */}
-      <div style={styles.header}>
-        <div>
-          <h1 style={{ margin: 0, color: '#333' }}>Manager Dashboard</h1>
-          <p style={{ margin: '5px 0 0 0', color: '#666' }}>
-            Welcome, {user?.name} • {user?.organization?.name}
-          </p>
+      <div className="dashboard-header">
+        <div className="header-content">
+          <div className="welcome-section">
+            <h1 className="dashboard-title">Manager Dashboard</h1>
+            <p className="welcome-message">
+              Welcome, {user?.name} • {user?.organization?.name}
+            </p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="logout-btn"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+            </svg>
+            Logout
+          </button>
         </div>
-        <button
-          onClick={handleLogout}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#dc3545',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: '500',
-            transition: 'background-color 0.2s'
-          }}
-          onMouseOver={(e) => e.target.style.backgroundColor = '#c82333'}
-          onMouseOut={(e) => e.target.style.backgroundColor = '#dc3545'}
-        >
-          Logout
-        </button>
-        <div style={styles.nav}>
-          <span
-            style={activeView === 'overview' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
+        <div className="navigation-tabs">
+          <button
+            className={`nav-tab ${activeView === 'overview' ? 'active' : ''}`}
             onClick={() => setActiveView('overview')}
           >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+            </svg>
             Analytics
-          </span>
-          <span
-            style={activeView === 'tasks' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
+          </button>
+          <button
+            className={`nav-tab ${activeView === 'tasks' ? 'active' : ''}`}
             onClick={() => setActiveView('tasks')}
           >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+            </svg>
             Tasks
-          </span>
-          <span
-            style={activeView === 'leads' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
+          </button>
+          <button
+            className={`nav-tab ${activeView === 'leads' ? 'active' : ''}`}
             onClick={() => setActiveView('leads')}
           >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
             Leads
-          </span>
-          <span
-            style={activeView === 'sightseeings' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
+          </button>
+          <button
+            className={`nav-tab ${activeView === 'sightseeings' ? 'active' : ''}`}
             onClick={() => setActiveView('sightseeings')}
           >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
             Sightseeings
-          </span>
-          <span
-            style={activeView === 'transfers' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
+          </button>
+          <button
+            className={`nav-tab ${activeView === 'transfers' ? 'active' : ''}`}
             onClick={() => setActiveView('transfers')}
           >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/>
+            </svg>
             Transfers
-          </span>
-          <span
-            style={activeView === 'hotels' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
+          </button>
+          <button
+            className={`nav-tab ${activeView === 'hotels' ? 'active' : ''}`}
             onClick={() => setActiveView('hotels')}
           >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4zm-1 7h-6v-2h6v2z"/>
+            </svg>
             Hotels
-          </span>
-          <span
-            style={activeView === 'invoices' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
+          </button>
+          <button
+            className={`nav-tab ${activeView === 'invoices' ? 'active' : ''}`}
             onClick={() => navigate('/invoices')}
           >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+            </svg>
             Invoices
-          </span>
-          <span
-            style={activeView === 'suppliers' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
+          </button>
+          <button
+            className={`nav-tab ${activeView === 'suppliers' ? 'active' : ''}`}
             onClick={() => navigate('/suppliers')}
           >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
             Suppliers
-          </span>
-          <span
-            style={activeView === 'calendar' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
+          </button>
+          <button
+            className={`nav-tab ${activeView === 'calendar' ? 'active' : ''}`}
             onClick={() => navigate('/calendar')}
           >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+            </svg>
             Calendar
-          </span>
+          </button>
         </div>
       </div>
 
-      {/* Overview View */}
+      {/* Analytics Overview */}
       {activeView === 'overview' && (
-        <div>
-          <h2 style={{ marginBottom: '20px', color: '#333' }}>Analytics Overview</h2>
-          
+        <div className="analytics-overview">
+          {/* Page Header */}
+          <div className="analytics-header">
+            <div className="header-content">
+              <h1 className="analytics-title">Analytics Overview</h1>
+              <p className="analytics-subtitle">Track your team's performance and business metrics</p>
+            </div>
+          </div>
+
           {/* Analytics Filters */}
-          <div style={{ 
-            display: 'flex', 
-            gap: '15px', 
-            marginBottom: '25px', 
-            padding: '15px', 
-            backgroundColor: '#f8f9fa', 
-            borderRadius: '8px',
-            border: '1px solid #dee2e6'
-          }}>
-            <div>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Month:</label>
+          <div className="analytics-filters">
+            <div className="filter-group">
+              <label className="filter-label">Month</label>
               <input
                 type="month"
                 value={analyticsFilters.month}
                 onChange={(e) => setAnalyticsFilters(prev => ({ ...prev, month: e.target.value }))}
-                style={{
-                  padding: '8px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  fontSize: '14px'
-                }}
+                className="filter-input"
               />
             </div>
             
-            <div>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Sales Person:</label>
+            <div className="filter-group">
+              <label className="filter-label">Sales Person</label>
               <select
                 value={analyticsFilters.salesPerson}
                 onChange={(e) => setAnalyticsFilters(prev => ({ ...prev, salesPerson: e.target.value }))}
-                style={{
-                  padding: '8px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  fontSize: '14px',
-                  minWidth: '150px'
-                }}
+                className="filter-select"
               >
                 <option value="all">All Sales Team</option>
                 {salesUsers.map(user => (
@@ -1066,90 +942,125 @@ const ManagerDashboard = () => {
               </select>
             </div>
             
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <div className="filter-actions">
               <button
                 onClick={() => downloadAnalyticsReport()}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#007bff',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
+                className="download-btn primary"
               >
-                📊 Download Report
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                </svg>
+                Download Report
               </button>
               
               <button
                 onClick={() => downloadCalendarReport()}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#28a745',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
+                className="download-btn secondary"
               >
-                📅 Download Calendar
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                </svg>
+                Download Calendar
               </button>
             </div>
           </div>
           
           {/* Metrics Cards */}
-          <div style={styles.metricsGrid}>
-            <div style={styles.metricCard}>
-              <div style={styles.metricValue}>{metrics.ongoingLeads}</div>
-              <div style={styles.metricLabel}>Ongoing Leads</div>
-            </div>
-            <div style={styles.metricCard}>
-              <div style={styles.metricValue}>{metrics.convertedLeads}</div>
-              <div style={styles.metricLabel}>Converted Leads</div>
-            </div>
-            <div style={styles.metricCard}>
-              <div style={styles.metricValue}>
-                ₹{metrics.totalBookedAmount.toLocaleString('en-IN')}
+          <div className="metrics-grid">
+            <div className="metric-card">
+              <div className="metric-icon ongoing">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
               </div>
-              <div style={styles.metricLabel}>Total Booked Amount</div>
+              <div className="metric-content">
+                <div className="metric-value">{metrics.ongoingLeads}</div>
+                <div className="metric-label">Ongoing Leads</div>
+                <div className="metric-description">Active leads in pipeline</div>
+              </div>
             </div>
-            <div style={styles.metricCard}>
-              <div style={styles.metricValue}>{salesUsers.length}</div>
-              <div style={styles.metricLabel}>Sales Team Members</div>
+            
+            <div className="metric-card">
+              <div className="metric-icon converted">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+              </div>
+              <div className="metric-content">
+                <div className="metric-value">{metrics.convertedLeads}</div>
+                <div className="metric-label">Converted Leads</div>
+                <div className="metric-description">Successfully closed deals</div>
+              </div>
+            </div>
+            
+            <div className="metric-card">
+              <div className="metric-icon revenue">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1.81.45 1.61 1.67 1.61 1.16 0 1.6-.64 1.6-1.46 0-.84-.68-1.22-1.88-1.58-1.85-.54-3.21-1.36-3.21-3.23 0-1.61 1.21-2.75 2.95-3.08V4.9h2.67v2.06c1.42.35 2.59 1.42 2.7 2.95h-1.96c-.05-.6-.38-1.55-1.75-1.55-1.03 0-1.52.52-1.52 1.3 0 .73.56 1.09 1.88 1.51 1.87.55 3.21 1.34 3.21 3.37 0 1.78-1.32 2.86-3.08 3.2z"/>
+                </svg>
+              </div>
+              <div className="metric-content">
+                <div className="metric-value">₹{metrics.totalBookedAmount.toLocaleString('en-IN')}</div>
+                <div className="metric-label">Total Booked Amount</div>
+                <div className="metric-description">Revenue from conversions</div>
+              </div>
+            </div>
+            
+            <div className="metric-card">
+              <div className="metric-icon team">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A2.998 2.998 0 0 0 17.14 6h-3.28c-.8 0-1.54.38-2.02 1.01L8.03 14H5v8h15zm-5.5-16h3.28l2.5 7.5H19.5L17 6z"/>
+                </svg>
+              </div>
+              <div className="metric-content">
+                <div className="metric-value">{salesUsers.length}</div>
+                <div className="metric-label">Sales Team Members</div>
+                <div className="metric-description">Active team members</div>
+              </div>
             </div>
           </div>
 
           {/* Sales Performance Table */}
-          <div style={styles.performanceTable}>
-            <div style={{ padding: '20px', borderBottom: '1px solid #dee2e6' }}>
-              <h3 style={{ margin: 0 }}>Sales Performance</h3>
+          <div className="performance-section">
+            <div className="performance-header">
+              <h3 className="performance-title">Sales Performance</h3>
+              <div className="performance-description">Individual team member performance metrics</div>
             </div>
-            <table style={styles.table}>
-              <thead>
-                <tr>
-                  <th style={styles.th}>Sales Person</th>
-                  <th style={styles.th}>Total Leads</th>
-                  <th style={styles.th}>Converted</th>
-                  <th style={styles.th}>Conversion Rate</th>
-                  <th style={styles.th}>Total Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {metrics.salesPerformance.map((performance, index) => (
-                  <tr key={performance.id}>
-                    <td style={styles.td}>{performance.name}</td>
-                    <td style={styles.td}>{performance.totalLeads}</td>
-                    <td style={styles.td}>{performance.convertedLeads}</td>
-                    <td style={styles.td}>{performance.conversionRate}%</td>
-                    <td style={styles.td}>₹{performance.totalAmount.toLocaleString('en-IN')}</td>
+            <div className="performance-table-container">
+              <table className="performance-table">
+                <thead>
+                  <tr>
+                    <th>Sales Person</th>
+                    <th>Total Leads</th>
+                    <th>Converted</th>
+                    <th>Conversion Rate</th>
+                    <th>Total Amount</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {metrics.salesPerformance.map((performance, index) => (
+                    <tr key={performance.id}>
+                      <td className="person-cell">
+                        <div className="person-info">
+                          <div className="person-avatar">
+                            {performance.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="person-name">{performance.name}</div>
+                        </div>
+                      </td>
+                      <td className="number-cell">{performance.totalLeads}</td>
+                      <td className="number-cell">{performance.convertedLeads}</td>
+                      <td className="rate-cell">
+                        <div className="rate-badge">
+                          {performance.conversionRate}%
+                        </div>
+                      </td>
+                      <td className="amount-cell">₹{performance.totalAmount.toLocaleString('en-IN')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
@@ -1612,34 +1523,42 @@ const ManagerDashboard = () => {
             </button>
           </div>
           
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
-            {sightseeings.map(sightseeing => (
-              <div key={sightseeing._id} style={{
-                backgroundColor: '#f8f9fa',
-                padding: '20px',
-                borderRadius: '8px',
-                border: '1px solid #dee2e6'
-              }}>
-                <h4 style={{ margin: '0 0 10px 0', color: '#333' }}>{sightseeing.name}</h4>
-                <p style={{ margin: '0 0 10px 0', color: '#666', fontSize: '14px' }}>
-                  {sightseeing.description?.substring(0, 100)}...
-                </p>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontWeight: 'bold', color: '#007bff' }}>
-                    ₹{sightseeing.rate?.toLocaleString('en-IN')}/person
-                  </span>
-                  <span style={{ fontSize: '12px', color: '#666' }}>
-                    {sightseeing.duration} hours
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          {sightseeings.length === 0 && (
+          {loadingSightseeings ? (
             <div style={{ textAlign: 'center', padding: '40px', color: '#6c757d' }}>
-              No sightseeings found. Click "Add Sightseeing" to create one.
+              Loading sightseeings...
             </div>
+          ) : (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+                {sightseeings.map(sightseeing => (
+                  <div key={sightseeing._id} style={{
+                    backgroundColor: '#f8f9fa',
+                    padding: '20px',
+                    borderRadius: '8px',
+                    border: '1px solid #dee2e6'
+                  }}>
+                    <h4 style={{ margin: '0 0 10px 0', color: '#333' }}>{sightseeing.name}</h4>
+                    <p style={{ margin: '0 0 10px 0', color: '#666', fontSize: '14px' }}>
+                      {sightseeing.description?.substring(0, 100)}...
+                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 'bold', color: '#007bff' }}>
+                        ₹{sightseeing.rate?.toLocaleString('en-IN')}/person
+                      </span>
+                      <span style={{ fontSize: '12px', color: '#666' }}>
+                        {sightseeing.duration} hours
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {sightseeings.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '40px', color: '#6c757d' }}>
+                  No sightseeings found. Click "Add Sightseeing" to create one.
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
@@ -1662,62 +1581,70 @@ const ManagerDashboard = () => {
             </button>
           </div>
           
-          <div style={{ overflowX: 'auto' }}>
-            <table style={styles.table}>
-              <thead>
-                <tr>
-                  <th style={styles.th}>Name</th>
-                  <th style={styles.th}>From</th>
-                  <th style={styles.th}>To</th>
-                  <th style={styles.th}>Vehicle Type</th>
-                  <th style={styles.th}>Capacity</th>
-                  <th style={styles.th}>Rate</th>
-                  <th style={styles.th}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {transfers.map(transfer => (
-                  <tr key={transfer._id}>
-                    <td style={styles.td}>{transfer.name}</td>
-                    <td style={styles.td}>{transfer.fromLocation}</td>
-                    <td style={styles.td}>{transfer.toLocation}</td>
-                    <td style={styles.td}>{transfer.vehicleType}</td>
-                    <td style={styles.td}>{transfer.capacity} persons</td>
-                    <td style={styles.td}>₹{transfer.rate?.toLocaleString('en-IN')}</td>
-                    <td style={styles.td}>
-                      <button style={{
-                        padding: '4px 8px',
-                        backgroundColor: '#28a745',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        fontSize: '12px',
-                        marginRight: '5px'
-                      }}>
-                        Edit
-                      </button>
-                      <button style={{
-                        padding: '4px 8px',
-                        backgroundColor: '#dc3545',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        fontSize: '12px'
-                      }}>
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            
-            {transfers.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '40px', color: '#6c757d' }}>
-                No transfers found. Click "Add Transfer" to create one.
+          {loadingTransfers ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#6c757d' }}>
+              Loading transfers...
+            </div>
+          ) : (
+            <>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={styles.table}>
+                  <thead>
+                    <tr>
+                      <th style={styles.th}>Name</th>
+                      <th style={styles.th}>From</th>
+                      <th style={styles.th}>To</th>
+                      <th style={styles.th}>Vehicle Type</th>
+                      <th style={styles.th}>Capacity</th>
+                      <th style={styles.th}>Rate</th>
+                      <th style={styles.th}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {transfers.map(transfer => (
+                      <tr key={transfer._id}>
+                        <td style={styles.td}>{transfer.name}</td>
+                        <td style={styles.td}>{transfer.fromLocation}</td>
+                        <td style={styles.td}>{transfer.toLocation}</td>
+                        <td style={styles.td}>{transfer.vehicleType}</td>
+                        <td style={styles.td}>{transfer.capacity} persons</td>
+                        <td style={styles.td}>₹{transfer.rate?.toLocaleString('en-IN')}</td>
+                        <td style={styles.td}>
+                          <button style={{
+                            padding: '4px 8px',
+                            backgroundColor: '#28a745',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            marginRight: '5px'
+                          }}>
+                            Edit
+                          </button>
+                          <button style={{
+                            padding: '4px 8px',
+                            backgroundColor: '#dc3545',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            fontSize: '12px'
+                          }}>
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                
+                {transfers.length === 0 && (
+                  <div style={{ textAlign: 'center', padding: '40px', color: '#6c757d' }}>
+                    No transfers found. Click "Add Transfer" to create one.
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
       )}
     </div>

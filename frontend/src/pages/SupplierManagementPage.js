@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import './SupplierManagementPage.css';
 
 const SupplierManagementPage = () => {
   const navigate = useNavigate();
@@ -207,96 +208,66 @@ const SupplierManagementPage = () => {
   }
 
   return (
-    <div style={{ padding: '20px', backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
-      <style jsx>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <button 
-            onClick={() => navigate(-1)}
-            style={{
-              backgroundColor: '#6c757d',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              padding: '8px 16px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px'
-            }}
-          >
-            ← Back
+    <div className="supplier-management-page">
+      {/* Page Header */}
+      <div className="page-header">
+        <div className="header-left">
+          <button className="back-button" onClick={() => navigate(-1)}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            </svg>
+            <span>Back</span>
           </button>
-          <h2 style={{ margin: 0, color: '#333' }}>
-            🏢 Supplier Management
-          </h2>
+          <div className="page-title">
+            <h1>Supplier Management</h1>
+            <p>Manage your suppliers and vendor relationships</p>
+          </div>
         </div>
         <button 
+          className="add-supplier-btn"
           onClick={() => {
             resetForm();
             setEditingSupplier(null);
             setShowAddForm(true);
           }}
-          style={{
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            padding: '10px 20px',
-            cursor: 'pointer'
-          }}
         >
-          ➕ Add Supplier
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+          <span>Add Supplier</span>
         </button>
       </div>
 
-      {/* Filters */}
-      <div style={{ 
-        backgroundColor: 'white', 
-        padding: '20px', 
-        borderRadius: '8px', 
-        marginBottom: '20px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-      }}>
-        <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ flex: '1', minWidth: '250px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>🔍 Search</label>
-            <input
-              type="text"
-              placeholder="Search by name, contact, email, phone, type, city..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '8px 12px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '14px'
-              }}
-            />
+      {/* Filters Section */}
+      <div className="filters-section">
+        <div className="filters-grid">
+          <div className="search-filter">
+            <label className="filter-label">Search Suppliers</label>
+            <div className="search-input-wrapper">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="search-icon">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+              <input
+                type="text"
+                placeholder="Search by name, contact, email, phone, type, city..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
+            </div>
             {searchTerm && (
-              <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+              <div className="search-results">
                 Found {filteredSuppliers.length} supplier{filteredSuppliers.length !== 1 ? 's' : ''}
               </div>
             )}
           </div>
-          <div>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Type</label>
+          
+          <div className="filter-dropdown">
+            <label className="filter-label">Supplier Type</label>
             <select 
               value={filter.type}
               onChange={(e) => setFilter(prev => ({ ...prev, type: e.target.value }))}
-              style={{
-                padding: '8px',
-                border: '1px solid #ddd',
-                borderRadius: '4px'
-              }}
+              className="filter-select"
             >
               <option value="">All Types</option>
               <option value="hotel">Hotel</option>
@@ -307,16 +278,13 @@ const SupplierManagementPage = () => {
               <option value="other">Other</option>
             </select>
           </div>
-          <div>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Status</label>
+          
+          <div className="filter-dropdown">
+            <label className="filter-label">Status</label>
             <select 
               value={filter.status}
               onChange={(e) => setFilter(prev => ({ ...prev, status: e.target.value }))}
-              style={{
-                padding: '8px',
-                border: '1px solid #ddd',
-                borderRadius: '4px'
-              }}
+              className="filter-select"
             >
               <option value="">All Status</option>
               <option value="active">Active</option>
@@ -328,134 +296,105 @@ const SupplierManagementPage = () => {
       </div>
 
       {error && (
-        <div style={{
-          backgroundColor: '#f8d7da',
-          border: '1px solid #f5c6cb',
-          borderRadius: '8px',
-          padding: '15px',
-          marginBottom: '20px',
-          color: '#721c24'
-        }}>
-          {error}
+        <div className="error-message">
+          <div className="error-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+          </div>
+          <div className="error-text">{error}</div>
         </div>
       )}
 
       {/* Suppliers List */}
       {suppliers.length === 0 ? (
-        <div style={{
-          textAlign: 'center',
-          padding: '60px 20px',
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}>
-          <div style={{ fontSize: '60px', marginBottom: '20px' }}>🏢</div>
-          <h4 style={{ color: '#333', marginBottom: '10px' }}>No Suppliers Found</h4>
-          <p style={{ color: '#666' }}>Add your first supplier to get started.</p>
-        </div>
-      ) : filteredSuppliers.length === 0 && searchTerm ? (
-        <div style={{
-          textAlign: 'center',
-          padding: '60px 20px',
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}>
-          <div style={{ fontSize: '60px', marginBottom: '20px' }}>🔍</div>
-          <h4 style={{ color: '#333', marginBottom: '10px' }}>No Suppliers Found</h4>
-          <p style={{ color: '#666', marginBottom: '20px' }}>No suppliers matching "{searchTerm}"</p>
+        <div className="empty-state">
+          <div className="empty-icon">🏢</div>
+          <h3 className="empty-title">No Suppliers Found</h3>
+          <p className="empty-description">Add your first supplier to get started with managing your vendor relationships.</p>
           <button 
-            onClick={() => setSearchTerm('')}
-            style={{
-              backgroundColor: '#6c757d',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              padding: '8px 16px',
-              cursor: 'pointer'
+            className="empty-action-btn"
+            onClick={() => {
+              resetForm();
+              setEditingSupplier(null);
+              setShowAddForm(true);
             }}
           >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+            Add Your First Supplier
+          </button>
+        </div>
+      ) : filteredSuppliers.length === 0 && searchTerm ? (
+        <div className="empty-state">
+          <div className="empty-icon">🔍</div>
+          <h3 className="empty-title">No Suppliers Found</h3>
+          <p className="empty-description">No suppliers matching "{searchTerm}"</p>
+          <button 
+            className="empty-action-btn"
+            onClick={() => setSearchTerm('')}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
             Clear Search
           </button>
         </div>
       ) : (
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          overflow: 'hidden'
-        }}>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div className="suppliers-table-container">
+          <div className="table-wrapper">
+            <table className="suppliers-table">
               <thead>
-                <tr style={{ backgroundColor: '#007bff', color: 'white' }}>
-                  <th style={{ padding: '15px', textAlign: 'left' }}>Name</th>
-                  <th style={{ padding: '15px', textAlign: 'left' }}>Type</th>
-                  <th style={{ padding: '15px', textAlign: 'left' }}>Contact Person</th>
-                  <th style={{ padding: '15px', textAlign: 'left' }}>Email</th>
-                  <th style={{ padding: '15px', textAlign: 'left' }}>Phone</th>
-                  <th style={{ padding: '15px', textAlign: 'left' }}>Status</th>
-                  <th style={{ padding: '15px', textAlign: 'left' }}>Actions</th>
+                <tr>
+                  <th>Supplier Name</th>
+                  <th>Type</th>
+                  <th>Contact Person</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {Array.isArray(filteredSuppliers) && filteredSuppliers.map((supplier) => (
-                  <tr key={supplier._id} style={{ borderBottom: '1px solid #dee2e6' }}>
-                    <td style={{ padding: '15px' }}>
-                      <strong 
+                  <tr key={supplier._id} className="supplier-row">
+                    <td className="supplier-name-cell">
+                      <div 
+                        className="supplier-name-link"
                         onClick={() => navigate(`/supplier/${supplier._id}`)}
-                        style={{
-                          color: '#007bff',
-                          cursor: 'pointer',
-                          textDecoration: 'underline'
-                        }}
                       >
                         {supplier.name}
-                      </strong>
+                      </div>
                       {supplier.gstNumber && (
-                        <>
-                          <br />
-                          <small style={{ color: '#666' }}>GST: {supplier.gstNumber}</small>
-                        </>
+                        <div className="supplier-gst">GST: {supplier.gstNumber}</div>
                       )}
                     </td>
-                    <td style={{ padding: '15px' }}>{getTypeBadge(supplier.type)}</td>
-                    <td style={{ padding: '15px' }}>{supplier.contactPerson}</td>
-                    <td style={{ padding: '15px' }}>{supplier.email}</td>
-                    <td style={{ padding: '15px' }}>{supplier.phone}</td>
-                    <td style={{ padding: '15px' }}>{getStatusBadge(supplier.status)}</td>
-                    <td style={{ padding: '15px' }}>
-                      <div style={{ display: 'flex', gap: '5px' }}>
+                    <td className="supplier-type-cell">{getTypeBadge(supplier.type)}</td>
+                    <td className="supplier-contact-cell">{supplier.contactPerson}</td>
+                    <td className="supplier-email-cell">{supplier.email}</td>
+                    <td className="supplier-phone-cell">{supplier.phone}</td>
+                    <td className="supplier-status-cell">{getStatusBadge(supplier.status)}</td>
+                    <td className="supplier-actions-cell">
+                      <div className="action-buttons">
                         <button 
+                          className="action-btn edit-btn"
                           onClick={() => handleEdit(supplier)}
-                          style={{
-                            backgroundColor: '#007bff',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            padding: '6px 10px',
-                            cursor: 'pointer',
-                            fontSize: '12px'
-                          }}
                           title="Edit"
                         >
-                          ✏️
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                          </svg>
                         </button>
                         <button 
+                          className={`action-btn delete-btn ${supplier.status === 'active' && suppliers.filter(s => s.status === 'active').length <= 1 ? 'disabled' : ''}`}
                           onClick={() => handleDelete(supplier._id)}
                           disabled={supplier.status === 'active' && suppliers.filter(s => s.status === 'active').length <= 1}
-                          style={{
-                            backgroundColor: supplier.status === 'active' && suppliers.filter(s => s.status === 'active').length <= 1 ? '#6c757d' : '#dc3545',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            padding: '6px 10px',
-                            cursor: supplier.status === 'active' && suppliers.filter(s => s.status === 'active').length <= 1 ? 'not-allowed' : 'pointer',
-                            fontSize: '12px'
-                          }}
-                          title="Deactivate"
+                          title="Delete"
                         >
-                          🗑️
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                          </svg>
                         </button>
                       </div>
                     </td>

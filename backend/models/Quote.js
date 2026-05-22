@@ -101,7 +101,7 @@ const quoteSchema = new mongoose.Schema({
   markupType: { type: String, enum: ['percentage', 'amount'], default: 'percentage' },
   markupValue: { type: Number, default: 0 },
   markupAmount: { type: Number, default: 0 },
-  discountType: { type: String, enum: ['percentage', 'amount'], default: 'percentage' },
+  discountType: { type: String, enum: ['percentage', 'amount'], default: 'amount' },
   discountValue: { type: Number, default: 0 },
   discountAmount: { type: Number, default: 0 },
   taxRate: { type: Number, default: 0 }, // Tax percentage

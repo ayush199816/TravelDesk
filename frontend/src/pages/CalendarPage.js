@@ -44,11 +44,8 @@ const CalendarPage = () => {
   const fetchCalendarData = useCallback(async () => {
     try {
       setLoading(true);
-      const [invoicesResponse, leadsResponse, quotesResponse, supplierAssignmentsResponse] = await Promise.all([
+      const [invoicesResponse, quotesResponse, supplierAssignmentsResponse] = await Promise.all([
         api.get('/invoices', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        }),
-        api.get(`/leads?organization=${user.organization._id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         }),
         api.get(`/quotes?organization=${user.organization._id}`, {
@@ -58,34 +55,6 @@ const CalendarPage = () => {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         })
       ]);
-
-      console.log('=== DATA FETCHING DEBUG ===');
-      console.log('Invoices fetched:', invoicesResponse.data.length);
-      console.log('Leads fetched:', leadsResponse.data.length);
-      console.log('Quotes fetched:', quotesResponse.data.length);
-      console.log('Supplier assignments fetched:', supplierAssignmentsResponse.data.length);
-      
-      if (invoicesResponse.data.length > 0) {
-        console.log('Sample invoice:', invoicesResponse.data[0]);
-      }
-      if (leadsResponse.data.length > 0) {
-        console.log('Sample lead:', leadsResponse.data[0]);
-      }
-      if (quotesResponse.data.length > 0) {
-        console.log('Sample quote:', quotesResponse.data[0]);
-        console.log('Full quote structure:', JSON.stringify(quotesResponse.data[0], null, 2));
-      }
-      if (supplierAssignmentsResponse.data.length > 0) {
-        console.log('Sample supplier assignment:', supplierAssignmentsResponse.data[0]);
-        console.log('All supplier assignments:', Array.isArray(supplierAssignmentsResponse.data) ? supplierAssignmentsResponse.data.map(a => ({
-          quoteNumber: a.quote?.quoteNumber,
-          activityType: a.activityType,
-          activityName: a.activityName,
-          supplierName: a.supplier?.name,
-          paymentStatus: a.paymentStatus
-        })) : []);
-      }
-      console.log('=== END DATA FETCHING DEBUG ===');
 
       const calendarEvents = [];
 
@@ -141,38 +110,11 @@ const CalendarPage = () => {
 
       // Process quotes for day-wise activities (only converted trips)
       quotesResponse.data.forEach(quote => {
-        console.log(`Processing quote ${quote.quoteNumber}:`, {
-          isConverted: quote.isConverted,
-          travelStartDate: quote.travelStartDate,
-          hasDays: !!quote.days,
-          daysCount: quote.days?.length,
-          daysStructure: quote.days?.map((day, index) => ({
-            dayIndex: index,
-            dayNumber: day.dayNumber,
-            date: day.date,
-            hasSightseeings: !!day.sightseeings,
-            sightseeingsCount: day.sightseeings?.length,
-            hasTransfers: !!day.transfers,
-            transfersCount: day.transfers?.length,
-            hasHotels: !!day.hotels,
-            hotelsCount: day.hotels?.length,
-            hasTempHotels: !!quote.hotels,
-            tempHotelsCount: quote.hotels?.length
-          }))
-        });
-        
         if (quote.isConverted && quote.travelStartDate && quote.days) {
           // Check if quote has supplier assignments
           const quoteAssignments = supplierAssignmentsResponse.data.filter(
             assignment => assignment.quote?._id === quote._id
           );
-          
-          console.log(`🔍 DEBUG: Quote ${quote.quoteNumber} assignments:`, quoteAssignments.map(a => ({
-            activityType: a.activityType,
-            activityName: a.activityName,
-            supplierName: a.supplier?.name,
-            paymentStatus: a.paymentStatus
-          })));
           
           const hasSupplierAssignments = quoteAssignments.length > 0;
 
@@ -190,13 +132,6 @@ const CalendarPage = () => {
             // Normalize date to avoid timezone issues
             const normalizedDate = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate());
             
-            console.log(`Processing day ${dayIndex + 1} for quote ${quote.quoteNumber}:`, {
-              originalDayDate: day.date,
-              calculatedDate: dayDate.toISOString(),
-              normalizedDate: normalizedDate.toISOString(),
-              dayNumber: day.dayNumber
-            });
-
             // Collect all activities for this day to group them
             const dayActivities = {
               sightseeings: [],
@@ -214,26 +149,7 @@ const CalendarPage = () => {
                   assignment => assignment.quote?._id === quote._id && 
                                  assignment.activityType === 'sightseeing'
                 );
-                
-                const sightseeingMatchingResults = sightseeingAssignments.map(a => {
-                  // Check if any assigned item matches this sightseeing
-                  const hasMatchingItem = a.assignedItems && a.assignedItems.some(item => {
-                    const itemName = item.name || '';
-                    const exactMatch = itemName === sightseeingName;
-                    const itemContainsSightseeing = itemName.includes(sightseeingName.split(' ')[0]);
-                    const sightseeingContainsItem = sightseeingName.includes(itemName.split(' ')[0]);
-                    return exactMatch || itemContainsSightseeing || sightseeingContainsItem;
-                  });
-                  
-                  return {
-                    activityName: a.activityName,
-                    assignedItems: a.assignedItems?.map(item => item.name) || [],
-                    hasMatchingItem
-                  };
-                });
-                
-                console.log(`🏛️ DEBUG: Sightseeing "${sightseeingName}" matching with assignments:`, sightseeingMatchingResults);
-                
+
                 const hasSupplierForActivity = sightseeingAssignments.some(assignment => {
                   return assignment.assignedItems && assignment.assignedItems.some(item => {
                     const itemName = item.name || '';
@@ -263,26 +179,7 @@ const CalendarPage = () => {
                   assignment => assignment.quote?._id === quote._id && 
                                  assignment.activityType === 'transport'
                 );
-                
-                const matchingResults = transportAssignments.map(a => {
-                  // Check if any assigned item matches this transfer
-                  const hasMatchingItem = a.assignedItems && a.assignedItems.some(item => {
-                    const itemName = item.name || '';
-                    const exactMatch = itemName === transferName;
-                    const itemContainsTransfer = itemName.includes(transferName.split(' - ')[0]);
-                    const transferContainsItem = transferName.includes(itemName.split(' - ')[0]);
-                    return exactMatch || itemContainsTransfer || transferContainsItem;
-                  });
-                  
-                  return {
-                    activityName: a.activityName,
-                    assignedItems: a.assignedItems?.map(item => item.name) || [],
-                    hasMatchingItem
-                  };
-                });
-                
-                console.log(`🚐 DEBUG: Transfer "${transferName}" matching with assignments:`, matchingResults);
-                
+
                 const hasSupplierForActivity = transportAssignments.some(assignment => {
                   return assignment.assignedItems && assignment.assignedItems.some(item => {
                     const itemName = item.name || '';
@@ -413,25 +310,11 @@ const CalendarPage = () => {
 
           // Also process hotels at the quote level (if they exist there)
           if (quote.hotels && quote.hotels.length > 0) {
-            console.log(`Processing quote-level hotels for quote ${quote.quoteNumber}:`, quote.hotels);
             quote.hotels.forEach((hotel, index) => {
-              console.log(`Processing quote-level hotel ${index + 1}:`, hotel);
               const hotelName = hotel.hotel?.name || hotel.name || 'Hotel';
               const firstRoom = hotel.rooms?.[0];
               
               // Check if this specific hotel has supplier assignment
-              console.log(`Checking supplier assignment for hotel "${hotelName}":`, {
-                quoteId: quote._id,
-                activityType: 'hotel',
-                activityName: hotelName,
-                allAssignments: supplierAssignmentsResponse.data.map(a => ({
-                  quoteId: a.quote?._id,
-                  activityType: a.activityType,
-                  activityName: a.activityName,
-                  supplierName: a.supplier?.name
-                }))
-              });
-              
               const hasSupplierForActivity = supplierAssignmentsResponse.data.some(
                 assignment => assignment.quote?._id === quote._id && 
                                assignment.activityType === 'hotel' &&
@@ -450,8 +333,7 @@ const CalendarPage = () => {
                                  assignment.activityName.toLowerCase().includes(hotelName.toLowerCase())
                                )
               );
-              
-              console.log(`Supplier assignment result for "${hotelName}":`, hasSupplierForActivity);
+
               
               // Calculate number of nights from check-in/check-out dates
               let numberOfNights = 1; // Default to 1 night
@@ -461,8 +343,6 @@ const CalendarPage = () => {
                 const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
                 numberOfNights = nights > 0 ? nights : 1;
               }
-              
-              console.log(`Hotel "${hotelName}" is booked for ${numberOfNights} night(s)`);
               
               // Create hotel events for each night
               for (let night = 0; night < numberOfNights; night++) {
@@ -495,7 +375,6 @@ const CalendarPage = () => {
                   childPax: quote.childPax,
                   isConverted: quote.isConverted
                 };
-                console.log(`Creating hotel event for night ${night + 1}:`, hotelEvent);
                 calendarEvents.push(hotelEvent);
               }
             });
@@ -521,17 +400,9 @@ const CalendarPage = () => {
         }
       });
 
-      const hotelEvents = calendarEvents.filter(event => event.type === 'hotel');
-      console.log('Total calendar events created:', calendarEvents.length);
-      console.log('Total hotel events created:', hotelEvents.length);
-      console.log('Sample events:', calendarEvents.slice(0, 5));
-      if (hotelEvents.length > 0) {
-        console.log('Sample hotel events:', hotelEvents.slice(0, 3));
-      }
-
       setEvents(calendarEvents);
     } catch (error) {
-      console.error('Error fetching calendar data:', error);
+      // Error fetching calendar data
     } finally {
       setLoading(false);
     }
@@ -653,17 +524,8 @@ const CalendarPage = () => {
     
     let message = `Details for tomorrow tour is:\n\n`;
     message += `Quote ID: ${event.quoteNumber}\n`;
-    // Try multiple possible fields for lead name
-    console.log('Checking lead name fields:');
-    console.log('event.leadName:', event.leadName);
-    console.log('event.clientName:', event.clientName);
-    console.log('event.guestName:', event.guestName);
-    console.log('event.name:', event.name);
-    console.log('event.lead?.name:', event.lead?.name);
-    console.log('event.client?.name:', event.client?.name);
     
     const leadName = event.leadName || event.clientName || event.guestName || event.name || event.lead?.name || event.client?.name || 'N/A';
-    console.log('Final leadName:', leadName);
     message += `Name of Lead Pax: ${leadName}\n`;
     message += `Number of Pax: ${event.adultPax} Adults${event.childPax > 0 ? `, ${event.childPax} Children` : ''}\n`;
     message += `Pickup Time: ${event.pickupTime || 'To be confirmed'}\n`;
@@ -713,10 +575,6 @@ const CalendarPage = () => {
   };
 
   const shareTourDetails = (event) => {
-    // Debug: Log the event data to see available fields
-    console.log('Event data for debugging:', event);
-    console.log('Available fields:', Object.keys(event));
-    
     // Fetch lead name from quote data since it's not in event data
     fetchLeadNameFromQuote(event.quoteNumber, event);
   };
@@ -733,17 +591,13 @@ const CalendarPage = () => {
       
       if (response.ok) {
         const quoteData = await response.json();
-        console.log('Quote data:', quoteData);
         
         // Update event with lead name from quote
         event.leadName = quoteData.leadName || quoteData.clientName || quoteData.name || quoteData.lead?.name || quoteData.client?.name || 'N/A';
-        console.log('Updated lead name from quote:', event.leadName);
       } else {
-        console.log('Failed to fetch quote data');
         event.leadName = 'N/A';
       }
     } catch (error) {
-      console.error('Error fetching quote data:', error);
       event.leadName = 'N/A';
     }
     
@@ -761,7 +615,6 @@ const CalendarPage = () => {
     navigator.clipboard.writeText(text).then(() => {
       alert('Tour details copied to clipboard!');
     }).catch(err => {
-      console.error('Failed to copy: ', err);
       alert('Failed to copy tour details. Please copy manually.');
     });
   };

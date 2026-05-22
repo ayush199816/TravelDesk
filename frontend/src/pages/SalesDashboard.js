@@ -1,13 +1,14 @@
-import React, { useContext, useState, useEffect, useCallback } from 'react';
+import React, { useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import api from '../api/axios';
+import './SalesDashboard.css';
 
 const SalesDashboard = () => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeView, setActiveView] = useState('tasks');
+  const [activeView, setActiveView] = useState('analytics');
   const [leads, setLeads] = useState([]);
   const [filteredLeads, setFilteredLeads] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -15,6 +16,15 @@ const SalesDashboard = () => {
   const [showEditForm, setShowEditForm] = useState(false);
   const [editingLead, setEditingLead] = useState(null);
   const [leadStatuses, setLeadStatuses] = useState([]);
+  const [updatingLead, setUpdatingLead] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState('');
+  
+  // Analytics filters
+  const [analyticsFilters, setAnalyticsFilters] = useState({
+    month: new Date().toISOString().slice(0, 7),
+    startDate: '',
+    endDate: ''
+  });
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -55,7 +65,7 @@ const SalesDashboard = () => {
       setLeads(response.data);
       setFilteredLeads(response.data);
     } catch (error) {
-      console.error('Error fetching my leads:', error);
+      // Error fetching my leads
     } finally {
       setLoading(false);
     }
@@ -66,7 +76,7 @@ const SalesDashboard = () => {
       const response = await api.get(`/organizations/${user.organization._id}/lead-statuses`);
       setLeadStatuses(response.data);
     } catch (error) {
-      console.error('Error fetching lead statuses:', error);
+      // Error fetching lead statuses
     }
   }, [user.organization._id]);
 
@@ -190,7 +200,6 @@ const SalesDashboard = () => {
         notes: ''
       });
     } catch (error) {
-      console.error('Error creating lead:', error);
       alert('Error creating lead: ' + (error.response?.data?.message || error.message));
     }
   };
@@ -217,7 +226,6 @@ const SalesDashboard = () => {
       });
       setShowEditForm(true);
     } catch (error) {
-      console.error('Error fetching lead details:', error);
       // Fallback to using the lead from state if fetch fails
       setEditingLead(lead);
       setFormData({
@@ -240,6 +248,9 @@ const SalesDashboard = () => {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+    setUpdatingLead(true);
+    setUpdateMessage('Updating lead...');
+    
     try {
       const leadData = {
         ...formData,
@@ -247,8 +258,15 @@ const SalesDashboard = () => {
       };
       await api.put(`/leads/${editingLead._id}`, leadData);
       fetchMyLeads();
-      setShowEditForm(false);
-      setEditingLead(null);
+      
+      setUpdateMessage('Lead updated successfully!');
+      
+      setTimeout(() => {
+        setShowEditForm(false);
+        setEditingLead(null);
+        setUpdateMessage('');
+      }, 2000);
+      
       setFormData({
         name: '',
         email: '',
@@ -264,17 +282,96 @@ const SalesDashboard = () => {
         notes: ''
       });
     } catch (error) {
-      console.error('Error updating lead:', error);
-      alert('Error updating lead: ' + (error.response?.data?.message || error.message));
+      setUpdateMessage('Error updating lead: ' + (error.response?.data?.message || error.message));
+      setTimeout(() => {
+        setUpdateMessage('');
+      }, 3000);
+    } finally {
+      setUpdatingLead(false);
     }
   };
 
   useEffect(() => {
-    if (activeView === 'leads') {
+    if (activeView === 'leads' || activeView === 'analytics') {
       fetchMyLeads();
-      fetchLeadStatuses();
+      if (activeView === 'leads') {
+        fetchLeadStatuses();
+      }
     }
   }, [activeView, fetchMyLeads, fetchLeadStatuses]);
+
+  // Calculate sales analytics metrics
+  const analytics = useMemo(() => {
+    let userLeads = leads.filter(lead => lead.assignedTo === user?._id);
+    
+    // Apply date filters
+    if (analyticsFilters.startDate || analyticsFilters.endDate) {
+      userLeads = userLeads.filter(lead => {
+        const leadDate = lead.dateOfTravel ? new Date(lead.dateOfTravel) : null;
+        if (!leadDate) return false;
+        
+        const startDate = analyticsFilters.startDate ? new Date(analyticsFilters.startDate) : null;
+        const endDate = analyticsFilters.endDate ? new Date(analyticsFilters.endDate) : null;
+        
+        if (startDate && leadDate < startDate) return false;
+        if (endDate && leadDate > endDate) return false;
+        
+        return true;
+      });
+    } else if (analyticsFilters.month) {
+      // Filter by month
+      const selectedMonth = new Date(analyticsFilters.month);
+      userLeads = userLeads.filter(lead => {
+        const leadDate = lead.dateOfTravel ? new Date(lead.dateOfTravel) : null;
+        if (!leadDate) return false;
+        
+        return leadDate.getMonth() === selectedMonth.getMonth() &&
+               leadDate.getFullYear() === selectedMonth.getFullYear();
+      });
+    }
+    
+    let ongoingLeads = 0;
+    let convertedLeads = 0;
+    let totalSalesAmount = 0;
+    let todayFollowups = 0;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    userLeads.forEach(lead => {
+      // Count ongoing leads (not converted)
+      if (lead.status !== 'converted' && lead.status !== 'lost') {
+        ongoingLeads++;
+      }
+      
+      // Count converted leads
+      if (lead.status === 'converted') {
+        convertedLeads++;
+        // Add sales amount if available
+        if (lead.totalAmount) {
+          totalSalesAmount += parseFloat(lead.totalAmount);
+        }
+      }
+      
+      // Count leads with today's follow-up date
+      if (lead.nextFollowUpDate) {
+        const followUpDate = new Date(lead.nextFollowUpDate);
+        followUpDate.setHours(0, 0, 0, 0);
+        if (followUpDate.getTime() === today.getTime()) {
+          todayFollowups++;
+        }
+      }
+    });
+    
+    return {
+      ongoingLeads,
+      convertedLeads,
+      totalSalesAmount,
+      totalLeads: userLeads.length,
+      conversionRate: userLeads.length > 0 ? ((convertedLeads / userLeads.length) * 100).toFixed(1) : 0,
+      todayFollowups
+    };
+  }, [leads, user?._id, analyticsFilters]);
 
 
 
@@ -537,51 +634,296 @@ const SalesDashboard = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <nav style={styles.nav}>
-        <div style={styles.navLinks}>
-          <span
-            style={activeView === 'tasks' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
-            onClick={() => setActiveView('tasks')}
-          >
-            Tasks
-          </span>
-          <span
-            style={activeView === 'leads' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
-            onClick={() => setActiveView('leads')}
-          >
-            My Leads
-          </span>
-          <span
-            style={activeView === 'invoices' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
-            onClick={() => navigate('/invoices')}
-          >
-            Invoices
-          </span>
-          <span
-            style={activeView === 'suppliers' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
-            onClick={() => navigate('/suppliers')}
-          >
-            Suppliers
-          </span>
-          <span
-            style={activeView === 'calendar' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
-            onClick={() => navigate('/calendar')}
-          >
-            Calendar
-          </span>
-        </div>
-        <div style={{fontSize: '16px', fontWeight: '600', color: '#333'}}>{user?.organization?.name || 'Organization'}</div>
-        <button style={styles.menuButton} onClick={toggleMenu}>👤</button>
-        <div style={styles.dropdown}>
-          <div style={styles.userInfo}>
-            <p>Hello, {user?.name}</p>
-            <p>Role: Sales</p>
+    <div className="sales-dashboard">
+      {/* Sidebar Navigation */}
+      <aside className={`sidebar ${menuOpen ? 'sidebar-open' : ''}`}>
+        <div className="sidebar-header">
+          <div className="brand-logo">
+            <div className="logo-icon">N</div>
+            <span className="logo-text">NaviDesk</span>
           </div>
-          <button style={styles.logoutButton} onClick={handleLogout}>Logout</button>
+          <button className="sidebar-toggle" onClick={toggleMenu}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+            </svg>
+          </button>
         </div>
-      </nav>
-      <div style={styles.mainContent}>
+
+        <nav className="sidebar-nav">
+          <div className="nav-section">
+            <div className="nav-section-title">Main</div>
+            <button
+              className={`nav-item ${activeView === 'analytics' ? 'nav-active' : ''}`}
+              onClick={() => setActiveView('analytics')}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="nav-icon">
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+              </svg>
+              <span>Analytics</span>
+            </button>
+            <button
+              className={`nav-item ${activeView === 'tasks' ? 'nav-active' : ''}`}
+              onClick={() => setActiveView('tasks')}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="nav-icon">
+                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+              </svg>
+              <span>Tasks</span>
+            </button>
+            <button
+              className={`nav-item ${activeView === 'leads' ? 'nav-active' : ''}`}
+              onClick={() => setActiveView('leads')}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="nav-icon">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              <span>My Leads</span>
+            </button>
+          </div>
+
+          <div className="nav-section">
+            <div className="nav-section-title">Management</div>
+            <button
+              className={`nav-item ${activeView === 'invoices' ? 'nav-active' : ''}`}
+              onClick={() => navigate('/invoices')}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="nav-icon">
+                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+              </svg>
+              <span>Invoices</span>
+            </button>
+            <button
+              className={`nav-item ${activeView === 'calendar' ? 'nav-active' : ''}`}
+              onClick={() => navigate('/calendar')}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="nav-icon">
+                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+              </svg>
+              <span>Calendar</span>
+            </button>
+          </div>
+        </nav>
+
+        {/* Logout Button */}
+        <div style={{ padding: '0 16px 24px' }}>
+          <button
+            onClick={handleLogout}
+            className="logout-btn"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+            </svg>
+            Logout
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <div className="main-content">
+        {/* Top Header */}
+        <header className="top-header">
+          <div className="header-left">
+            <button className="mobile-menu-toggle" onClick={toggleMenu}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+              </svg>
+            </button>
+            <div className="page-title">
+              <h1>Sales Dashboard</h1>
+              <p>Welcome back, {user?.name}</p>
+            </div>
+          </div>
+          <div className="header-right">
+            <div className="org-info">
+              <span className="org-name">{user?.organization?.name || 'Organization'}</span>
+            </div>
+            <div className="user-dropdown">
+              <button className="user-menu-btn" onClick={toggleMenu}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+              </button>
+              <div className={`user-dropdown-menu ${menuOpen ? 'dropdown-open' : ''}`}>
+                <div className="user-dropdown-item">{user?.name}</div>
+                <div className="user-dropdown-item">Role: Sales</div>
+                <div className="user-dropdown-item" onClick={handleLogout}>Logout</div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <div className="page-content">
+        
+        {/* Update Message Notification */}
+        {updateMessage && (
+          <div className={`update-notification ${updatingLead ? 'updating' : ''}`}>
+            <div className="notification-content">
+              {updatingLead && (
+                <div className="notification-spinner"></div>
+              )}
+              <span className="notification-text">{updateMessage}</span>
+              <button className="notification-close" onClick={() => setUpdateMessage('')}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+        
+        {/* Analytics View */}
+        {activeView === 'analytics' && (
+          <div className="analytics-overview">
+            {/* Page Header */}
+            <div className="analytics-header">
+              <div className="header-content">
+                <h1 className="analytics-title">Sales Analytics</h1>
+                <p className="analytics-subtitle">Track your sales performance and metrics</p>
+              </div>
+            </div>
+
+            {/* Analytics Filters */}
+            <div className="analytics-filters">
+              <div className="filter-group">
+                <label className="filter-label">Month</label>
+                <input
+                  type="month"
+                  value={analyticsFilters.month}
+                  onChange={(e) => setAnalyticsFilters(prev => ({ ...prev, month: e.target.value }))}
+                  className="filter-input"
+                />
+              </div>
+              
+              <div className="filter-group">
+                <label className="filter-label">Start Date</label>
+                <input
+                  type="date"
+                  value={analyticsFilters.startDate}
+                  onChange={(e) => setAnalyticsFilters(prev => ({ ...prev, startDate: e.target.value }))}
+                  className="filter-input"
+                />
+              </div>
+              
+              <div className="filter-group">
+                <label className="filter-label">End Date</label>
+                <input
+                  type="date"
+                  value={analyticsFilters.endDate}
+                  onChange={(e) => setAnalyticsFilters(prev => ({ ...prev, endDate: e.target.value }))}
+                  className="filter-input"
+                />
+              </div>
+              
+              <div className="filter-actions">
+                <button
+                  onClick={() => setAnalyticsFilters({
+                    month: new Date().toISOString().slice(0, 7),
+                    startDate: '',
+                    endDate: ''
+                  })}
+                  className="download-btn secondary"
+                >
+                  Reset Filters
+                </button>
+              </div>
+            </div>
+            
+            {/* Metrics Cards */}
+            <div className="metrics-grid">
+              <div className="metric-card">
+                <div className="metric-icon ongoing">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                </div>
+                <div className="metric-content">
+                  <div className="metric-value">{analytics.ongoingLeads}</div>
+                  <div className="metric-label">Ongoing Leads</div>
+                  <div className="metric-description">Active leads in pipeline</div>
+                </div>
+              </div>
+              
+              <div className="metric-card">
+                <div className="metric-icon converted">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                  </svg>
+                </div>
+                <div className="metric-content">
+                  <div className="metric-value">{analytics.convertedLeads}</div>
+                  <div className="metric-label">Converted Leads</div>
+                  <div className="metric-description">Successfully closed deals</div>
+                </div>
+              </div>
+              
+              <div className="metric-card">
+                <div className="metric-icon revenue">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1.81.45 1.61 1.67 1.61 1.16 0 1.6-.64 1.6-1.46 0-.84-.68-1.22-1.88-1.58-1.85-.54-3.21-1.36-3.21-3.23 0-1.61 1.21-2.75 2.95-3.08V4.9h2.67v2.06c1.42.35 2.59 1.42 2.7 2.95h-1.96c-.05-.6-.38-1.55-1.75-1.55-1.03 0-1.52.52-1.52 1.3 0 .73.56 1.09 1.88 1.51 1.87.55 3.21 1.34 3.21 3.37 0 1.78-1.32 2.86-3.08 3.2z"/>
+                  </svg>
+                </div>
+                <div className="metric-content">
+                  <div className="metric-value">₹{analytics.totalSalesAmount.toLocaleString('en-IN')}</div>
+                  <div className="metric-label">Total Sales Amount</div>
+                  <div className="metric-description">Revenue from conversions</div>
+                </div>
+              </div>
+              
+              <div className="metric-card">
+                <div className="metric-icon team">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                </div>
+                <div className="metric-content">
+                  <div className="metric-value">{analytics.conversionRate}%</div>
+                  <div className="metric-label">Conversion Rate</div>
+                  <div className="metric-description">Lead to sales conversion</div>
+                </div>
+              </div>
+              <div className="metric-card">
+                <div className="metric-icon ongoing">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V8h14v12H19zM7 10h5v5H7z"/>
+                  </svg>
+                </div>
+                <div className="metric-content">
+                  <div className="metric-value">{analytics.todayFollowups}</div>
+                  <div className="metric-label">Today's Follow-ups</div>
+                  <div className="metric-description">Leads requiring follow-up today</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Performance Summary */}
+            <div className="performance-section">
+              <div className="performance-header">
+                <h3 className="performance-title">Performance Summary</h3>
+                <div className="performance-description">Your sales performance overview</div>
+              </div>
+              <div className="performance-summary">
+                <div className="summary-item">
+                  <div className="summary-label">Total Leads</div>
+                  <div className="summary-value">{analytics.totalLeads}</div>
+                </div>
+                <div className="summary-item">
+                  <div className="summary-label">Conversion Rate</div>
+                  <div className="summary-value">{analytics.conversionRate}%</div>
+                </div>
+                <div className="summary-item">
+                  <div className="summary-label">Average Deal Value</div>
+                  <div className="summary-value">
+                    ₹{analytics.convertedLeads > 0 
+                      ? (analytics.totalSalesAmount / analytics.convertedLeads).toLocaleString('en-IN')
+                      : '0'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {activeView === 'tasks' && (
           <div style={styles.card}>
             <div style={styles.section}>
@@ -1126,6 +1468,7 @@ const SalesDashboard = () => {
             </div>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

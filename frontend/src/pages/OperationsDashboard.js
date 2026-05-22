@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import api from '../api/axios';
+import './OperationsDashboard.css';
 
 const OperationsDashboard = () => {
   const { user, logout } = useContext(AuthContext);
@@ -76,13 +77,37 @@ const OperationsDashboard = () => {
     setMenuOpen(!menuOpen);
   };
 
+  const getPageTitle = () => {
+    switch (activeView) {
+      case 'tasks': return 'Dashboard';
+      case 'leads': return 'Lead Management';
+      case 'sightseeings': return 'Sightseeing Management';
+      case 'transfers': return 'Transfer Management';
+      case 'hotels': return 'Hotel Management';
+      case 'settings': return 'Settings';
+      default: return 'Dashboard';
+    }
+  };
+
+  const getPageSubtitle = () => {
+    switch (activeView) {
+      case 'tasks': return 'Analytics and overview';
+      case 'leads': return 'Manage your leads and conversions';
+      case 'sightseeings': return 'Manage sightseeing activities';
+      case 'transfers': return 'Manage transfer services';
+      case 'hotels': return 'Manage hotel bookings';
+      case 'settings': return 'System configuration';
+      default: return 'Welcome back';
+    }
+  };
+
   const fetchLeads = useCallback(async () => {
     try {
       const response = await api.get(`/leads?organization=${user.organization._id}`);
       setLeads(response.data);
       setFilteredLeads(response.data);
     } catch (error) {
-      console.error('Error fetching leads:', error);
+      // Error fetching leads
     } finally {
       setLoading(false);
     }
@@ -253,19 +278,7 @@ const OperationsDashboard = () => {
       flights: { assigned: 0, unassigned: 0 }
     };
 
-    // Debug: Log the actual data structure
-    console.log('🔍 DEBUG - Sightseeings data:', sightseeings.slice(0, 2));
-    console.log('🔍 DEBUG - Transfers data:', transfers.slice(0, 2));
-    console.log('🔍 DEBUG - Hotels data:', hotels.slice(0, 2));
-    console.log('🔍 DEBUG - Quotes data:', quotes.slice(0, 2));
-    console.log('🔍 DEBUG - Supplier assignments data:', supplierAssignments.slice(0, 2));
     
-    // Also check unassigned sightseeings from the general sightseeings list
-    console.log('🔍 DEBUG - All sightseeings count:', sightseeings.length);
-    sightseeings.forEach(sightseeing => {
-      console.log('🔍 DEBUG - Available sightseeing:', sightseeing.name);
-    });
-
     // Helper function to check if an item has supplier assignment
     const hasSupplierAssignment = (quoteId, activityType, activityName) => {
       const assignments = supplierAssignments.filter(assignment => 
@@ -273,21 +286,16 @@ const OperationsDashboard = () => {
         assignment.activityType === activityType
       );
       
-      console.log('🔍 DEBUG - Checking assignments for quote:', quoteId, 'type:', activityType, 'name:', activityName);
-      console.log('🔍 DEBUG - Found assignments:', assignments.length);
-      
       // Check if any assignment matches the activity name
       return assignments.some(assignment => {
         if (assignment.assignedItems && assignment.assignedItems.length > 0) {
           const hasMatch = assignment.assignedItems.some(item => {
             const itemName = item.name || item;
-            console.log('🔍 DEBUG - Comparing:', itemName, 'with', activityName);
             return itemName.includes(activityName) || 
                    activityName.includes(itemName) ||
                    (itemName.includes('Day 1:') && activityName.includes(itemName.split('Day 1: ')[1])) ||
                    (activityName.includes('Day 1:') && itemName.includes(activityName.split('Day 1: ')[1]));
           });
-          console.log('🔍 DEBUG - Assignment has match:', hasMatch);
           return hasMatch;
         }
         return assignment.activityName === activityName;
@@ -296,8 +304,6 @@ const OperationsDashboard = () => {
 
     // Calculate from quotes and their supplier assignments
     quotes.forEach(quote => {
-      console.log('🔍 DEBUG - Processing quote:', quote.quoteNumber);
-      
       // Process activities from quote days
       if (quote.days && quote.days.length > 0) {
         quote.days.forEach((day, dayIndex) => {
@@ -307,7 +313,6 @@ const OperationsDashboard = () => {
               const activityName = sightseeingItem.sightseeing?.name || 'Unknown Activity';
               const hasSupplier = hasSupplierAssignment(quote._id, 'sightseeing', activityName);
               
-              console.log('🔍 DEBUG - Activity:', activityName, 'hasSupplier:', hasSupplier);
               if (hasSupplier) {
                 supplierStats.activities.assigned++;
               } else {
@@ -322,7 +327,6 @@ const OperationsDashboard = () => {
               const transferName = transferItem.transfer?.name || 'Unknown Transfer';
               const hasSupplier = hasSupplierAssignment(quote._id, 'transfer', transferName);
               
-              console.log('🔍 DEBUG - Transfer:', transferName, 'hasSupplier:', hasSupplier);
               if (hasSupplier) {
                 supplierStats.transfers.assigned++;
               } else {
@@ -337,7 +341,6 @@ const OperationsDashboard = () => {
               const hotelName = hotelItem.hotel?.name || hotelItem.name || 'Unknown Hotel';
               const hasSupplier = hasSupplierAssignment(quote._id, 'hotel', hotelName);
               
-              console.log('🔍 DEBUG - Day Hotel:', hotelName, 'hasSupplier:', hasSupplier);
               if (hasSupplier) {
                 supplierStats.hotels.assigned++;
               } else {
@@ -354,7 +357,6 @@ const OperationsDashboard = () => {
           const hotelName = hotelItem.name || 'Unknown Hotel';
           const hasSupplier = hasSupplierAssignment(quote._id, 'hotel', hotelName);
           
-          console.log('🔍 DEBUG - Quote Hotel:', hotelName, 'hasSupplier:', hasSupplier);
           if (hasSupplier) {
             supplierStats.hotels.assigned++;
           } else {
@@ -369,7 +371,6 @@ const OperationsDashboard = () => {
           const flightName = flightItem.name || flightItem.flightNumber || 'Unknown Flight';
           const hasSupplier = hasSupplierAssignment(quote._id, 'flight', flightName);
           
-          console.log('🔍 DEBUG - Flight hasSupplier:', hasSupplier);
           if (hasSupplier) {
             supplierStats.flights.assigned++;
           } else {
@@ -380,9 +381,8 @@ const OperationsDashboard = () => {
     });
 
     
-    console.log('🔍 DEBUG - Final supplier stats:', supplierStats);
     return supplierStats;
-  }, [sightseeings, transfers, hotels, quotes, supplierAssignments]);
+  }, [quotes, supplierAssignments]);
 
   
   // Update filtered leads when leads or filters change
@@ -396,7 +396,7 @@ const OperationsDashboard = () => {
       const response = await api.get(`/leads/users/sales?organization=${user.organization._id}`);
       setSalesUsers(response.data);
     } catch (error) {
-      console.error('Error fetching sales users:', error);
+      // Error fetching sales users
     }
   }, [user.organization._id]);
 
@@ -405,7 +405,7 @@ const OperationsDashboard = () => {
       const response = await api.get(`/sightseeings?organization=${user.organization._id}`);
       setSightseeings(response.data);
     } catch (error) {
-      console.error('Error fetching sightseeings:', error);
+      // Error fetching sightseeings
     }
   }, [user.organization._id]);
 
@@ -414,7 +414,7 @@ const OperationsDashboard = () => {
       const response = await api.get(`/transfers?organization=${user.organization._id}`);
       setTransfers(response.data);
     } catch (error) {
-      console.error('Error fetching transfers:', error);
+      // Error fetching transfers
     }
   }, [user.organization._id]);
 
@@ -423,7 +423,7 @@ const OperationsDashboard = () => {
       const response = await api.get(`/hotels?organization=${user.organization._id}`);
       setHotels(response.data);
     } catch (error) {
-      console.error('Error fetching hotels:', error);
+      // Error fetching hotels
     }
   }, [user.organization._id]);
 
@@ -432,7 +432,7 @@ const OperationsDashboard = () => {
       const response = await api.get('/supplier-assignments');
       setSupplierAssignments(response.data);
     } catch (error) {
-      console.error('Error fetching supplier assignments:', error);
+      // Error fetching supplier assignments
     }
   }, []);
 
@@ -441,7 +441,7 @@ const OperationsDashboard = () => {
       const response = await api.get(`/quotes?organization=${user.organization._id}`);
       setQuotes(response.data);
     } catch (error) {
-      console.error('Error fetching quotes:', error);
+      // Error fetching quotes
     }
   }, [user.organization._id]);
 
@@ -454,13 +454,11 @@ const OperationsDashboard = () => {
       try {
         const statusesResponse = await api.get(`/leads/statuses?organization=${user.organization._id}`);
         setLeadStatuses(statusesResponse.data);
-        console.log('Lead statuses fetched:', statusesResponse.data);
       } catch (statusError) {
-        console.log('Using default lead statuses');
         setLeadStatuses(['new', 'contacted', 'qualified', 'proposal_sent', 'converted', 'booking_confirmed', 'lost']);
       }
     } catch (error) {
-      console.error('Error fetching organization data:', error);
+      // Error fetching organization data
     }
   }, [user.organization._id]);
 
@@ -490,6 +488,7 @@ const OperationsDashboard = () => {
         delete leadData.assignedTo;
       }
       await api.post('/leads', leadData);
+      alert('Lead created successfully!');
       fetchLeads();
       setShowAddForm(false);
       setFormData({
@@ -508,7 +507,6 @@ const OperationsDashboard = () => {
         notes: ''
       });
     } catch (error) {
-      console.error('Error creating lead:', error);
       alert('Error creating lead: ' + (error.response?.data?.message || error.message));
     }
   };
@@ -553,6 +551,7 @@ const OperationsDashboard = () => {
         tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
       };
       await api.put(`/leads/${editingLead._id}`, leadData);
+      alert('Lead updated successfully!');
       fetchLeads();
       setShowEditForm(false);
       setEditingLead(null);
@@ -572,7 +571,6 @@ const OperationsDashboard = () => {
         notes: ''
       });
     } catch (error) {
-      console.error('Error updating lead:', error);
       alert('Error updating lead: ' + (error.response?.data?.message || error.message));
     }
   };
@@ -601,9 +599,9 @@ const OperationsDashboard = () => {
     if (window.confirm('Are you sure you want to delete this lead?')) {
       try {
         await api.delete(`/leads/${leadId}`);
+        alert('Lead deleted successfully!');
         fetchLeads();
       } catch (error) {
-        console.error('Error deleting lead:', error);
         alert('Error deleting lead: ' + (error.response?.data?.message || error.message));
       }
     }
@@ -876,8 +874,6 @@ const OperationsDashboard = () => {
         formData.append('images', image);
       });
       
-      console.log('Frontend - Sending hotel with images:', hotelImages.length);
-      
       if (editingHotel) {
         await api.put(`/hotels/${editingHotel._id}`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
@@ -916,11 +912,8 @@ const OperationsDashboard = () => {
       setHotelImagePreviews([]);
       setExistingHotelImages([]);
     } catch (error) {
-      console.error('Error saving hotel:', error);
-      console.error('Error response:', error.response?.data);
       
       if (error.response?.data?.validationErrors) {
-        console.error('Validation errors:', error.response.data.validationErrors);
         const validationErrors = error.response.data.validationErrors.map(err => 
           `${err.field}: ${err.message}`
         ).join('\n');
@@ -937,7 +930,7 @@ const OperationsDashboard = () => {
         await api.delete(`/hotels/${id}`);
         fetchHotels();
       } catch (error) {
-        console.error('Error deleting hotel:', error);
+        // Error deleting hotel
       }
     }
   };
@@ -971,7 +964,7 @@ const OperationsDashboard = () => {
       await api.put(`/leads/${leadId}`, { status: newStatus });
       fetchLeads();
     } catch (error) {
-      console.error('Error updating lead status:', error);
+      // Error updating lead status
     }
   };
 
@@ -997,8 +990,6 @@ const OperationsDashboard = () => {
       sightseeingImages.forEach((image, index) => {
         formData.append('images', image);
       });
-      
-      console.log('Frontend - Sending sightseeing with images:', sightseeingImages.length);
       
       if (editingSightseeing) {
         await api.put(`/sightseeings/${editingSightseeing._id}`, formData, {
@@ -1026,7 +1017,6 @@ const OperationsDashboard = () => {
       setSightseeingImages([]);
       setSightseeingImagePreviews([]);
     } catch (error) {
-      console.error('Error saving sightseeing:', error);
       alert('Error saving sightseeing: ' + (error.response?.data?.message || error.message));
     }
   };
@@ -1060,7 +1050,6 @@ const OperationsDashboard = () => {
         country: ''
       });
     } catch (error) {
-      console.error('Error saving transfer:', error);
       alert('Error saving transfer: ' + (error.response?.data?.message || error.message));
     }
   };
@@ -1071,7 +1060,7 @@ const OperationsDashboard = () => {
         await api.delete(`/sightseeings/${id}`);
         fetchSightseeings();
       } catch (error) {
-        console.error('Error deleting sightseeing:', error);
+        // Error deleting sightseeing
       }
     }
   };
@@ -1082,7 +1071,7 @@ const OperationsDashboard = () => {
         await api.delete(`/transfers/${id}`);
         fetchTransfers();
       } catch (error) {
-        console.error('Error deleting transfer:', error);
+        // Error deleting transfer
       }
     }
   };
@@ -1537,98 +1526,191 @@ const styles = {
 };
 
   return (
-    <div style={styles.container}>
-      <nav style={styles.nav}>
-        <div style={styles.navLinks}>
-          <span
-            style={activeView === 'tasks' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
-            onClick={() => setActiveView('tasks')}
-          >
-            Tasks
-          </span>
-          <span
-            style={activeView === 'leads' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
-            onClick={() => setActiveView('leads')}
-          >
-            Leads
-          </span>
-          <span
-            style={activeView === 'sightseeings' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
-            onClick={() => setActiveView('sightseeings')}
-          >
-            Sightseeings
-          </span>
-          <span
-            style={activeView === 'transfers' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
-            onClick={() => setActiveView('transfers')}
-          >
-            Transfers
-          </span>
-          <span
-            style={activeView === 'hotels' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
-            onClick={() => setActiveView('hotels')}
-          >
-            Hotels
-          </span>
-          <span
-            style={activeView === 'invoices' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
-            onClick={() => navigate('/invoices')}
-          >
-            Invoices
-          </span>
+    <div className="operations-dashboard">
+      {/* Modern Sidebar Navigation */}
+      <aside className={`sidebar ${menuOpen ? 'sidebar-open' : ''}`}>
+        <div className="sidebar-header">
+          <div className="brand-logo">
+            <div className="logo-icon">N</div>
+            <span className="logo-text">NaviDesk</span>
+          </div>
+          <button className="sidebar-toggle" onClick={toggleMenu}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+            </svg>
+          </button>
+        </div>
+        
+        <nav className="sidebar-nav">
+          <div className="nav-section">
+            <div className="nav-section-title">Main</div>
+            <button
+              className={`nav-item ${activeView === 'tasks' ? 'nav-active' : ''}`}
+              onClick={() => setActiveView('tasks')}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="nav-icon">
+                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+              </svg>
+              <span>Dashboard</span>
+            </button>
+            <button
+              className={`nav-item ${activeView === 'leads' ? 'nav-active' : ''}`}
+              onClick={() => setActiveView('leads')}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="nav-icon">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              <span>Leads</span>
+            </button>
+          </div>
+          
+          <div className="nav-section">
+            <div className="nav-section-title">Management</div>
+            <button
+              className={`nav-item ${activeView === 'sightseeings' ? 'nav-active' : ''}`}
+              onClick={() => setActiveView('sightseeings')}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="nav-icon">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+              </svg>
+              <span>Sightseeings</span>
+            </button>
+            <button
+              className={`nav-item ${activeView === 'transfers' ? 'nav-active' : ''}`}
+              onClick={() => setActiveView('transfers')}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="nav-icon">
+                <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+              </svg>
+              <span>Transfers</span>
+            </button>
+            <button
+              className={`nav-item ${activeView === 'hotels' ? 'nav-active' : ''}`}
+              onClick={() => setActiveView('hotels')}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="nav-icon">
+                <path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4zm-1 7h-6v-2h6v2z"/>
+              </svg>
+              <span>Hotels</span>
+            </button>
+            <button
+              className={`nav-item ${activeView === 'invoices' ? 'nav-active' : ''}`}
+              onClick={() => navigate('/invoices')}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="nav-icon">
+                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+              </svg>
+              <span>Invoices</span>
+            </button>
+          </div>
+          
           {(() => {
             const userRole = user?.role;
             const allowedRoles = ['organization_admin', 'manager', 'operations'];
             const canAccessSuppliers = allowedRoles.includes(userRole);
-            
-            // const userObject = user ? { id: user._id, name: user.name, role: user.role } : null
-            
             return canAccessSuppliers;
           })() && (
-            <span
-              style={activeView === 'suppliers' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
-              onClick={() => navigate('/suppliers')}
-            >
-              Suppliers
-            </span>
+            <div className="nav-section">
+              <div className="nav-section-title">Operations</div>
+              <button
+                className={`nav-item ${activeView === 'suppliers' ? 'nav-active' : ''}`}
+                onClick={() => navigate('/suppliers')}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="nav-icon">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>Suppliers</span>
+              </button>
+            </div>
           )}
+          
           {(() => {
             const userRole = user?.role;
             const allowedRoles = ['organization_admin', 'manager', 'operations', 'accounts'];
             const canAccessCalendar = allowedRoles.includes(userRole);
-            
             return canAccessCalendar;
           })() && (
-            <span
-              style={activeView === 'calendar' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
+            <button
+              className={`nav-item ${activeView === 'calendar' ? 'nav-active' : ''}`}
               onClick={() => navigate('/calendar')}
             >
-              Calendar
-            </span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="nav-icon">
+                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+              </svg>
+              <span>Calendar</span>
+            </button>
           )}
-          {(() => {
-            const shouldShow = user.role === 'organization_admin';
-            return shouldShow;
-          })() && (
-            <span
-              style={activeView === 'settings' ? { ...styles.navLink, ...styles.activeNavLink } : styles.navLink}
-              onClick={() => setActiveView('settings')}
-            >
-              Settings
-            </span>
+          
+          {user.role === 'organization_admin' && (
+            <div className="nav-section">
+              <div className="nav-section-title">Admin</div>
+              <button
+                className={`nav-item ${activeView === 'settings' ? 'nav-active' : ''}`}
+                onClick={() => setActiveView('settings')}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="nav-icon">
+                  <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                </svg>
+                <span>Settings</span>
+              </button>
+            </div>
           )}
-        </div>
-        <div style={{fontSize: '16px', fontWeight: '600', color: '#333'}}>{user?.organization?.name || 'Organization'}</div>
-        <button style={styles.menuButton} onClick={toggleMenu}>👤</button>
-        <div style={styles.dropdown}>
-          <div style={styles.userInfo}>
-            <p>Hello, {user?.name}</p>
-            <p>Role: {user?.role || 'Unknown'}</p>
+        </nav>
+      </aside>
+
+      {/* Main Content Area */}
+      <div className="main-content">
+        {/* Top Header */}
+        <header className="top-header">
+          <div className="header-left">
+            <button className="mobile-menu-toggle" onClick={toggleMenu}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+              </svg>
+            </button>
+            <div className="page-title">
+              <h1>{getPageTitle()}</h1>
+              <p>{getPageSubtitle()}</p>
+            </div>
           </div>
-          <button style={styles.logoutButton} onClick={handleLogout}>Logout</button>
-        </div>
-      </nav>
-      <div style={styles.mainContent}>
+          
+          <div className="header-right">
+            <div className="org-info">
+              <span className="org-name">{user?.organization?.name || 'Organization'}</span>
+            </div>
+            
+            <div className="user-menu">
+              <button className="user-avatar" onClick={toggleMenu}>
+                <div className="avatar-circle">
+                  {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                </div>
+              </button>
+              
+              <div className={`user-dropdown ${menuOpen ? 'dropdown-open' : ''}`}>
+                <div className="user-info">
+                  <div className="user-name">{user?.name}</div>
+                  <div className="user-role">{user?.role || 'Unknown'}</div>
+                </div>
+                <div className="dropdown-divider"></div>
+                <button className="dropdown-item" onClick={() => navigate('/profile')}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                  </svg>
+                  Profile
+                </button>
+                <button className="dropdown-item logout-btn" onClick={handleLogout}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                  </svg>
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <main className="page-content">
         {activeView === 'tasks' && (
           <div style={styles.card}>
             <div style={styles.section}>
@@ -3545,6 +3627,7 @@ const styles = {
             </div>
           </div>
         )}
+        </main>
       </div>
     </div>
   );

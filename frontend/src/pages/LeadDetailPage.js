@@ -37,17 +37,10 @@ const LeadDetailPage = () => {
   const fetchLeadByNumber = useCallback(async () => {
     try {
       setLoading(true);
-      console.log('🔍 Fetching lead:', leadNumber, 'for organization:', user.organization._id);
       const response = await api.get(`/leads/by-number/${leadNumber}?organization=${user.organization._id}`);
-      console.log('📦 Lead response:', response.data);
       setLead(response.data);
       setError(null);
     } catch (error) {
-      console.error('❌ Error fetching lead:', error);
-      console.log('📄 Response data:', error.response?.data);
-      console.log('📄 Response status:', error.response?.status);
-      console.log('📄 Response headers:', error.response?.headers);
-      
       if (error.response?.status === 404) {
         setError('Lead not found');
       } else if (error.response?.status === 403) {
@@ -62,14 +55,10 @@ const LeadDetailPage = () => {
 
   const fetchQuotes = useCallback(async () => {
     try {
-      console.log('🔍 Fetching quotes for lead:', lead?._id);
       const response = await api.get(`/quotes?organization=${user.organization._id}&lead=${lead._id}`);
-      console.log('📦 Quotes response:', response.data);
       setQuotes(response.data);
     } catch (error) {
-      console.error('❌ Error fetching quotes:', error);
-      console.log('📄 Response data:', error.response?.data);
-      console.log('📄 Response status:', error.response?.status);
+      // Error fetching quotes
     }
   }, [lead?._id, user.organization._id]);
 
@@ -90,13 +79,6 @@ const LeadDetailPage = () => {
       params.append('organization', user.organization._id);
       params.append('excludeLead', lead._id); // Exclude current lead's quotes
       
-      console.log('🔍 DEBUG - Fetching recommendations for lead:', {
-        leadId: lead._id,
-        country: lead.travelToCountry,
-        tags: lead.tags,
-        organization: user.organization._id
-      });
-      
       if (lead.travelToCountry) {
         params.append('country', lead.travelToCountry);
       }
@@ -106,15 +88,10 @@ const LeadDetailPage = () => {
       }
       
       const url = `/quotes/recommendations?${params.toString()}`;
-      console.log('🔍 DEBUG - Request URL:', url);
       
       const response = await api.get(url);
-      console.log('🔍 DEBUG - Recommendations response:', response.data);
       setRecommendedQuotes(response.data || []);
     } catch (error) {
-      console.error('❌ Error fetching recommended quotes:', error);
-      console.log('📄 Response data:', error.response?.data);
-      console.log('📄 Response status:', error.response?.status);
       setRecommendedQuotes([]);
     } finally {
       setLoadingRecommendations(false);
@@ -126,7 +103,7 @@ const LeadDetailPage = () => {
       const response = await api.get(`/invoices/lead/${lead._id}?organization=${user.organization._id}`);
       setInvoices(response.data);
     } catch (error) {
-      console.error('Error fetching invoices:', error);
+      // Error fetching invoices
     }
   }, [lead?._id, user.organization._id]);
 
@@ -169,7 +146,6 @@ const LeadDetailPage = () => {
       await api.delete(`/quotes/${quoteId}`);
       setQuotes(quotes.filter(q => q._id !== quoteId));
     } catch (error) {
-      console.error('Error deleting quote:', error);
       alert('Error deleting quote: ' + (error.response?.data?.message || error.message));
     }
   };
@@ -206,6 +182,12 @@ const LeadDetailPage = () => {
         currency: recommendedQuote.currency,
         total: recommendedQuote.total,
         subtotal: recommendedQuote.subtotal || recommendedQuote.total, // Add subtotal
+        markupType: recommendedQuote.markupType || 'percentage',
+        markupValue: recommendedQuote.markupValue || 0,
+        markupAmount: recommendedQuote.markupAmount || 0,
+        discountType: recommendedQuote.discountType || 'amount',
+        discountValue: recommendedQuote.discountValue || 0,
+        discountAmount: recommendedQuote.discountAmount || 0,
         taxRate: recommendedQuote.taxRate,
         flights: recommendedQuote.flights || [],
         hotels: recommendedQuote.hotels || [],
@@ -230,7 +212,6 @@ const LeadDetailPage = () => {
       
       alert('Quote added successfully! You can now edit it to customize for this lead.');
     } catch (error) {
-      console.error('Error adding recommended quote:', error);
       alert('Error adding quote: ' + (error.response?.data?.message || error.message));
     }
   };
@@ -264,44 +245,11 @@ const LeadDetailPage = () => {
     // Calculate cost breakdown
     const totalAmount = quote.total || 0;
     const flightTotal = quote.flights ? quote.flights.reduce((sum, flight) => sum + (flight.price || 0), 0) : 0;
-    const taxAmount = quote.taxAmount || 0;
     const tcsAmount = quote.tcsAmount || 0;
-    const markupAmount = quote.markupAmount || 0;
-    const discountAmount = quote.discountAmount || 0;
-    
-    // Use stored totals from quote data (same as PDF calculation)
-    let sightseeingTotal = quote.sightseeingTotal || 0;
-    let transferTotal = quote.transferTotal || 0;
-    let hotelTotal = 0;
-    
-    // Calculate hotel total manually if not stored
-    if (quote.hotels) {
-      hotelTotal = quote.hotels.reduce((sum, hotel) => {
-        if (hotel.rooms) {
-          return sum + hotel.rooms.reduce((roomSum, room) => {
-            const nights = room.nights || 1;
-            return roomSum + (room.adultRate || 0) * (room.numberOfRooms || 1) * nights;
-          }, 0);
-        }
-        return sum;
-      }, 0);
-    }
-    
-    // Debug logging
-    console.log('WhatsApp Calculation Debug:', {
-      sightseeingTotal,
-      transferTotal,
-      hotelTotal,
-      taxAmount,
-      markupAmount,
-      discountAmount,
-      totalAmount,
-      storedSightseeingTotal: quote.sightseeingTotal,
-      storedTransferTotal: quote.transferTotal
-    });
-    
-    // Calculate package cost (Transfer + Sightseeing + Tax + Hotel + Markup - Discount)
-    const packageCost = transferTotal + sightseeingTotal + taxAmount + hotelTotal + markupAmount - discountAmount;
+
+    // Calculate package cost (Total - TCS - Flight)
+    // Note: totalAmount already includes discount deduction from backend
+    const packageCost = totalAmount - tcsAmount - flightTotal;
     
     message += `Price (${quote.currency}):
 `;
@@ -313,7 +261,7 @@ const LeadDetailPage = () => {
     if (tcsAmount > 0) {
       message += `* TCS (2.5%): ${Math.round(tcsAmount).toLocaleString()} ${quote.currency}\n`;
     }
-    
+
     // Show Flight Cost if exists
     if (flightTotal > 0) {
       message += `* Flight Cost: ${Math.round(flightTotal).toLocaleString()} ${quote.currency}\n`;
@@ -355,7 +303,7 @@ const LeadDetailPage = () => {
 `;
             message += `Check-in: ${checkIn.replace(',', '')} & Check-out: ${checkOut.replace(',', '')}
 `;
-            message += `${hotel.name} ${hotel.isTemporary ? '(Temporary)' : `(⭐${hotel.starRating || 3} Star)`}
+            message += `${hotel.name} ${hotel.isTemporary ? '' : `(⭐${hotel.starRating || 3} Star)`}
 `;
             message += `${room.roomName} • ${room.numberOfRooms} Room (${quote.adultPax} Pax${quote.childPax > 0 ? ` + ${quote.childPax} Child` : ''})
 
@@ -622,7 +570,6 @@ const LeadDetailPage = () => {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      console.error('Error downloading PDF:', error);
       alert('Error generating PDF. Please try again.');
     } finally {
       setDownloadingPDF(false);

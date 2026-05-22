@@ -22,7 +22,7 @@ class PDFGenerator {
         try {
           await this.browser.close();
         } catch (err) {
-          console.log('Error closing disconnected browser:', err.message);
+          // Error closing disconnected browser
         }
         this.browser = null;
       }
@@ -724,51 +724,27 @@ class PDFGenerator {
                 <div style="margin-bottom: 10px; font-size: 14px;">
                   <strong>Price (${quote.currency}):</strong><br/>
                   ${(() => {
-                    // Correct calculation: use total amount (including markup) for per-person pricing
-                    const totalAmount = (quote.total || 0) - (quote.flightTotal || 0); // Exclude flights, include markup
-                    const totalPassengers = quote.adultPax + (quote.childPax * 0.7); // Child counts as 0.7 adult
-                    const adultPrice = totalPassengers > 0 ? Math.round(totalAmount / totalPassengers) : 0;
-                    const childPrice = Math.round(adultPrice * 0.7);
+                    // Simplified calculation: package cost divided by total passengers
+                    const packageCost = (quote.total || 0) - (quote.flightTotal || 0);
+                    const totalPassengers = quote.adultPax + quote.childPax;
+                    const perPersonPrice = totalPassengers > 0 ? Math.round(packageCost / totalPassengers) : 0;
                     
-                    console.log('Debug - Corrected calculation:', {
-                      total: quote.total,
-                      flightTotal: quote.flightTotal,
-                      totalAmount: totalAmount,
-                      markupAmount: quote.markupAmount,
-                      adultPax: quote.adultPax,
-                      childPax: quote.childPax,
-                      totalPassengers: totalPassengers,
-                      adultPrice: adultPrice,
-                      childPrice: childPrice,
-                      checkTotal: (adultPrice * quote.adultPax) + (childPrice * quote.childPax) + (quote.flightTotal || 0)
-                    });
-                    
-                    // Fallback: if childPax is 0 or undefined, use only adults
-                    const finalAdultPrice = (quote.childPax > 0 && totalPassengers > quote.adultPax) ? adultPrice : Math.round(totalAmount / quote.adultPax);
-                    const finalChildPrice = Math.round(finalAdultPrice * 0.7);
-                    
-                    return quote.adultPax > 0 && finalAdultPrice > 0 ? `
-                      * ${finalAdultPrice.toLocaleString('en-IN')} / Person (Package) x ${quote.adultPax} Pax<br/>
+                    return quote.adultPax > 0 && perPersonPrice > 0 ? `
+                      * ${perPersonPrice.toLocaleString('en-IN')} / Person (Package) x ${quote.adultPax} Adults<br/>
                     ` : '';
                   })()}
                   ${(() => {
-                    // Use same calculation as above
-                    const totalAmount = (quote.total || 0) - (quote.flightTotal || 0);
-                    const totalPassengers = quote.adultPax + (quote.childPax * 0.7);
-                    const adultPrice = totalPassengers > 0 ? Math.round(totalAmount / totalPassengers) : 0;
-                    const childPrice = Math.round(adultPrice * 0.7);
+                    const packageCost = (quote.total || 0) - (quote.flightTotal || 0);
+                    const totalPassengers = quote.adultPax + quote.childPax;
+                    const perPersonPrice = totalPassengers > 0 ? Math.round(packageCost / totalPassengers) : 0;
                     
-                    // Fallback: if childPax is 0 or undefined, use only adults
-                    const finalAdultPrice = (quote.childPax > 0 && totalPassengers > quote.adultPax) ? adultPrice : Math.round(totalAmount / quote.adultPax);
-                    const finalChildPrice = Math.round(finalAdultPrice * 0.7);
-                    
-                    return quote.childPax > 0 && finalChildPrice > 0 ? `
-                      * ${finalChildPrice.toLocaleString('en-IN')} / Child (Package) x ${quote.childPax} Child<br/>
+                    return quote.childPax > 0 && perPersonPrice > 0 ? `
+                      * ${perPersonPrice.toLocaleString('en-IN')} / Child (Package) x ${quote.childPax} Children<br/>
                     ` : '';
                   })()}
                 </div>
                 <div style="font-size: 18px; color: ${quoteTemplate.colors.primary}; font-weight: bold; margin-top: 10px;">
-                  <strong>Total: ${quote.currency} ${quote.total?.toLocaleString('en-IN') || '0'}/- (inc. Tax ${quote.markupType === 'percentage' ? quote.markupValue + '%' : '2.5'}%)</strong>
+                  <strong>Total: ${quote.currency} ${quote.total?.toLocaleString('en-IN') || '0'}/- (inc. Tax ${quote.currency} ${(quote.taxAmount || 0).toLocaleString('en-IN')})</strong>
                 </div>
               </td>
             </tr>
@@ -786,171 +762,163 @@ class PDFGenerator {
     </div>
     
     <!-- Page 3: Accommodation Details -->
-    ${quote.hotels && quote.hotels.length > 0 ? `
-      ${(() => {
-        // Group consecutive nights by hotel
-        const hotelStays = [];
+    ${quote.hotels && quote.hotels.length > 0 ? (() => {
+      // Group consecutive nights by hotel
+      const hotelStays = [];
+      
+      quote.hotels.forEach(hotel => {
+        const hotelName = hotel.name || hotel.hotel?.name || 'N/A';
+        const cityName = hotel.city || hotel.hotel?.city || 'N/A';
+        const starRating = hotel.starRating || hotel.hotel?.starRating || 0;
+        // Use images from populated hotel reference first, then from quote data
+        const hotelImage = (hotel.hotel?.images && hotel.hotel.images.length > 0) 
+          ? hotel.hotel.images[0] 
+          : (hotel.images && hotel.images.length > 0 
+            ? hotel.images[0] 
+            : '');
         
-        quote.hotels.forEach(hotel => {
-          const hotelName = hotel.name || hotel.hotel?.name || 'N/A';
-          const cityName = hotel.city || hotel.hotel?.city || 'N/A';
-          const starRating = hotel.starRating || hotel.hotel?.starRating || 0;
-          // Use images from populated hotel reference first, then from quote data
-          const hotelImage = (hotel.hotel?.images && hotel.hotel.images.length > 0) 
-            ? hotel.hotel.images[0] 
-            : (hotel.images && hotel.images.length > 0 
-              ? hotel.images[0] 
-              : '');
+        const roomsData = hotel.rooms || [];
+        roomsData.forEach(room => {
+          const checkInDate = room.checkIn ? new Date(room.checkIn).toLocaleDateString('en-US', { 
+            day: 'numeric', 
+            month: 'short', 
+            year: 'numeric' 
+          }) : 'N/A';
           
-          const roomsData = hotel.rooms || [];
-          roomsData.forEach(room => {
-            const checkInDate = room.checkIn ? new Date(room.checkIn).toLocaleDateString('en-US', { 
-              day: 'numeric', 
-              month: 'short', 
-              year: 'numeric' 
-            }) : 'N/A';
-            
-            // Calculate nights - use provided value or calculate from check-in/check-out dates
-            let nights = room.nights;
-            if (!nights && room.checkIn && room.checkOut) {
-              const checkIn = new Date(room.checkIn);
-              const checkOut = new Date(room.checkOut);
-              const timeDiff = checkOut.getTime() - checkIn.getTime();
-              nights = Math.ceil(timeDiff / (1000 * 3600 * 24)); // Convert milliseconds to days
-            }
-            nights = nights || 1; // Fallback to 1 if still not calculated
-            
-            hotelStays.push({
-              hotelName,
-              cityName,
-              starRating,
-              hotelImage,
-              numberOfRooms: room.numberOfRooms || 1,
-              roomName: room.roomName || 'Standard Room',
-              checkInDate,
-              nights,
-              checkIn: new Date(room.checkIn)
-            });
+          const nights = room.nights || 1;
+          
+          hotelStays.push({
+            hotelName,
+            cityName,
+            starRating,
+            hotelImage,
+            numberOfRooms: room.numberOfRooms || 1,
+            roomName: room.roomName || 'Standard Room',
+            checkInDate,
+            nights,
+            checkIn: new Date(room.checkIn)
           });
         });
+      });
+      
+      // Sort stays by check-in date
+      hotelStays.sort((a, b) => a.checkIn - b.checkIn);
+      
+      // Group hotels into pages of 4
+      const hotelsPerPage = 3;
+      const hotelPages = [];
+      for (let i = 0; i < hotelStays.length; i += hotelsPerPage) {
+        hotelPages.push(hotelStays.slice(i, i + hotelsPerPage));
+      }
+      
+      // Generate pages
+      return hotelPages.map((pageHotels, pageIndex) => {
+        const isLastPage = pageIndex === hotelPages.length - 1;
         
-        // Sort stays by check-in date
-        hotelStays.sort((a, b) => a.checkIn - b.checkIn);
-        
-        // Calculate cumulative night numbers for all hotels
-        let cumulativeNight = 1;
-        hotelStays.forEach(stay => {
-          stay.startNight = cumulativeNight;
-          stay.endNight = cumulativeNight + stay.nights - 1;
-          cumulativeNight += stay.nights;
-        });
-        
-        // Split hotels into groups of 3 per page
-        const hotelPages = [];
-        for (let i = 0; i < hotelStays.length; i += 3) {
-          hotelPages.push(hotelStays.slice(i, i + 3));
+        // Calculate starting night number for this page
+        let startNightNumber = 1;
+        for (let i = 0; i < pageIndex * hotelsPerPage; i++) {
+          if (hotelStays[i]) {
+            startNightNumber += hotelStays[i].nights;
+          }
         }
         
-        return hotelPages.map((pageHotels, pageIndex) => {
-          const pageContent = [];
-          
-          pageHotels.forEach((stay, index) => {
-            // Generate night boxes using template nightBox settings with sequential numbering
-            const nightBoxes = [];
-            const showNightBox = quoteTemplate.hotel?.nightBox?.showNightBox !== false;
-            
-            if (showNightBox) {
-              for (let i = stay.startNight; i <= stay.endNight; i++) {
-                nightBoxes.push(`
-                  <div style="
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    width: 35px;
-                    height: 35px;
-                    background-color: ${quoteTemplate.hotel?.nightBox?.backgroundColor || '#ffffff'};
-                    border: ${quoteTemplate.hotel?.nightBox?.borderWidth || 1}px solid ${quoteTemplate.hotel?.nightBox?.borderColor || '#dee2e6'};
-                    border-radius: ${quoteTemplate.hotel?.nightBox?.borderRadius || 6}px;
-                    margin-right: 8px;
-                    margin-bottom: 8px;
-                    font-size: ${quoteTemplate.hotel?.nightBox?.titleFontSize || 12}px;
-                    font-weight: bold;
-                    color: ${quoteTemplate.hotel?.nightBox?.titleColor || '#495057'};
-                    font-family: ${quoteTemplate.hotel?.nightBox?.titleFont || 'Arial, sans-serif'};
-                  ">
-                    ${i}N
-                  </div>
-                `);
+        return `
+          <div class="page middle-page ${!isLastPage ? 'page-break' : ''}">
+            <div class="content-wrapper">
+              <h1 style="color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.header}; font-size: ${quoteTemplate.fontSizes.header}px;">Accommodation Details</h1>
+              ${pageHotels.map((stay, index) => {
+              // Calculate starting night for this hotel
+              const hotelStartNight = startNightNumber;
+              startNightNumber += stay.nights;
+              
+              // Generate night boxes using template nightBox settings
+              const nightBoxes = [];
+              const showNightBox = quoteTemplate.hotel?.nightBox?.showNightBox !== false;
+              
+              if (showNightBox) {
+                for (let i = 0; i < stay.nights; i++) {
+                  nightBoxes.push(`
+                    <div style="
+                      display: inline-flex;
+                      align-items: center;
+                      justify-content: center;
+                      width: 35px;
+                      height: 35px;
+                      background-color: ${quoteTemplate.hotel?.nightBox?.backgroundColor || '#ffffff'};
+                      border: ${quoteTemplate.hotel?.nightBox?.borderWidth || 1}px solid ${quoteTemplate.hotel?.nightBox?.borderColor || '#dee2e6'};
+                      border-radius: ${quoteTemplate.hotel?.nightBox?.borderRadius || 6}px;
+                      margin-right: 8px;
+                      margin-bottom: 8px;
+                      font-size: ${quoteTemplate.hotel?.nightBox?.titleFontSize || 12}px;
+                      font-weight: bold;
+                      color: ${quoteTemplate.hotel?.nightBox?.titleColor || '#495057'};
+                      font-family: ${quoteTemplate.hotel?.nightBox?.titleFont || 'Arial, sans-serif'};
+                    ">
+                      ${hotelStartNight + i}N
+                    </div>
+                  `);
+                }
               }
-            }
-            
-            // Use template hotel box settings
-            const showHotelBox = quoteTemplate.hotel?.showBox !== false;
-            const hotelBoxStyles = showHotelBox ? `
-              padding: 20px;
-              border: ${quoteTemplate.hotel?.borderWidth || 1}px solid ${quoteTemplate.hotel?.borderColor || '#e9ecef'};
-              border-radius: ${quoteTemplate.hotel?.borderRadius || 8}px;
-              background-color: ${quoteTemplate.hotel?.backgroundColor || '#f8f9fa'};
-              margin-bottom: 30px;
-            ` : `
-              margin-bottom: 30px;
-            `;
-            
-            pageContent.push(`
-              <div style="${hotelBoxStyles}">
-                <!-- Night boxes at the top -->
-                ${showNightBox && nightBoxes.length > 0 ? `
-                  <div style="display: flex; flex-wrap: wrap; margin-bottom: 15px;">
-                    ${nightBoxes.join('')}
-                  </div>
-                ` : ''}
-                
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                  <div style="flex: 1;">
-                    ${stay.checkInDate !== 'N/A' ? `
-                      <div style="font-size: ${quoteTemplate.hotel?.bodyFontSize || 14}px; color: ${quoteTemplate.hotel?.bodyColor || '#666666'}; margin-bottom: 10px; font-family: ${quoteTemplate.hotel?.bodyFont || 'Arial, sans-serif'};">
-                        Check-in: ${stay.checkInDate}
-                      </div>
-                    ` : ''}
-                    <div style="font-size: ${quoteTemplate.hotel?.titleFontSize || 18}px; font-weight: bold; color: ${quoteTemplate.hotel?.titleColor || '#333333'}; margin-bottom: 5px; font-family: ${quoteTemplate.hotel?.titleFont || 'Arial, sans-serif'};">
-                      ${stay.hotelName}
-                    </div>
-                    <div style="font-size: ${quoteTemplate.hotel?.bodyFontSize || 14}px; color: ${quoteTemplate.hotel?.bodyColor || '#666666'}; margin-bottom: 8px; font-family: ${quoteTemplate.hotel?.bodyFont || 'Arial, sans-serif'};">
-                      ${stay.cityName}
-                    </div>
-                    ${stay.starRating ? `
-                      <div style="color: #ffd700; margin-bottom: 15px; font-size: 24px;">
-                        ${'★'.repeat(stay.starRating)}${'☆'.repeat(5 - stay.starRating)}
-                      </div>
-                    ` : ''}
-                    <div style="font-size: ${quoteTemplate.hotel?.bodyFontSize || 14}px; color: ${quoteTemplate.hotel?.bodyColor || '#666666'}; font-family: ${quoteTemplate.hotel?.bodyFont || 'Arial, sans-serif'};">
-                      ${stay.numberOfRooms} × ${stay.roomName}
-                    </div>
-                  </div>
-                  
-                  ${stay.hotelImage ? `
-                    <div style="margin-left: 15px; flex-shrink: 0; height: 100%; display: flex; align-items: center; margin-top: 10px;">
-                      <img src="${stay.hotelImage}" alt="${stay.hotelName}" style="width: 320px; height: 160px; border-radius: ${quoteTemplate.hotel?.imageBorderRadius || 8}px; object-fit: cover; border: 1px solid ${quoteTemplate.hotel?.borderColor || 'rgba(255, 255, 255, 0.3)'};" />
+              
+              // Use template hotel box settings
+              const showHotelBox = quoteTemplate.hotel?.showBox !== false;
+              const hotelBoxStyles = showHotelBox ? `
+                padding: 20px;
+                border: ${quoteTemplate.hotel?.borderWidth || 1}px solid ${quoteTemplate.hotel?.borderColor || '#e9ecef'};
+                border-radius: ${quoteTemplate.hotel?.borderRadius || 8}px;
+                background-color: ${quoteTemplate.hotel?.backgroundColor || '#f8f9fa'};
+                margin-bottom: 30px;
+              ` : `
+                margin-bottom: 30px;
+              `;
+              
+              return `
+                <div style="${hotelBoxStyles}">
+                  <!-- Night boxes at the top -->
+                  ${showNightBox && nightBoxes.length > 0 ? `
+                    <div style="display: flex; flex-wrap: wrap; margin-bottom: 15px;">
+                      ${nightBoxes.join('')}
                     </div>
                   ` : ''}
+                  
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div style="flex: 1;">
+                      ${stay.checkInDate !== 'N/A' ? `
+                        <div style="font-size: ${quoteTemplate.hotel?.bodyFontSize || 14}px; color: ${quoteTemplate.hotel?.bodyColor || '#666666'}; margin-bottom: 10px; font-family: ${quoteTemplate.hotel?.bodyFont || 'Arial, sans-serif'};">
+                          Check-in: ${stay.checkInDate}
+                        </div>
+                      ` : ''}
+                      <div style="font-size: ${quoteTemplate.hotel?.titleFontSize || 18}px; font-weight: bold; color: ${quoteTemplate.hotel?.titleColor || '#333333'}; margin-bottom: 5px; font-family: ${quoteTemplate.hotel?.titleFont || 'Arial, sans-serif'};">
+                        ${stay.hotelName}
+                      </div>
+                      <div style="font-size: ${quoteTemplate.hotel?.bodyFontSize || 14}px; color: ${quoteTemplate.hotel?.bodyColor || '#666666'}; margin-bottom: 8px; font-family: ${quoteTemplate.hotel?.bodyFont || 'Arial, sans-serif'};">
+                        ${stay.cityName}
+                      </div>
+                      ${stay.starRating ? `
+                        <div style="color: #ffd700; margin-bottom: 15px; font-size: 24px;">
+                          ${'★'.repeat(stay.starRating)}${'☆'.repeat(5 - stay.starRating)}
+                        </div>
+                      ` : ''}
+                      <div style="font-size: ${quoteTemplate.hotel?.bodyFontSize || 14}px; color: ${quoteTemplate.hotel?.bodyColor || '#666666'}; font-family: ${quoteTemplate.hotel?.bodyFont || 'Arial, sans-serif'};">
+                        ${stay.numberOfRooms} × ${stay.roomName}
+                      </div>
+                    </div>
+                    
+                    ${stay.hotelImage ? `
+                      <div style="margin-left: 15px; flex-shrink: 0; height: 100%; display: flex; align-items: center; margin-top: 10px;">
+                        <img src="${stay.hotelImage}" alt="${stay.hotelName}" style="width: 320px; height: 160px; border-radius: ${quoteTemplate.hotel?.imageBorderRadius || 8}px; object-fit: cover; border: 1px solid ${quoteTemplate.hotel?.borderColor || 'rgba(255, 255, 255, 0.3)'};" />
+                      </div>
+                    ` : ''}
+                  </div>
                 </div>
-              </div>
-            `);
-          });
-          
-          return `
-            <div class="page middle-page ${pageIndex < hotelPages.length - 1 ? 'page-break' : ''}">
-              <div class="content-wrapper">
-                <h1 style="color: ${quoteTemplate.colors.text}; font-family: ${quoteTemplate.fonts.header}; font-size: ${quoteTemplate.fontSizes.header}px;">
-                  Accommodation Details ${hotelPages.length > 1 ? `(Page ${pageIndex + 1}/${hotelPages.length})` : ''}
-                </h1>
-                ${pageContent.join('')}
-              </div>
+              `;
+            }).join('')}
             </div>
-          `;
-        }).join('');
-      })()}
-    ` : ''}
+          </div>
+        `;
+      }).join('');
+    })() : ''}
     
     <!-- Flight Details -->
     ${quote.flights && quote.flights.length > 0 ? `
@@ -1197,21 +1165,28 @@ class PDFGenerator {
     </div>
     ` : ''}
     
-    <!-- Day-wise Itinerary - Continuous flow with smart pagination -->
+    <!-- Day-wise Itinerary - Smart pagination based on content height -->
     ${quote.days && quote.days.length > 0 ? (() => {
-      let allActivities = [];
+      let allPages = [];
       let currentPageContent = [];
       let currentPageHeight = 0;
-      const maxPageHeight = 750; // Increased max content height per page for better space utilization
-      const pages = [];
+      const maxPageHeight = 1000; // Approximate max content height per page in px
+      let globalActivityIndex = 1;
       
-      // Track days with activities on current page
-      let daysWithActivitiesOnCurrentPage = 0;
+      const addToPage = (content, height) => {
+        if (currentPageHeight + height > maxPageHeight && currentPageContent.length > 0) {
+          // Create new page
+          allPages.push(currentPageContent.join(''));
+          currentPageContent = [content];
+          currentPageHeight = height;
+        } else {
+          currentPageContent.push(content);
+          currentPageHeight += height;
+        }
+      };
       
-      // Collect all activities with day headers
       quote.days.forEach((day, dayIndex) => {
-        let dailyActivityIndex = 1; // Reset for each day
-        
+        let dailyActivityIndex = 1;
         // Collect images for this day
         let dayImages = [];
         if (day.sightseeings) {
@@ -1233,14 +1208,12 @@ class PDFGenerator {
         dayImages = [...new Set(dayImages)];
         
         const activities = [...(day.sightseeings || []), ...(day.transfers || [])];
+        const hasImages = dayImages.length > 0;
         
-        // Check if this day has sightseeing activities
-        const hasSightseeingActivities = day.sightseeings && day.sightseeings.length > 0;
-        
-        // Add day header with optimized spacing and day image
+        // Add day header
         const dayHeader = `
-          <!-- Day ${day.dayNumber} Header -->
-          <div style="display: flex; align-items: flex-start; margin-bottom: 15px;">
+          ${dayIndex > 0 ? '<div style="width: 100%; height: 2px; background: linear-gradient(90deg, ' + quoteTemplate.colors.primary + ' 0%, ' + quoteTemplate.colors.secondary + ' 100%); margin: 30px 0 20px 0; opacity: 0.5;"></div>' : ''}
+          <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
             <div style="
               width: 60px;
               height: 60px;
@@ -1261,7 +1234,6 @@ class PDFGenerator {
                 ${(() => {
                   const dayActivities = [];
                   
-                  // Interleave activities and transfers in sequence
                   let sightseeingIndex = 0;
                   let transferIndex = 0;
                   let totalItems = Math.max(
@@ -1270,7 +1242,6 @@ class PDFGenerator {
                   );
                   
                   for (let i = 0; i < totalItems; i++) {
-                    // Add sightseeing if exists
                     if (day.sightseeings && day.sightseeings[i]) {
                       const sightseeing = day.sightseeings[i].sightseeing && typeof day.sightseeings[i].sightseeing === 'object' 
                         ? day.sightseeings[i].sightseeing 
@@ -1278,7 +1249,6 @@ class PDFGenerator {
                       dayActivities.push(sightseeing.name);
                     }
                     
-                    // Add transfer if exists
                     if (day.transfers && day.transfers[i]) {
                       const transfer = day.transfers[i];
                       const transferName = transfer.transfer?.name || transfer.name || 'Transfer';
@@ -1286,7 +1256,6 @@ class PDFGenerator {
                     }
                   }
                   
-                  // Add any remaining sightseeings
                   if (day.sightseeings && day.sightseeings.length > totalItems) {
                     for (let i = totalItems; i < day.sightseeings.length; i++) {
                       const sightseeing = day.sightseeings[i].sightseeing && typeof day.sightseeings[i].sightseeing === 'object' 
@@ -1296,7 +1265,6 @@ class PDFGenerator {
                     }
                   }
                   
-                  // Add any remaining transfers
                   if (day.transfers && day.transfers.length > totalItems) {
                     for (let i = totalItems; i < day.transfers.length; i++) {
                       const transfer = day.transfers[i];
@@ -1310,76 +1278,34 @@ class PDFGenerator {
               </div>
             </div>
           </div>
-          ${dayImages.length > 0 ? `
-            <div style="margin-bottom: 15px; width: 100%; height: 180px; overflow: hidden; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);">
-              <img src="${dayImages[0]}" alt="Day ${day.dayNumber} Activities" style="width: 100%; height: 100%; object-fit: cover;" />
-            </div>
-          ` : ''}
         `;
         
+        addToPage(dayHeader, 120);
+        
         if (activities.length === 0) {
-          // Free day - check if it fits on current page, otherwise start new page
           const freeDayContent = `
-            ${dayHeader}
-            <div style="text-align: center; padding: 60px 40px; color: #666;">
+            <div style="text-align: center; padding: 40px; color: #666; margin-bottom: 20px;">
               <div style="font-size: 48px; margin-bottom: 15px; font-weight: bold; color: #4CAF50;">☼</div>
               <div style="font-size: 24px; font-weight: bold; color: #333;">Free Day</div>
               <div style="font-size: 16px; margin-top: 8px; color: #666;">Relax and explore at your own pace</div>
             </div>
           `;
-          
-          const estimatedHeight = 180; // Optimized height for free day
-          if (currentPageHeight + estimatedHeight > maxPageHeight && currentPageContent.length > 0) {
-            // Start new page
-            pages.push(currentPageContent.join(''));
-            currentPageContent = [freeDayContent];
-            currentPageHeight = estimatedHeight;
-            // Reset counter for days with activities on new page
-            daysWithActivitiesOnCurrentPage = 0;
-          } else {
-            // Add to current page
-            currentPageContent.push(freeDayContent);
-            currentPageHeight += estimatedHeight;
-            // Free days don't count towards the activities limit
-          }
+          addToPage(freeDayContent, 150);
         } else {
-          // Add day header with simple line separator and optimized spacing
-          const headerHeight = dayImages.length > 0 ? 280 : 90; // Further optimized height: day image (180px) + header (75px)
-          const daySeparator = currentPageContent.length > 0 ? `
-            <div style="margin: 15px 0 15px 0; text-align: center;">
-              <div style="display: inline-block; width: 60%; height: 1px; background: linear-gradient(90deg, transparent, ${quoteTemplate.colors.primary}40, transparent);"></div>
-            </div>
-            ${dayHeader}
-          ` : dayHeader;
-          
-          // Check if we need to start a new page due to 2-day limit for activities
-          const shouldStartNewPageForDayLimit = hasSightseeingActivities && daysWithActivitiesOnCurrentPage >= 2 && currentPageContent.length > 0;
-          
-          if ((currentPageHeight + headerHeight > maxPageHeight || shouldStartNewPageForDayLimit) && currentPageContent.length > 0) {
-            // Start new page for this day
-            pages.push(currentPageContent.join(''));
-            currentPageContent = [dayHeader];
-            currentPageHeight = headerHeight;
-            // Reset counter for days with activities on new page
-            daysWithActivitiesOnCurrentPage = hasSightseeingActivities ? 1 : 0;
-          } else {
-            // Add to current page
-            currentPageContent.push(daySeparator);
-            currentPageHeight += headerHeight;
-            // Increment counter if this day has activities
-            if (hasSightseeingActivities) {
-              daysWithActivitiesOnCurrentPage++;
-            }
+          if (hasImages) {
+            const imageContent = `
+              <div style="margin-bottom: 20px; width: 100%; height: 180px; overflow: hidden; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);">
+                <img src="${dayImages[0]}" alt="Day ${day.dayNumber} Activities" style="width: 100%; height: 100%; object-fit: cover;" />
+              </div>
+            `;
+            addToPage(imageContent, 200);
           }
           
-          // Add activities one by one, checking page height
           activities.forEach((item) => {
-            // Check if this is a transfer
             const isTransfer = item.transfer || item.fromLocation || item.toLocation;
             
             let activityData;
             if (isTransfer) {
-              // Handle transfer
               const transferName = item.transfer?.name || item.name || 'Transfer';
               const fromLocation = item.fromLocation || item.transfer?.fromLocation || 'Pickup Point';
               const toLocation = item.toLocation || item.transfer?.toLocation || 'Drop Point';
@@ -1391,11 +1317,10 @@ class PDFGenerator {
                 images: item.transfer?.images || item.images || []
               };
             } else {
-              // Handle sightseeing
               activityData = item.sightseeing && typeof item.sightseeing === 'object' 
                 ? item.sightseeing 
                 : { 
-                  name: item.name || `Activity ${dailyActivityIndex}`,
+                  name: item.name || `Activity ${globalActivityIndex}`,
                   description: item.sightseeingDescription || item.description || 'Enjoy this amazing activity.',
                   duration: item.sightseeingDuration || item.duration || 'Flexible timing',
                   location: item.sightseeingLocation || item.location || 'To be confirmed',
@@ -1403,15 +1328,12 @@ class PDFGenerator {
                 };
             }
             
-            // Helper function to format passenger count
             const formatPassengerCount = (item) => {
               const adultPax = quote.adultPax || 0;
               const childPax = quote.childPax || 0;
               const isTransfer = item.transfer || item.fromLocation || item.toLocation;
               const hasChildActivity = item.childPrice > 0 || item.includeChild === true;
               
-              // For transfers, always show both adults and children if they exist
-              // For sightseeings, only show children if the activity includes them
               if (adultPax > 0 && childPax > 0 && (isTransfer || hasChildActivity)) {
                 return `${adultPax}A+${childPax}C`;
               } else if (adultPax > 0 && childPax > 0 && isTransfer) {
@@ -1424,8 +1346,8 @@ class PDFGenerator {
             };
             
             const activityContent = `
-              <div style="margin-bottom: 15px;">
-                <div style="padding: 12px; background-color: ${quoteTemplate.backgrounds.activity}; border-radius: 8px; border: 1px solid ${quoteTemplate.borders.activity}; box-shadow: 0 2px 6px ${quoteTemplate.shadows?.activity === 'transparent' ? 'transparent' : `${quoteTemplate.shadows?.activity || '#000000'}${Math.round((quoteTemplate.shadows?.activityOpacity || 0.05) * 255).toString(16).padStart(2, '0')}`};">
+              <div style="margin-bottom: 20px;">
+                <div style="padding: 15px; background-color: ${quoteTemplate.backgrounds.activity}; border-radius: 8px; border: 1px solid ${quoteTemplate.borders.activity}; box-shadow: 0 2px 6px ${quoteTemplate.shadows?.activity === 'transparent' ? 'transparent' : `${quoteTemplate.shadows?.activity || '#000000'}${Math.round((quoteTemplate.shadows?.activityOpacity || 0.05) * 255).toString(16).padStart(2, '0')}`};">
                   <div style="display: flex; align-items: start;">
                     <div style="
                       width: 32px;
@@ -1444,16 +1366,10 @@ class PDFGenerator {
                     <div style="flex: 1;">
                       <h3 style="margin: 0 0 6px 0; font-size: ${quoteTemplate.fontSizes.activity}px; color: ${quoteTemplate.colors.text}; font-weight: bold; font-family: ${quoteTemplate.fonts.activity};">${activityData.name}</h3>
                       <p style="margin: 0 0 8px 0; font-size: ${quoteTemplate.fontSizes.description}px; line-height: 1.4; color: ${quoteTemplate.colors.muted}; font-family: ${quoteTemplate.fonts.body};">${activityData.description || 'Experience this wonderful activity with professional guidance and create lasting memories.'}</p>
-                      <div style="display: flex; gap: 15px; font-size: 12px; color: #666; font-family: ${quoteTemplate.fonts.body};">
-                        <div style="display: flex; align-items: center; gap: 4px;">
-                          📍 Location: <strong>${activityData.location}</strong>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 4px;">
-                          ⏱️ Duration: <strong>${activityData.duration}</strong>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 4px;">
-                          👥 Passengers: <strong>${formatPassengerCount(item)}</strong>
-                        </div>
+                      <div style="display: flex; gap: 15px; font-size: ${quoteTemplate.fontSizes.details}px; color: ${quoteTemplate.colors.muted}; padding-top: 6px; border-top: 1px solid ${quoteTemplate.borders.activity}; font-family: ${quoteTemplate.fonts.body};">
+                        <span style="display: flex; align-items: center;"><strong>Location:</strong> ${activityData.location || 'Location TBD'}</span>
+                        <span style="display: flex; align-items: center;"><strong>Duration:</strong> ${activityData.duration || 'Flexible'}</span>
+                        ${formatPassengerCount(item) ? `<span style="display: flex; align-items: center; background-color: ${quoteTemplate.colors.primary}20; color: ${quoteTemplate.colors.primary}; padding: 2px 6px; border-radius: 4px; font-weight: bold;"><strong>Pax:</strong> ${formatPassengerCount(item)}</span>` : ''}
                       </div>
                     </div>
                   </div>
@@ -1461,36 +1377,31 @@ class PDFGenerator {
               </div>
             `;
             
-            const activityHeight = 140; // Tighter height per activity
-            if (currentPageHeight + activityHeight > maxPageHeight && currentPageContent.length > 0) {
-              // Start new page
-              pages.push(currentPageContent.join(''));
-              currentPageContent = [activityContent];
-              currentPageHeight = activityHeight;
-            } else {
-              // Add to current page
-              currentPageContent.push(activityContent);
-              currentPageHeight += activityHeight;
-            }
+            addToPage(activityContent, 180);
             
             dailyActivityIndex++;
+            globalActivityIndex++;
           });
         }
       });
       
-      // Add the last page if it has content
+      // Add remaining content to last page
       if (currentPageContent.length > 0) {
-        pages.push(currentPageContent.join(''));
+        allPages.push(currentPageContent.join(''));
       }
       
-      // Generate HTML for all pages
-      return pages.map((pageContent, pageIndex) => `
-        <div class="page middle-page ${pageIndex < pages.length - 1 ? 'page-break' : ''}">
-          <div class="content-wrapper">
-            ${pageContent}
+      // Generate page divs
+      return allPages.map((pageContent, index) => {
+        const isLastPage = index === allPages.length - 1;
+        return `
+          <div class="page middle-page ${!isLastPage ? 'page-break' : ''}">
+            <div class="content-wrapper">
+              ${index === 0 ? '<h1 style="color: ' + quoteTemplate.colors.text + '; font-family: ' + quoteTemplate.fonts.header + '; font-size: ' + quoteTemplate.fontSizes.header + 'px; margin-bottom: 20px;">Day-wise Itinerary</h1>' : ''}
+              ${pageContent}
+            </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     })() : ''}
     
     <!-- Payment Details Page -->
@@ -1510,7 +1421,7 @@ class PDFGenerator {
             ${(() => {
               // Calculate flight total from flights array
               const flightTotal = quote.flights ? quote.flights.reduce((sum, flight) => sum + (flight.price || 0), 0) : 0;
-              // Calculate package cost: sightseeing + transfers + hotels + markup - discount
+              // Calculate package cost: sightseeing + transfers + hotels + markup
               // Use stored values if available, otherwise calculate from quote data
               let sightseeingTotal = quote.sightseeingTotal || 0;
               let transferTotal = quote.transferTotal || 0;
@@ -1545,28 +1456,27 @@ class PDFGenerator {
                       }
                     });
                   }
-                  
-                  // Calculate hotels from day level
-                  if (day.hotels && day.hotels.length > 0) {
-                    day.hotels.forEach(hotelItem => {
-                      if (hotelItem.rooms && hotelItem.rooms.length > 0) {
-                        hotelItem.rooms.forEach(room => {
-                          const nights = room.nights || 1;
-                          hotelTotal += room.adultRate * room.numberOfRooms * nights;
-                        });
-                      }
-                    });
-                  }
                 });
+                
+                // Calculate hotels
+                if (quote.hotels && quote.hotels.length > 0) {
+                  quote.hotels.forEach(hotelItem => {
+                    if (hotelItem.rooms && hotelItem.rooms.length > 0) {
+                      hotelItem.rooms.forEach(room => {
+                        const nights = room.nights || 1;
+                        hotelTotal += room.adultRate * room.numberOfRooms * nights;
+                      });
+                    }
+                  });
+                }
               }
               
-              // Calculate package cost including tax
-              const taxAmount = quote.taxAmount || 0;
-              const packageCost = sightseeingTotal + transferTotal + hotelTotal + (quote.markupAmount || 0) - (quote.discountAmount || 0) + taxAmount;
+              const packageCost = sightseeingTotal + transferTotal + hotelTotal + (quote.markupAmount || 0) - (quote.discountAmount || 0) + (quote.taxAmount || 0);
               
               // Update quote with calculated flight total for consistency
               quote.flightTotal = flightTotal;
-              // Use actual TCS amount from quote
+              // Use actual tax and TCS amounts from quote
+              const taxAmount = quote.taxAmount || 0;
               const tcsAmount = quote.tcsAmount || 0;
               // Total amount from quote
               const totalAmount = quote.total || 0;
@@ -1583,10 +1493,10 @@ class PDFGenerator {
                 `;
               }
               
-              // Add package cost (now includes tax)
+              // Add package cost
               tableRows += `
                 <tr>
-                  <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">Package Cost (Incl. Tax)</td>
+                  <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">Package Cost</td>
                   <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; text-align: right;">${quote.currency || 'USD'} ${packageCost.toLocaleString('en-IN')}</td>
                 </tr>
               `;
