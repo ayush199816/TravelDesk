@@ -83,7 +83,7 @@
   padding: 24px 16px;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 120px); /* Adjusted for header height (32px + 32px + border) */
+  min-height: calc(100vh - 120px); /* Use min-height instead of height */
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -127,6 +127,9 @@
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
+  min-height: 48px; /* Ensure minimum height for touch targets */
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .sidebar-nav .nav-item:hover {
@@ -163,6 +166,7 @@
   cursor: default;
   flex-shrink: 0;
   box-sizing: border-box;
+  min-height: 68px; /* Ensure minimum height for user info */
 }
 
 .user-avatar-sidebar {
@@ -212,6 +216,7 @@
   border-left: 3px solid #dc2626 !important;
   flex-shrink: 0;
   box-sizing: border-box;
+  min-height: 48px; /* Ensure minimum height matching other nav items */
 }
 
 .logout-btn:hover {
