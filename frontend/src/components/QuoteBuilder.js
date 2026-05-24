@@ -3512,37 +3512,22 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                                   </div>
 
-                                  <div style={{display: 'flex', gap: '5px'}}>
-                                    <button
-                                      type="button"
-                                      onClick={() => moveActivityUp(dayIndex, 'sightseeing', sightseeingIndex)}
-                                      disabled={item.order === 0}
+                                  <div style={{display: 'flex', gap: '5px', alignItems: 'center'}}>
+                                    <label style={{fontSize: '12px', fontWeight: '600'}}>Order:</label>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      max={day.sightseeings.length + day.transfers.length}
+                                      value={(item.order || 0) + 1}
+                                      onChange={(e) => updateActivityOrder(dayIndex, 'sightseeing', sightseeingIndex, e.target.value)}
                                       style={{
-                                        ...styles.removeButton,
-                                        opacity: item.order === 0 ? 0.5 : 1,
-                                        cursor: item.order === 0 ? 'not-allowed' : 'pointer',
-                                        padding: '5px 10px',
-                                        fontSize: '14px'
+                                        width: '50px',
+                                        padding: '5px',
+                                        border: '1px solid #ced4da',
+                                        borderRadius: '4px',
+                                        textAlign: 'center'
                                       }}
-                                      title="Move up"
-                                    >
-                                      ↑
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => moveActivityDown(dayIndex, 'sightseeing', sightseeingIndex)}
-                                      disabled={item.order === (day.sightseeings.length + day.transfers.length - 1)}
-                                      style={{
-                                        ...styles.removeButton,
-                                        opacity: item.order === (day.sightseeings.length + day.transfers.length - 1) ? 0.5 : 1,
-                                        cursor: item.order === (day.sightseeings.length + day.transfers.length - 1) ? 'not-allowed' : 'pointer',
-                                        padding: '5px 10px',
-                                        fontSize: '14px'
-                                      }}
-                                      title="Move down"
-                                    >
-                                      ↓
-                                    </button>
+                                    />
                                     <button
 
                                       type="button"
@@ -3828,37 +3813,22 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                                   </div>
 
-                                  <div style={{display: 'flex', gap: '5px'}}>
-                                    <button
-                                      type="button"
-                                      onClick={() => moveActivityUp(dayIndex, 'transfer', transferIndex)}
-                                      disabled={item.order === 0}
+                                  <div style={{display: 'flex', gap: '5px', alignItems: 'center'}}>
+                                    <label style={{fontSize: '12px', fontWeight: '600'}}>Order:</label>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      max={day.sightseeings.length + day.transfers.length}
+                                      value={(item.order || 0) + 1}
+                                      onChange={(e) => updateActivityOrder(dayIndex, 'transfer', transferIndex, e.target.value)}
                                       style={{
-                                        ...styles.removeButton,
-                                        opacity: item.order === 0 ? 0.5 : 1,
-                                        cursor: item.order === 0 ? 'not-allowed' : 'pointer',
-                                        padding: '5px 10px',
-                                        fontSize: '14px'
+                                        width: '50px',
+                                        padding: '5px',
+                                        border: '1px solid #ced4da',
+                                        borderRadius: '4px',
+                                        textAlign: 'center'
                                       }}
-                                      title="Move up"
-                                    >
-                                      ↑
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => moveActivityDown(dayIndex, 'transfer', transferIndex)}
-                                      disabled={item.order === (day.sightseeings.length + day.transfers.length - 1)}
-                                      style={{
-                                        ...styles.removeButton,
-                                        opacity: item.order === (day.sightseeings.length + day.transfers.length - 1) ? 0.5 : 1,
-                                        cursor: item.order === (day.sightseeings.length + day.transfers.length - 1) ? 'not-allowed' : 'pointer',
-                                        padding: '5px 10px',
-                                        fontSize: '14px'
-                                      }}
-                                      title="Move down"
-                                    >
-                                      ↓
-                                    </button>
+                                    />
                                     <button
 
                                       type="button"
