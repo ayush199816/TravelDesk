@@ -2079,73 +2079,74 @@ const styles = {
           </div>
         )}
         {showAddForm && (
-          <div style={styles.modal}>
-            <div style={styles.modalContent}>
-              <div style={styles.modalHeader}>
-                <h3 style={styles.modalTitle}>Add New Lead</h3>
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h3 className="modal-title">Add New Lead</h3>
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(false)}
+                  className="modal-close"
+                >
+                  ×
+                </button>
               </div>
-              <form onSubmit={handleFormSubmit} style={styles.modalBody}>
-                <div style={styles.formGrid}>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Name</label>
+              <form onSubmit={handleFormSubmit} className="modal-body">
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>Name</label>
                     <input
                       type="text"
                       name="name"
                       value={formData.name}
                       onChange={handleFormChange}
-                      style={styles.input}
                       required
                     />
                   </div>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Email</label>
+                  <div className="form-group">
+                    <label>Email</label>
                     <input
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleFormChange}
-                      style={styles.input}
                       required
                     />
                   </div>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Phone</label>
+                  <div className="form-group">
+                    <label>Phone</label>
                     <input
                       type="tel"
                       name="phone"
                       value={formData.phone}
                       onChange={handleFormChange}
-                      style={styles.input}
                       required
                     />
                   </div>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Date of Travel</label>
+                  <div className="form-group">
+                    <label>Date of Travel</label>
                     <input
                       type="date"
                       name="dateOfTravel"
                       value={formData.dateOfTravel}
                       onChange={handleFormChange}
-                      style={styles.input}
                     />
                   </div>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Travel to Country</label>
+                  <div className="form-group">
+                    <label>Travel to Country</label>
                     <input
                       type="text"
                       name="travelToCountry"
                       value={formData.travelToCountry}
                       onChange={handleFormChange}
-                      style={styles.input}
                     />
                   </div>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Status</label>
+                  <div className="form-group">
+                    <label>Status</label>
                     <select
                       name="status"
                       value={formData.status}
                       onChange={handleFormChange}
-                      style={styles.select}
                     >
                       {leadStatuses.map(status => (
                         <option key={status} value={status}>
@@ -2154,52 +2155,47 @@ const styles = {
                       ))}
                     </select>
                   </div>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Next Follow Up Date</label>
+                  <div className="form-group">
+                    <label>Next Follow Up Date</label>
                     <input
                       type="date"
                       name="nextFollowUpDate"
                       value={formData.nextFollowUpDate}
                       onChange={handleFormChange}
-                      style={styles.input}
                     />
                   </div>
-                  <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
-                    <label style={styles.label}>Requirements</label>
+                  <div className="form-group full-width">
+                    <label>Requirements</label>
                     <textarea
                       name="requirements"
                       value={formData.requirements}
                       onChange={handleFormChange}
-                      style={styles.textarea}
                     />
                   </div>
-                  <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
-                    <label style={styles.label}>Latest Comment</label>
+                  <div className="form-group full-width">
+                    <label>Latest Comment</label>
                     <textarea
                       name="latestComment"
                       value={formData.latestComment}
                       onChange={handleFormChange}
-                      style={styles.textarea}
                     />
                   </div>
-                  <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
-                    <label style={styles.label}>Tags</label>
+                  <div className="form-group full-width">
+                    <label>Tags</label>
                     <input
                       type="text"
                       name="tags"
                       value={formData.tags}
                       onChange={handleFormChange}
-                      style={styles.input}
                       placeholder="e.g., family, budget, luxury"
                     />
                   </div>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Assigned To</label>
+                  <div className="form-group">
+                    <label>Assigned To</label>
                     <select
                       name="assignedTo"
                       value={formData.assignedTo}
                       onChange={handleFormChange}
-                      style={styles.select}
                     >
                       <option value="">Select Sales User</option>
                       {salesUsers.map(user => (
@@ -2207,21 +2203,20 @@ const styles = {
                       ))}
                     </select>
                   </div>
-                  <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
-                    <label style={styles.label}>Notes</label>
+                  <div className="form-group full-width">
+                    <label>Notes</label>
                     <textarea
                       name="notes"
                       value={formData.notes}
                       onChange={handleFormChange}
-                      style={styles.textarea}
                     />
                   </div>
                 </div>
-                <div style={styles.modalFooter}>
-                  <button type="button" style={styles.cancelButton} onClick={() => setShowAddForm(false)}>
+                <div className="modal-footer">
+                  <button type="button" className="cancel-btn" onClick={() => setShowAddForm(false)}>
                     Cancel
                   </button>
-                  <button type="submit" style={styles.submitButton}>
+                  <button type="submit" className="submit-btn">
                     Add Lead
                   </button>
                 </div>
@@ -2230,73 +2225,74 @@ const styles = {
           </div>
         )}
         {showEditForm && (
-          <div style={styles.modal}>
-            <div style={styles.modalContent}>
-              <div style={styles.modalHeader}>
-                <h3 style={styles.modalTitle}>Edit Lead</h3>
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h3 className="modal-title">Edit Lead</h3>
+                <button
+                  type="button"
+                  onClick={() => setShowEditForm(false)}
+                  className="modal-close"
+                >
+                  ×
+                </button>
               </div>
-              <form onSubmit={handleUpdate} style={styles.modalBody}>
-                <div style={styles.formGrid}>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Name</label>
+              <form onSubmit={handleUpdate} className="modal-body">
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>Name</label>
                     <input
                       type="text"
                       name="name"
                       value={formData.name}
                       onChange={handleFormChange}
-                      style={styles.input}
                       required
                     />
                   </div>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Email</label>
+                  <div className="form-group">
+                    <label>Email</label>
                     <input
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleFormChange}
-                      style={styles.input}
                       required
                     />
                   </div>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Phone</label>
+                  <div className="form-group">
+                    <label>Phone</label>
                     <input
                       type="tel"
                       name="phone"
                       value={formData.phone}
                       onChange={handleFormChange}
-                      style={styles.input}
                       required
                     />
                   </div>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Date of Travel</label>
+                  <div className="form-group">
+                    <label>Date of Travel</label>
                     <input
                       type="date"
                       name="dateOfTravel"
                       value={formData.dateOfTravel}
                       onChange={handleFormChange}
-                      style={styles.input}
                     />
                   </div>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Travel to Country</label>
+                  <div className="form-group">
+                    <label>Travel to Country</label>
                     <input
                       type="text"
                       name="travelToCountry"
                       value={formData.travelToCountry}
                       onChange={handleFormChange}
-                      style={styles.input}
                     />
                   </div>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Status</label>
+                  <div className="form-group">
+                    <label>Status</label>
                     <select
                       name="status"
                       value={formData.status}
                       onChange={handleFormChange}
-                      style={styles.select}
                     >
                       {leadStatuses.map(status => (
                         <option key={status} value={status}>
@@ -2305,52 +2301,47 @@ const styles = {
                       ))}
                     </select>
                   </div>
-                  <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
-                    <label style={styles.label}>Requirements</label>
+                  <div className="form-group full-width">
+                    <label>Requirements</label>
                     <textarea
                       name="requirements"
                       value={formData.requirements}
                       onChange={handleFormChange}
-                      style={styles.textarea}
                     />
                   </div>
-                  <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
-                    <label style={styles.label}>Latest Comment</label>
+                  <div className="form-group full-width">
+                    <label>Latest Comment</label>
                     <textarea
                       name="latestComment"
                       value={formData.latestComment}
                       onChange={handleFormChange}
-                      style={styles.textarea}
                     />
                   </div>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Next Follow Up Date</label>
+                  <div className="form-group">
+                    <label>Next Follow Up Date</label>
                     <input
                       type="date"
                       name="nextFollowUpDate"
                       value={formData.nextFollowUpDate}
                       onChange={handleFormChange}
-                      style={styles.input}
                     />
                   </div>
-                  <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
-                    <label style={styles.label}>Tags</label>
+                  <div className="form-group full-width">
+                    <label>Tags</label>
                     <input
                       type="text"
                       name="tags"
                       value={formData.tags}
                       onChange={handleFormChange}
-                      style={styles.input}
                       placeholder="e.g., family, budget, luxury"
                     />
                   </div>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Assigned To</label>
+                  <div className="form-group">
+                    <label>Assigned To</label>
                     <select
                       name="assignedTo"
                       value={formData.assignedTo}
                       onChange={handleFormChange}
-                      style={styles.select}
                     >
                       <option value="">Select Sales User</option>
                       {salesUsers.map(user => (
@@ -2358,13 +2349,12 @@ const styles = {
                       ))}
                     </select>
                   </div>
-                  <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
-                    <label style={styles.label}>Notes</label>
+                  <div className="form-group full-width">
+                    <label>Notes</label>
                     <textarea
                       name="notes"
                       value={formData.notes}
                       onChange={handleFormChange}
-                      style={styles.textarea}
                     />
                   </div>
                 </div>
@@ -2398,11 +2388,11 @@ const styles = {
                     ))}
                   </div>
                 )}
-                <div style={styles.modalFooter}>
-                  <button type="button" style={styles.cancelButton} onClick={() => setShowEditForm(false)}>
+                <div className="modal-footer">
+                  <button type="button" className="cancel-btn" onClick={() => setShowEditForm(false)}>
                     Cancel
                   </button>
-                  <button type="submit" style={styles.submitButton}>
+                  <button type="submit" className="submit-btn">
                     Update Lead
                   </button>
                 </div>

@@ -450,6 +450,98 @@
   color: #374151;
 }
 
+/* Form Grid Layout */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.form-grid .full-width {
+  grid-column: 1 / -1;
+}
+
+/* Form Input Styles */
+.form-grid input,
+.form-grid select,
+.form-grid textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background: #f8fafc;
+  font-weight: 500;
+}
+
+.form-grid select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+.form-grid input:focus,
+.form-grid select:focus,
+.form-grid textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+  background: white;
+}
+
+.form-grid input:hover,
+.form-grid select:hover,
+.form-grid textarea:hover {
+  border-color: #dee2e6;
+}
+
+.form-grid textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Form Button Styles */
+.cancel-btn,
+.submit-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.cancel-btn {
+  background: #6c757d;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+.submit-btn {
+  background: #667eea;
+  color: white;
+}
+
+.submit-btn:hover {
+  background: #5a67d8;
+  transform: translateY(-1px);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+}
+
 /* Analytics Cards */
 .analytics-grid {
   display: grid;
@@ -1029,6 +1121,28 @@
     gap: 15px !important;
   }
   
+  .form-grid input,
+  .form-grid select,
+  .form-grid textarea {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  
+  .form-grid textarea {
+    min-height: 80px;
+  }
+  
+  .form-group label {
+    font-size: 13px;
+  }
+  
+  .cancel-btn,
+  .submit-btn {
+    padding: 10px 20px;
+    font-size: 13px;
+    min-width: 100px;
+  }
+  
   .form-row {
     flex-direction: column !important;
   }
@@ -1288,6 +1402,33 @@
   
   .modal-footer button {
     width: 100%;
+  }
+  
+  /* Form styles for small mobile */
+  .form-grid input,
+  .form-grid select,
+  .form-grid textarea {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+  
+  .form-grid textarea {
+    min-height: 70px;
+  }
+  
+  .form-group label {
+    font-size: 12px;
+  }
+  
+  .form-grid {
+    gap: 12px !important;
+  }
+  
+  .cancel-btn,
+  .submit-btn {
+    padding: 8px 16px;
+    font-size: 12px;
+    min-width: 80px;
   }
   
   /* Pagination mobile */
