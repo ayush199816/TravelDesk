@@ -296,14 +296,12 @@
   gap: 16px;
 }
 
-/* Organization info styling in header-left */
-.header-left .org-info {
-  margin-left: 20px;
-  border-left: 1px solid #e2e8f0;
-  padding-left: 20px;
+/* Organization info styling in header-right - positioned more to the left */
+.header-right .org-info {
+  margin-right: 20px;
 }
 
-.header-left .org-name {
+.header-right .org-name {
   font-size: 14px;
   font-weight: 500;
   color: #64748b;

@@ -1648,9 +1648,6 @@ const styles = {
                 <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
               </svg>
             </button>
-            <div className="org-info">
-              <span className="org-name">{user?.organization?.name || 'Organization'}</span>
-            </div>
             <div className="page-title">
               <h1>{getPageTitle()}</h1>
               <p>{getPageSubtitle()}</p>
@@ -1658,6 +1655,9 @@ const styles = {
           </div>
           
           <div className="header-right">
+            <div className="org-info">
+              <span className="org-name">{user?.organization?.name || 'Organization'}</span>
+            </div>
           </div>
         </header>
 
