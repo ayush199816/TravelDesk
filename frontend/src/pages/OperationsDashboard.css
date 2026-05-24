@@ -80,11 +80,22 @@
 
 /* Sidebar Navigation */
 .sidebar-nav {
-  padding: 24px 16px;
+  padding: 24px 16px 24px 16px;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 100px);
+  overflow-y: auto;
 }
 
 .nav-section {
   margin-bottom: 24px;
+}
+
+.nav-section:last-child {
+  margin-bottom: 0;
+  margin-top: auto;
+  padding-top: 24px;
+  border-top: 1px solid #e9ecef;
 }
 
 .nav-section-title {
@@ -139,12 +150,14 @@
 .user-info-sidebar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px;
-  margin-bottom: 8px;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 16px;
   background: rgba(102, 126, 234, 0.05);
-  border-radius: 8px;
   border: 1px solid rgba(102, 126, 234, 0.1);
+  border-radius: 10px;
+  margin: 0 0 8px 0;
+  cursor: default;
 }
 
 .user-avatar-sidebar {
