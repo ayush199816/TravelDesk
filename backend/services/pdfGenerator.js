@@ -1278,7 +1278,13 @@ class PDFGenerator {
                   });
                   
                   (day.transfers || []).forEach((t, idx) => {
-                    const transferName = t.transfer?.name || t.name || 'Transfer';
+                    // Try to get transfer name from populated data or fallback
+                    let transferName = 'Transfer';
+                    if (t.transfer && typeof t.transfer === 'object' && t.transfer.name) {
+                      transferName = t.transfer.name;
+                    } else if (t.name) {
+                      transferName = t.name;
+                    }
                     allActivities.push({
                       name: this.toTitleCase(transferName),
                       order: t.order || 0,
