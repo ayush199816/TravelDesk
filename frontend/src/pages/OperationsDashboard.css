@@ -205,7 +205,7 @@
 
 /* Full width when sidebar is closed */
 .main-content.sidebar-closed .page-content {
-  width: 100vw; /* Use full viewport width */
+  width: 100%; /* Use full available width instead of 100vw */
   margin-left: 0;
   padding-left: 24px; /* Account for floating button space */
 }
@@ -283,11 +283,14 @@
 
 /* Full width header when sidebar is closed */
 .main-content.sidebar-closed .top-header {
-  width: 100vw;
+  width: 100%; /* Use consistent width with content */
   margin-left: 0;
   padding-left: 90px; /* Adjusted for button moved up */
   padding-right: 32px;
   box-sizing: border-box;
+  position: sticky;
+  top: 0;
+  left: 0;
 }
 
 .header-left {
