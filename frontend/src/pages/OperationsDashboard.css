@@ -443,6 +443,186 @@
   border-color: #dee2e6;
 }
 
+/* Leads Table Styles - General */
+.leads-table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -16px;
+  padding: 0 16px;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.leads-table {
+  min-width: 1200px;
+  font-size: 14px;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.leads-table th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  font-weight: 600;
+  color: #495057;
+  text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.leads-table td {
+  border-bottom: 1px solid #dee2e6;
+  vertical-align: middle;
+}
+
+.leads-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+.leads-table th,
+.leads-table td {
+  padding: 12px;
+  white-space: nowrap;
+}
+
+/* Lead link button */
+.lead-link-btn {
+  background: none;
+  border: none;
+  color: #007bff;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font-size: inherit;
+  transition: color 0.3s ease;
+}
+
+.lead-link-btn:hover {
+  color: #0056b3;
+}
+
+/* Status select in table */
+.status-select {
+  padding: 5px;
+  border-radius: 3px;
+  border: 1px solid #ddd;
+  font-size: 12px;
+  width: 100%;
+  background: white;
+  cursor: pointer;
+}
+
+.status-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Country badge */
+.country-badge {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* Not specified text */
+.not-specified {
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Leads table column widths */
+.leads-table .lead-number-cell {
+  min-width: 120px;
+}
+
+.leads-table .name-cell {
+  min-width: 150px;
+}
+
+.leads-table .email-cell {
+  min-width: 200px;
+}
+
+.leads-table .phone-cell {
+  min-width: 130px;
+}
+
+.leads-table .status-cell {
+  min-width: 120px;
+}
+
+.leads-table .assigned-cell {
+  min-width: 150px;
+}
+
+.leads-table .requirements-cell {
+  min-width: 200px;
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.leads-table .country-cell {
+  min-width: 120px;
+}
+
+.leads-table .followup-cell {
+  min-width: 120px;
+}
+
+.leads-table .travel-date-cell {
+  min-width: 120px;
+}
+
+.leads-table .actions-cell {
+  min-width: 180px;
+}
+
+/* Lead action buttons */
+.lead-action-buttons {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.lead-action-buttons button {
+  padding: 6px 10px;
+  font-size: 11px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 50px;
+}
+
+.lead-action-buttons .edit-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.lead-action-buttons .quote-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.lead-action-buttons .delete-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.lead-action-buttons button:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
+}
+
 /* Enhanced Form Styles */
 .page-content form {
   display: flex;
@@ -883,65 +1063,29 @@
     padding: 24px 16px;
   }
   
-  /* Lead table mobile styles */
+  /* Enhanced leads table mobile styles */
   .leads-table-container {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     margin: 0 -16px;
     padding: 0 16px;
     border-radius: 0;
-    background: white;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
   
-  .leads-table {
-    min-width: 1200px;
-    font-size: 14px;
-    border-collapse: collapse;
-    width: 100%;
-  }
-  
-  .leads-table th {
-    background-color: #f8f9fa;
-    border-bottom: 2px solid #dee2e6;
-    font-weight: 600;
-    color: #495057;
-    text-align: left;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  
-  .leads-table td {
-    border-bottom: 1px solid #dee2e6;
-    vertical-align: middle;
-  }
-  
-  .leads-table tr:hover {
-    background-color: #f8f9fa;
-  }
-  
-  /* Lead table specific mobile styles */
   .leads-table th,
   .leads-table td {
-    padding: 8px 12px;
-    white-space: nowrap;
+    padding: 8px 10px;
   }
   
-  /* Lead link button */
-  .lead-link-btn {
-    background: none;
-    border: none;
-    color: #007bff;
-    text-decoration: underline;
-    cursor: pointer;
-    padding: 0;
-    font-size: inherit;
-    transition: color 0.3s ease;
+  /* Sightseeings table mobile styles */
+  .sightseeings-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
   
-  .lead-link-btn:hover {
-    color: #0056b3;
+  .sightseeings-table {
+    min-width: 1000px;
+    font-size: 14px;
   }
   
   /* Status select in table */
