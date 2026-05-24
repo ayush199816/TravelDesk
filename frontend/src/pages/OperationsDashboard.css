@@ -328,7 +328,7 @@
 /* Page Content */
 .page-content {
   flex: 1;
-  padding: 20px;
+  padding: 0;
   background: #f8fafc;
   overflow-y: auto;
 }
@@ -447,15 +447,15 @@
 .leads-table-container {
   overflow-x: visible;
   margin: 0;
-  padding: 0;
+  padding: 16px;
   border-radius: 8px;
   background: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .leads-table {
-  min-width: 1600px;
-  width: 1600px;
+  min-width: calc(100vw - 380px);
+  width: calc(100vw - 380px);
   font-size: 14px;
   border-collapse: collapse;
 }
@@ -539,50 +539,61 @@
 
 /* Leads table column widths */
 .leads-table .lead-number-cell {
-  min-width: 130px;
+  min-width: 150px;
+  width: 150px;
 }
 
 .leads-table .name-cell {
-  min-width: 160px;
+  min-width: 200px;
+  width: 200px;
 }
 
 .leads-table .email-cell {
-  min-width: 220px;
+  min-width: 280px;
+  width: 280px;
 }
 
 .leads-table .phone-cell {
-  min-width: 140px;
+  min-width: 160px;
+  width: 160px;
 }
 
 .leads-table .status-cell {
-  min-width: 130px;
+  min-width: 150px;
+  width: 150px;
 }
 
 .leads-table .assigned-cell {
-  min-width: 160px;
+  min-width: 200px;
+  width: 200px;
 }
 
 .leads-table .requirements-cell {
-  min-width: 220px;
-  max-width: 280px;
+  min-width: 300px;
+  width: 300px;
+  max-width: 400px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .leads-table .country-cell {
-  min-width: 130px;
+  min-width: 150px;
+  width: 150px;
 }
 
 .leads-table .followup-cell {
-  min-width: 130px;
+  min-width: 150px;
+  width: 150px;
 }
 
 .leads-table .travel-date-cell {
-  min-width: 130px;
+  min-width: 150px;
+  width: 150px;
 }
 
 .leads-table .actions-cell {
-  min-width: 200px;
+  min-width: 250px;
+  width: 250px;
 }
 
 /* Lead action buttons */
