@@ -80,15 +80,17 @@
 
 /* Sidebar Navigation */
 .sidebar-nav {
-  padding: 24px 16px 24px 16px;
+  padding: 24px 16px;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 100px);
+  height: calc(100vh - 120px); /* Adjusted for header height (32px + 32px + border) */
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .nav-section {
   margin-bottom: 24px;
+  flex-shrink: 0;
 }
 
 .nav-section:last-child {
@@ -96,6 +98,7 @@
   margin-top: auto;
   padding-top: 24px;
   border-top: 1px solid #e9ecef;
+  flex-shrink: 0;
 }
 
 .nav-section-title {
@@ -158,6 +161,8 @@
   border-radius: 10px;
   margin: 0 0 8px 0;
   cursor: default;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .user-avatar-sidebar {
@@ -205,6 +210,8 @@
 .logout-btn {
   color: #dc2626 !important;
   border-left: 3px solid #dc2626 !important;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .logout-btn:hover {
@@ -216,6 +223,7 @@
 
 .logout-btn .nav-icon {
   color: #dc2626;
+  flex-shrink: 0;
 }
 
 .nav-icon {
