@@ -8,7 +8,7 @@
 
 /* Sidebar Navigation */
 .sidebar {
-  width: 320px;
+  width: 380px;
   background: #f8f9fa;
   border-right: 1px solid #e9ecef;
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
@@ -151,7 +151,7 @@
 /* Main Content Area */
 .main-content {
   flex: 1;
-  margin-left: 320px;
+  margin-left: 380px;
   display: flex;
   flex-direction: column;
 }
@@ -819,7 +819,7 @@
 
 @media (max-width: 768px) {
   .sidebar {
-    width: 280px;
+    width: 320px;
   }
 
   .top-header {
@@ -1538,7 +1538,7 @@
 /* Landscape mobile adjustments */
 @media (max-width: 768px) and (orientation: landscape) {
   .sidebar {
-    width: 300px;
+    width: 340px;
   }
   
   .modal-content {
