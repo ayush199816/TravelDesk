@@ -18,6 +18,11 @@
   z-index: 1000;
   overflow-y: auto;
   overflow-x: hidden;
+  transform: translateX(-100%); /* Hidden by default */
+}
+
+.sidebar.sidebar-open {
+  transform: translateX(0); /* Show when open */
 }
 
 .sidebar-header {
@@ -136,12 +141,37 @@
   height: 24px;
 }
 
+/* Sidebar Overlay */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.sidebar-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
 /* Main Content Area */
 .main-content {
   flex: 1;
-  margin-left: 320px;
+  margin-left: 0; /* No margin when sidebar is hidden */
   display: flex;
   flex-direction: column;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* When sidebar is open, add margin to main content */
+.sidebar-open ~ .main-content {
+  margin-left: 320px;
 }
 
 /* Top Header */
@@ -165,13 +195,19 @@
 }
 
 .mobile-menu-toggle {
-  display: none;
+  display: block; /* Always visible now */
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   padding: 8px;
   color: #64748b;
   cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-toggle:hover {
+  background: #e2e8f0;
+  color: #475569;
 }
 
 .page-title h1 {
@@ -745,22 +781,6 @@
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .sidebar {
-    transform: translateX(-100%);
-  }
-
-  .sidebar.sidebar-open {
-    transform: translateX(0);
-  }
-
-  .main-content {
-    margin-left: 0;
-  }
-
-  .mobile-menu-toggle {
-    display: block;
-  }
-
   .top-header {
     padding: 12px 20px;
     position: relative; /* Changed from sticky to relative on mobile */

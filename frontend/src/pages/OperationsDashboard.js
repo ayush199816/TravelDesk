@@ -1485,6 +1485,11 @@ const styles = {
 
   return (
     <div className="operations-dashboard">
+      {/* Sidebar Overlay */}
+      {menuOpen && (
+        <div className="sidebar-overlay active" onClick={toggleMenu} />
+      )}
+      
       {/* Modern Sidebar Navigation */}
       <aside className={`sidebar ${menuOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-header">
