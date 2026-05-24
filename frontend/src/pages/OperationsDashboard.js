@@ -1485,11 +1485,6 @@ const styles = {
 
   return (
     <div className="operations-dashboard">
-      {/* Sidebar Overlay */}
-      {menuOpen && (
-        <div className="sidebar-overlay active" onClick={toggleMenu} />
-      )}
-      
       {/* Modern Sidebar Navigation */}
       <aside className={`sidebar ${menuOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-header">
@@ -1619,21 +1614,13 @@ const styles = {
             </div>
           )}
           
-          {/* User Section */}
+          {/* Logout Section */}
           <div className="nav-section">
-            <div className="nav-section-title">User</div>
-            <div className="user-info-sidebar">
-              <div className="user-avatar-sidebar">
-                <div className="avatar-circle-sidebar">
-                  {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                </div>
-              </div>
-              <div className="user-details-sidebar">
-                <div className="user-name-sidebar">{user?.name}</div>
-                <div className="user-role-sidebar">{user?.role || 'Unknown'}</div>
-              </div>
-            </div>
-            <button className="nav-item logout-btn" onClick={handleLogout}>
+            <div className="nav-section-title">Account</div>
+            <button
+              className="nav-item logout-btn"
+              onClick={logout}
+            >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="nav-icon">
                 <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
               </svg>
@@ -1645,13 +1632,6 @@ const styles = {
 
       {/* Main Content Area */}
       <div className="main-content">
-        {/* Floating Menu Toggle Button */}
-        <button className="floating-menu-toggle" onClick={toggleMenu}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-          </svg>
-        </button>
-        
         {/* Top Header */}
         <header className="top-header">
           <div className="header-left">
@@ -1669,6 +1649,34 @@ const styles = {
           <div className="header-right">
             <div className="org-info">
               <span className="org-name">{user?.organization?.name || 'Organization'}</span>
+            </div>
+            
+            <div className="user-menu">
+              <button className="user-avatar" onClick={toggleMenu}>
+                <div className="avatar-circle">
+                  {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                </div>
+              </button>
+              
+              <div className={`user-dropdown ${menuOpen ? 'dropdown-open' : ''}`}>
+                <div className="user-info">
+                  <div className="user-name">{user?.name}</div>
+                  <div className="user-role">{user?.role || 'Unknown'}</div>
+                </div>
+                <div className="dropdown-divider"></div>
+                <button className="dropdown-item" onClick={() => navigate('/profile')}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                  </svg>
+                  Profile
+                </button>
+                <button className="dropdown-item logout-btn" onClick={handleLogout}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                  </svg>
+                  Logout
+                </button>
+              </div>
             </div>
           </div>
         </header>
