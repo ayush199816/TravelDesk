@@ -957,22 +957,8 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
       // Allow orders from 1 to 20
       if (isNaN(orderNumber) || orderNumber < 1 || orderNumber > 20) return prev;
       
-      // Update the activity order
+      // Simply update the activity order (user will manage ordering manually)
       newDays[dayIndex][currentActivity.arrayType][currentActivity.index].order = orderNumber - 1;
-      
-      // Reorder all other activities to maintain consistency
-      const allActivities = getDayActivities(dayIndex);
-      allActivities.forEach((activity, idx) => {
-        if (activity.type !== activityType || activity.index !== activityIndex) {
-          // Shift other activities if needed
-          const currentObj = newDays[dayIndex][activity.arrayType][activity.index];
-          if (currentObj.order >= orderNumber - 1 && activity.arrayType === currentActivity.arrayType && activity.index < currentActivity.index) {
-            currentObj.order = currentObj.order + 1;
-          } else if (currentObj.order < orderNumber - 1 && activity.arrayType === currentActivity.arrayType && activity.index > currentActivity.index) {
-            currentObj.order = currentObj.order - 1;
-          }
-        }
-      });
       
       return { ...prev, days: newDays };
     });
