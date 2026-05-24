@@ -17,6 +17,17 @@ class PDFGenerator {
     this.browser = null;
   }
 
+  // Helper function to convert text to title case
+  toTitleCase(str) {
+    if (!str) return str;
+    return str.replace(
+      /\w\S*/g,
+      function(txt) {
+        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+      }
+    );
+  }
+
   async initBrowser() {
     if (!this.browser || !this.browser.isConnected()) {
       // Close existing browser if it exists but is disconnected
@@ -1260,7 +1271,7 @@ class PDFGenerator {
                       ? s.sightseeing 
                       : { name: s.name || `Activity ${idx + 1}` };
                     allActivities.push({
-                      name: sightseeing.name,
+                      name: this.toTitleCase(sightseeing.name),
                       order: s.order || 0,
                       type: 'sightseeing'
                     });
@@ -1269,7 +1280,7 @@ class PDFGenerator {
                   (day.transfers || []).forEach((t, idx) => {
                     const transferName = t.transfer?.name || t.name || 'Transfer';
                     allActivities.push({
-                      name: transferName,
+                      name: this.toTitleCase(transferName),
                       order: t.order || 0,
                       type: 'transfer'
                     });
@@ -1320,14 +1331,14 @@ class PDFGenerator {
               const fromLocation = item.fromLocation || item.transfer?.fromLocation || 'Pickup Point';
               const toLocation = item.toLocation || item.transfer?.toLocation || 'Drop Point';
               activityData = {
-                name: transferName,
+                name: this.toTitleCase(transferName),
                 description: item.transfer?.description || item.description || 'Comfortable transfer between locations',
                 duration: item.transfer?.duration || item.duration || 'Flexible timing',
                 location: `${fromLocation} to ${toLocation}`,
                 images: item.transfer?.images || item.images || []
               };
             } else {
-              activityData = item.sightseeing && typeof item.sightseeing === 'object' 
+              const sightseeingObj = item.sightseeing && typeof item.sightseeing === 'object' 
                 ? item.sightseeing 
                 : { 
                   name: item.name || `Activity ${globalActivityIndex}`,
@@ -1336,6 +1347,9 @@ class PDFGenerator {
                   location: item.sightseeingLocation || item.location || 'To be confirmed',
                   images: item.images || []
                 };
+              // Apply title case to the name
+              sightseeingObj.name = this.toTitleCase(sightseeingObj.name);
+              activityData = sightseeingObj;
             }
             
             const formatPassengerCount = (item) => {
