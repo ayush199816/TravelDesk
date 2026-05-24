@@ -13,6 +13,7 @@ import {
   Form
 } from 'react-bootstrap';
 import { downloadInvoicePDF } from '../utils/invoiceUtils';
+import './InvoiceListPage.css';
 
 const InvoiceListPage = () => {
   const [invoices, setInvoices] = useState([]);

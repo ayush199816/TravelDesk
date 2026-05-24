@@ -672,6 +672,16 @@
   .analytics-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
+  
+  /* Tables responsive */
+  .leads-table {
+    font-size: 14px;
+  }
+  
+  .leads-table th,
+  .leads-table td {
+    padding: 8px 12px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -682,6 +692,7 @@
   .top-header {
     padding: 12px 16px;
     flex-wrap: wrap;
+    gap: 10px;
   }
 
   .page-content {
@@ -721,6 +732,51 @@
   .sidebar-header {
     padding: 24px 16px;
   }
+  
+  /* Lead table mobile styles */
+  .leads-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .leads-table {
+    min-width: 800px;
+  }
+  
+  /* Filter buttons mobile */
+  .filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .filter-buttons button {
+    flex: 1;
+    min-width: 120px;
+  }
+  
+  /* Forms mobile */
+  .form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 15px !important;
+  }
+  
+  .form-row {
+    flex-direction: column !important;
+  }
+  
+  /* Cards mobile */
+  .stats-card {
+    padding: 15px;
+  }
+  
+  .stats-card h3 {
+    font-size: 24px;
+  }
+  
+  .stats-card p {
+    font-size: 14px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -747,7 +803,76 @@
     font-size: 13px;
     gap: 10px;
   }
+  
+  /* Compact table for small screens */
+  .leads-table {
+    font-size: 12px;
+  }
+  
+  .leads-table th,
+  .leads-table td {
+    padding: 6px 8px;
+  }
+  
+  /* Action buttons mobile */
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .action-buttons button {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  
+  /* Modal mobile */
+  .modal-header {
+    padding: 15px;
+  }
+  
+  .modal-body {
+    padding: 15px;
+  }
+  
+  .modal-footer {
+    padding: 15px;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .modal-footer button {
+    width: 100%;
+  }
+  
+  /* Pagination mobile */
+  .pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .pagination button {
+    margin: 2px;
+    min-width: 36px;
+    height: 36px;
+    font-size: 12px;
+  }
+}
 
+/* Landscape mobile adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  .sidebar {
+    width: 300px;
+  }
+  
+  .modal-content {
+    max-height: 95vh;
+  }
+}
+
+/* Additional mobile styles */
+@media (max-width: 480px) {
   .nav-icon {
     width: 20px;
     height: 20px;

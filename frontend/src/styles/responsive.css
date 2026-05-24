@@ -1,0 +1,138 @@
+/* Shared Responsive Styles for All Pages */
+
+/* Base mobile-first approach */
+@media (max-width: 1200px) {
+  .container-fluid {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+}
+
+/* Tablet Styles */
+@media (max-width: 1024px) {
+  .desktop-only {
+    display: none !important;
+  }
+  
+  .tablet-hidden {
+    display: none !important;
+  }
+  
+  .tablet-flex-column {
+    flex-direction: column !important;
+  }
+  
+  .tablet-full-width {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .mobile-hidden {
+    display: none !important;
+  }
+  
+  .mobile-full-width {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  .mobile-flex-column {
+    flex-direction: column !important;
+  }
+  
+  .mobile-center {
+    text-align: center !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  .mobile-stack {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  
+  .mobile-scroll-x {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  /* Reduce padding and margins */
+  .page-container {
+    padding: 10px !important;
+  }
+  
+  .card {
+    margin-bottom: 15px !important;
+  }
+  
+  .btn {
+    padding: 8px 12px !important;
+    font-size: 14px !important;
+  }
+  
+  .form-control {
+    font-size: 16px !important; /* Prevent zoom on iOS */
+  }
+}
+
+/* Small Mobile Styles */
+@media (max-width: 480px) {
+  .small-hidden {
+    display: none !important;
+  }
+  
+  .small-full-width {
+    width: 100% !important;
+  }
+  
+  h1 {
+    font-size: 24px !important;
+  }
+  
+  h2 {
+    font-size: 20px !important;
+  }
+  
+  h3 {
+    font-size: 18px !important;
+  }
+  
+  .btn-sm {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+  }
+  
+  /* Make tables scrollable */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Stack grid layouts */
+  .grid-2, .grid-3, .grid-4 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Touch-friendly interactions */
+@media (hover: none) and (pointer: coarse) {
+  .btn, .clickable, .card {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .btn:hover {
+    transform: none !important;
+  }
+}
+
+/* Landscape mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .mobile-landscape-hidden {
+    display: none !important;
+  }
+}

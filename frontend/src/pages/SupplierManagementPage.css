@@ -554,10 +554,24 @@
   
   .page-header {
     padding: 20px;
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+  
+  .header-left {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
   }
   
   .filters-section {
     padding: 20px;
+  }
+  
+  .filters-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
   }
   
   .empty-state {
@@ -595,11 +609,45 @@
     width: 32px;
     height: 32px;
   }
+  
+  /* Modal mobile styles */
+  .modal-content {
+    width: 95%;
+    margin: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .form-row {
+    flex-direction: column;
+  }
+  
+  .address-fields {
+    grid-template-columns: 1fr;
+  }
+  
+  .btn {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
 }
 
 @media (max-width: 480px) {
+  .supplier-management-page {
+    padding: 10px;
+  }
+  
+  .page-header {
+    padding: 15px;
+  }
+  
   .page-title h1 {
-    font-size: 24px;
+    font-size: 20px;
   }
   
   .page-title p {
@@ -609,6 +657,10 @@
   .add-supplier-btn {
     padding: 10px 20px;
     font-size: 13px;
+  }
+  
+  .filters-section {
+    padding: 15px;
   }
   
   .suppliers-table-container {
@@ -629,6 +681,55 @@
   .supplier-actions-cell {
     padding: 12px 8px;
     min-width: auto;
+  }
+  
+  .suppliers-table th,
+  .suppliers-table td {
+    padding: 8px;
+    font-size: 12px;
+  }
+  
+  .supplier-name-link {
+    font-size: 12px;
+  }
+  
+  .action-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 10px;
+  }
+  
+  /* Modal mobile styles */
+  .modal-header {
+    padding: 15px;
+  }
+  
+  .modal-body {
+    padding: 15px;
+  }
+  
+  .modal-footer {
+    padding: 15px;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .modal-footer button {
+    width: 100%;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-control {
+    font-size: 16px; /* Prevent zoom on iOS */
+    padding: 12px;
+  }
+  
+  .form-label {
+    font-size: 14px;
+    margin-bottom: 5px;
   }
 }
 

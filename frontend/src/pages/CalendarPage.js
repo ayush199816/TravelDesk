@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
+import './CalendarPage.css';
 
 const CalendarPage = () => {
   const { user } = React.useContext(AuthContext);
@@ -709,50 +710,23 @@ const CalendarPage = () => {
   }
 
   return (
-    <div style={{ padding: '20px', backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
-      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+    <div className="calendar-page">
+      <div className="calendar-container">
         {/* Header */}
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          marginBottom: '30px',
-          backgroundColor: 'white',
-          padding: '20px',
-          borderRadius: '8px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <div className="calendar-header">
+          <div className="header-left">
             <button
               onClick={() => navigate('/dashboard')}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#6c757d',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}
+              className="btn btn-secondary"
             >
               ← Back to Dashboard
             </button>
-            <h1 style={{ margin: 0, color: '#333' }}>📅 Operations Calendar</h1>
+            <h1>📅 Operations Calendar</h1>
           </div>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <div className="header-right">
             <button
               onClick={() => setViewMode(viewMode === 'month' ? 'week' : 'month')}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#007bff',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
+              className="btn btn-primary"
             >
               {viewMode === 'month' ? 'Week View' : 'Month View'}
             </button>
