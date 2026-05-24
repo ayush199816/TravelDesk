@@ -3304,15 +3304,8 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                         <div>
                           <div style={{marginBottom: '15px'}}>
 
-                            {/* Searchable Sightseeing Dropdown */}
+                            {/* Single Searchable Sightseeing Dropdown */}
                             <div style={{marginBottom: '10px'}}>
-                              <input
-                                type="text"
-                                placeholder="🔍 Search sightseeings..."
-                                value={sightseeingSearch}
-                                onChange={(e) => setSightseeingSearch(e.target.value)}
-                                style={{...styles.input, width: '100%', marginBottom: '8px'}}
-                              />
                               <select
                                 id={`sightseeing-select-${dayIndex}`}
                                 style={{...styles.input, width: '100%'}}
@@ -3327,8 +3320,12 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                                     e.target.value = '';
                                   }
                                 }}
+                                onInput={(e) => {
+                                  setSightseeingSearch(e.target.value);
+                                }}
+                                value=""
                               >
-                                <option value="">Select sightseeing...</option>
+                                <option value="">🔍 Search and select sightseeing...</option>
                                 {filteredSightseeings.map(sightseeing => {
                                   const convertedAdultRate = sightseeing.currency === quoteData.currency ?
                                     sightseeing.rate :
@@ -3521,78 +3518,43 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                           <div style={{marginBottom: '15px'}}>
 
-                            {/* Dropdown Search */}
-                            
-                            <input
-                              type="text"
-                              placeholder="🔍 Search transfers..."
-                              value={transferSearch[dayIndex] || ''}
-                              onChange={(e) => setTransferSearch(prev => ({...prev, [dayIndex]: e.target.value}))}
-                              style={{...styles.input, width: '100%', marginBottom: '8px'}}
-                            />
+                            {/* Single Searchable Transfer Dropdown */}
                             
                             <select
-
                               id={`transfer-select-${dayIndex}`}
-
                               style={{...styles.input, width: '100%'}}
-
                               onChange={(e) => {
-
                                 const value = e.target.value;
-
                                 if (value) {
-
                                   const transfer = (filteredTransfers[dayIndex] || availableTransfers).find(t => t._id === value);
-
                                   if (transfer) {
-
                                     addTransferToDay(dayIndex, transfer);
-
                                     setTransferSearch(prev => ({
-
                                       ...prev,
-
                                       [dayIndex]: ''
-
                                     }));
-
                                   }
-
                                   e.target.value = '';
-
                                 }
-
                               }}
-
+                              onInput={(e) => {
+                                setTransferSearch(prev => ({...prev, [dayIndex]: e.target.value}));
+                              }}
+                              value=""
                             >
-
-                              <option value="">Select transfer...</option>
-
+                              <option value="">🔍 Search and select transfer...</option>
                               {(filteredTransfers[dayIndex] || availableTransfers).map(transfer => {
-
                                 // Convert rate to quote currency for display
-
                                 const convertedRate = transfer.currency === quoteData.currency ? 
-
                                   transfer.rate : 
-
                                   Math.round((transfer.rate / exchangeRates[transfer.currency]) * exchangeRates[quoteData.currency] * 100) / 100;
-
                                 
-
                                 return (
-
                                   <option key={transfer._id} value={transfer._id}>
-
                                     {transfer.name} - {quoteData.currency} {convertedRate}
-
                                   </option>
-
                                 );
-
                               })}
-
                             </select>
 
                             
