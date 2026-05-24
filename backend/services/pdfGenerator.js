@@ -1299,9 +1299,9 @@ class PDFGenerator {
                   // Sort by order field
                   allActivities.sort((a, b) => a.order - b.order);
                   
-                  // Extract names with order numbers in sorted order
+                  // Extract names in sorted order (without numbering for summary)
                   allActivities.forEach((activity, index) => {
-                    dayActivities.push(`${index + 1}. ${activity.name}`);
+                    dayActivities.push(activity.name);
                   });
                   
                   return dayActivities.length > 0 ? dayActivities.join(' + ') : 'Free day for leisure and exploration';
