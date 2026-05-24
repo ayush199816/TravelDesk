@@ -27,7 +27,8 @@ const quoteSchema = new mongoose.Schema({
       childRate: { type: Number, default: 0 },
       adultCount: { type: Number, default: 1 },
       childCount: { type: Number, default: 0 },
-      includeChild: { type: Boolean, default: true }
+      includeChild: { type: Boolean, default: true },
+      order: { type: Number, default: 0 }
     }],
     transfers: [{
       transfer: { type: mongoose.Schema.Types.ObjectId, ref: 'Transfer', required: true },
@@ -37,7 +38,8 @@ const quoteSchema = new mongoose.Schema({
       fromLocation: { type: String },
       toLocation: { type: String },
       vehicleType: { type: String },
-      capacity: { type: Number }
+      capacity: { type: Number },
+      order: { type: Number, default: 0 }
     }],
     hotels: [{
       hotel: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel', required: true },
