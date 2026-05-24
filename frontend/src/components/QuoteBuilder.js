@@ -927,6 +927,31 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
   };
 
+  // Function to get sorted sightseeings for a day
+  const getSortedSightseeings = (dayIndex) => {
+    const day = quoteData.days[dayIndex];
+    if (!day || !day.sightseeings) return [];
+    return [...day.sightseeings].sort((a, b) => (a.order || 0) - (b.order || 0));
+  };
+
+  // Function to get sorted transfers for a day
+  const getSortedTransfers = (dayIndex) => {
+    const day = quoteData.days[dayIndex];
+    if (!day || !day.transfers) return [];
+    return [...day.transfers].sort((a, b) => (a.order || 0) - (b.order || 0));
+  };
+
+  // Function to find original index of an activity in its array
+  const findOriginalIndex = (dayIndex, activityType, activityItem) => {
+    const day = quoteData.days[dayIndex];
+    if (!day) return -1;
+    
+    const array = activityType === 'sightseeing' ? day.sightseeings : day.transfers;
+    if (!array) return -1;
+    
+    return array.findIndex(item => item === activityItem);
+  };
+
   // Function to get all activities for a day combined and sorted by order
   const getDayActivities = (dayIndex) => {
     const day = quoteData.days[dayIndex];
@@ -3411,7 +3436,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                           
 
-                          {day.sightseeings.map((item, sightseeingIndex) => {
+                          {getSortedSightseeings(dayIndex).map((item, sightseeingIndex) => {
 
                             // Try to get sightseeing data from multiple sources
 
@@ -3491,7 +3516,10 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                                               checked={item.includeChild !== false}
 
-                                              onChange={(e) => updateSightseeingPax(dayIndex, sightseeingIndex, 'includeChild', e.target.checked)}
+                                              onChange={(e) => {
+                                                const originalIndex = findOriginalIndex(dayIndex, 'sightseeing', item);
+                                                updateSightseeingPax(dayIndex, originalIndex, 'includeChild', e.target.checked);
+                                              }}
 
                                               style={{margin: 0}}
 
@@ -3515,7 +3543,8 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                                       value={(item.order || 0) + 1}
                                       onChange={(e) => {
                                         console.log('Dropdown onChange:', e.target.value, 'Current order:', item.order);
-                                        updateActivityOrder(dayIndex, 'sightseeing', sightseeingIndex, e.target.value);
+                                        const originalIndex = findOriginalIndex(dayIndex, 'sightseeing', item);
+                                        updateActivityOrder(dayIndex, 'sightseeing', originalIndex, e.target.value);
                                       }}
                                       style={{
                                         width: '60px',
@@ -3535,7 +3564,10 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                                       style={styles.removeButton}
 
-                                      onClick={() => removeSightseeingFromDay(dayIndex, sightseeingIndex)}
+                                      onClick={() => {
+                                        const originalIndex = findOriginalIndex(dayIndex, 'sightseeing', item);
+                                        removeSightseeingFromDay(dayIndex, originalIndex);
+                                      }}
 
                                     >
 
@@ -3718,7 +3750,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                           
 
-                          {day.transfers.map((item, transferIndex) => {
+                          {getSortedTransfers(dayIndex).map((item, transferIndex) => {
 
                             // Try to get transfer data from multiple sources
 
@@ -3820,7 +3852,8 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                                       value={(item.order || 0) + 1}
                                       onChange={(e) => {
                                         console.log('Dropdown onChange (transfer):', e.target.value, 'Current order:', item.order);
-                                        updateActivityOrder(dayIndex, 'transfer', transferIndex, e.target.value);
+                                        const originalIndex = findOriginalIndex(dayIndex, 'transfer', item);
+                                        updateActivityOrder(dayIndex, 'transfer', originalIndex, e.target.value);
                                       }}
                                       style={{
                                         width: '60px',
@@ -3840,7 +3873,10 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                                       style={styles.removeButton}
 
-                                      onClick={() => removeTransferFromDay(dayIndex, transferIndex)}
+                                      onClick={() => {
+                                        const originalIndex = findOriginalIndex(dayIndex, 'transfer', item);
+                                        removeTransferFromDay(dayIndex, originalIndex);
+                                      }}
 
                                     >
 
