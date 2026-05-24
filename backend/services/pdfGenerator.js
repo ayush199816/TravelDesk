@@ -1136,12 +1136,16 @@ class PDFGenerator {
                     return sightseeing.name;
                   });
                   
-                  // Get transfer details
+                  // Get transfer details with proper names
                   const transferDetails = transfers.map((transfer, i) => {
-                    const fromLocation = transfer.fromLocation || transfer.transfer?.fromLocation || 'Pickup';
-                    const toLocation = transfer.toLocation || transfer.transfer?.toLocation || 'Drop-off';
-                    const vehicleType = transfer.vehicleType || transfer.transfer?.vehicleType || 'Sedan';
-                    return `Transfer: ${fromLocation} → ${toLocation} (${vehicleType})`;
+                    // Try to get the actual transfer name
+                    let transferName = 'Transfer';
+                    if (transfer.transfer && typeof transfer.transfer === 'object' && transfer.transfer.name) {
+                      transferName = transfer.transfer.name;
+                    } else if (transfer.name) {
+                      transferName = transfer.name;
+                    }
+                    return this.toTitleCase(transferName);
                   });
                   
                   // Combine activities and transfers
@@ -1278,15 +1282,6 @@ class PDFGenerator {
                   });
                   
                   (day.transfers || []).forEach((t, idx) => {
-                    // Debug: log transfer data structure
-                    console.log(`Transfer ${idx} data:`, {
-                      hasTransfer: !!t.transfer,
-                      transferType: typeof t.transfer,
-                      transferName: t.transfer?.name,
-                      tName: t.name,
-                      fullTransfer: t.transfer
-                    });
-                    
                     // Try to get transfer name from populated data or fallback
                     let transferName = 'Transfer';
                     if (t.transfer && typeof t.transfer === 'object' && t.transfer.name) {
