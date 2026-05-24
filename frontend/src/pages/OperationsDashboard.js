@@ -10,6 +10,7 @@ const OperationsDashboard = () => {
   
   // Debug user data
     const [menuOpen, setMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeView, setActiveView] = useState('tasks');
   const [leads, setLeads] = useState([]);
   const [filteredLeads, setFilteredLeads] = useState([]);
@@ -70,6 +71,10 @@ const OperationsDashboard = () => {
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
+  };
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
   };
 
   const getPageTitle = () => {
@@ -1481,13 +1486,13 @@ const styles = {
   return (
     <div className="operations-dashboard">
       {/* Modern Sidebar Navigation */}
-      <aside className={`sidebar ${menuOpen ? 'sidebar-open' : ''}`}>
+      <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
         <div className="sidebar-header">
           <div className="brand-logo">
             <div className="logo-icon">N</div>
             <span className="logo-text">NaviDesk</span>
           </div>
-          <button className="sidebar-toggle" onClick={toggleMenu}>
+          <button className="sidebar-toggle" onClick={toggleSidebar}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
             </svg>
@@ -1626,7 +1631,15 @@ const styles = {
       </aside>
 
       {/* Main Content Area */}
-      <div className="main-content">
+      <div className={`main-content ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+        {/* Floating Sidebar Toggle Button */}
+        {!sidebarOpen && (
+          <button className="floating-sidebar-toggle" onClick={toggleSidebar}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+            </svg>
+          </button>
+        )}
         {/* Top Header */}
         <header className="top-header">
           <div className="header-left">
