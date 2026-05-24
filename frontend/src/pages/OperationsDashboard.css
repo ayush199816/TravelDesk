@@ -328,7 +328,7 @@
 /* Page Content */
 .page-content {
   flex: 1;
-  padding: 32px;
+  padding: 20px;
   background: #f8fafc;
   overflow-y: auto;
 }
@@ -445,10 +445,9 @@
 
 /* Leads Table Styles - General */
 .leads-table-container {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  margin: 0 -8px;
-  padding: 0 8px;
+  overflow-x: visible;
+  margin: 0;
+  padding: 0;
   border-radius: 8px;
   background: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -456,9 +455,9 @@
 
 .leads-table {
   min-width: 1600px;
+  width: 1600px;
   font-size: 14px;
   border-collapse: collapse;
-  width: 100%;
 }
 
 .leads-table th {
