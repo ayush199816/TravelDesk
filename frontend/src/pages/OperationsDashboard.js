@@ -2485,43 +2485,49 @@ const styles = {
                 <p style={{margin: 0, color: '#6c757d', fontSize: '16px'}}>No sightseeings added yet. Click "Add New Sightseeing" to create your first sightseeing.</p>
               </div>
             ) : (
-              <div style={{overflowX: 'auto'}}>
-                <table style={styles.table}>
+              <div className="sightseeings-table-container">
+                <table className="sightseeings-table" style={styles.table}>
                   <thead>
                     <tr>
-                      <th style={styles.th}>Name</th>
-                      <th style={styles.th}>Location</th>
-                      <th style={styles.th}>Country</th>
-                      <th style={styles.th}>Duration</th>
-                      <th style={styles.th}>Adult Rate</th>
-                      <th style={styles.th}>Child Rate</th>
-                      <th style={styles.th}>Description</th>
-                      <th style={styles.th}>Actions</th>
+                      <th style={styles.th} className="name-cell">Name</th>
+                      <th style={styles.th} className="location-cell">Location</th>
+                      <th style={styles.th} className="country-cell">Country</th>
+                      <th style={styles.th} className="duration-cell">Duration</th>
+                      <th style={styles.th} className="adult-rate-cell">Adult Rate</th>
+                      <th style={styles.th} className="child-rate-cell">Child Rate</th>
+                      <th style={styles.th} className="description-cell">Description</th>
+                      <th style={styles.th} className="actions-cell">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredSightseeings.map(sightseeing => (
                       <tr key={sightseeing._id}>
-                        <td style={styles.td}>{sightseeing.name}</td>
-                        <td style={styles.td}>{sightseeing.location}</td>
-                        <td style={styles.td}>{sightseeing.country}</td>
-                        <td style={styles.td}>{sightseeing.duration || '-'}</td>
-                        <td style={styles.td}>{sightseeing.currency} {sightseeing.rate}</td>
-                        <td style={styles.td}>{sightseeing.currency} {sightseeing.childRate || 0}</td>
-                        <td style={styles.td}>{sightseeing.description}</td>
-                        <td style={styles.td}>
-                          <button 
-                            onClick={() => handleEditSightseeing(sightseeing)}
-                            style={styles.editButton}
-                          >
-                            Edit
-                          </button>
-                          <button 
-                            onClick={() => deleteSightseeing(sightseeing._id)}
-                            style={{...styles.deleteButton, marginLeft: '5px'}}
-                          >
-                            Delete
-                          </button>
+                        <td style={styles.td} className="name-cell">{sightseeing.name}</td>
+                        <td style={styles.td} className="location-cell">{sightseeing.location}</td>
+                        <td style={styles.td} className="country-cell">{sightseeing.country}</td>
+                        <td style={styles.td} className="duration-cell">{sightseeing.duration || '-'}</td>
+                        <td style={styles.td} className="adult-rate-cell">{sightseeing.currency} {sightseeing.rate}</td>
+                        <td style={styles.td} className="child-rate-cell">{sightseeing.currency} {sightseeing.childRate || 0}</td>
+                        <td style={styles.td} className="description-cell" title={sightseeing.description || ''}>
+                          {sightseeing.description ? (sightseeing.description.length > 50 ? sightseeing.description.substring(0, 50) + '...' : sightseeing.description) : '-'}
+                        </td>
+                        <td style={styles.td} className="actions-cell">
+                          <div className="action-buttons">
+                            <button 
+                              onClick={() => handleEditSightseeing(sightseeing)}
+                              className="edit-btn"
+                              style={styles.editButton}
+                            >
+                              Edit
+                            </button>
+                            <button 
+                              onClick={() => deleteSightseeing(sightseeing._id)}
+                              className="delete-btn"
+                              style={{...styles.deleteButton, marginLeft: '5px'}}
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -2607,45 +2613,51 @@ const styles = {
                 <p style={{margin: 0, color: '#6c757d', fontSize: '16px'}}>No transfers added yet. Click "Add New Transfer" to create your first transfer.</p>
               </div>
             ) : (
-              <div style={{overflowX: 'auto'}}>
-                <table style={styles.table}>
+              <div className="transfers-table-container">
+                <table className="transfers-table" style={styles.table}>
                   <thead>
                     <tr>
-                      <th style={styles.th}>Name</th>
-                      <th style={styles.th}>From</th>
-                      <th style={styles.th}>To</th>
-                      <th style={styles.th}>Country</th>
-                      <th style={styles.th}>Vehicle</th>
-                      <th style={styles.th}>Capacity</th>
-                      <th style={styles.th}>Rate</th>
-                      <th style={styles.th}>Description</th>
-                      <th style={styles.th}>Actions</th>
+                      <th style={styles.th} className="name-cell">Name</th>
+                      <th style={styles.th} className="from-cell">From</th>
+                      <th style={styles.th} className="to-cell">To</th>
+                      <th style={styles.th} className="country-cell">Country</th>
+                      <th style={styles.th} className="vehicle-cell">Vehicle</th>
+                      <th style={styles.th} className="capacity-cell">Capacity</th>
+                      <th style={styles.th} className="rate-cell">Rate</th>
+                      <th style={styles.th} className="description-cell">Description</th>
+                      <th style={styles.th} className="actions-cell">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredTransfers.map(transfer => (
                       <tr key={transfer._id}>
-                        <td style={styles.td}>{transfer.name}</td>
-                        <td style={styles.td}>{transfer.fromLocation}</td>
-                        <td style={styles.td}>{transfer.toLocation}</td>
-                        <td style={styles.td}>{transfer.country}</td>
-                        <td style={styles.td}>{transfer.vehicleType}</td>
-                        <td style={styles.td}>{transfer.capacity} persons</td>
-                        <td style={styles.td}>{transfer.currency} {transfer.rate}</td>
-                        <td style={styles.td}>{transfer.description}</td>
-                        <td style={styles.td}>
-                          <button 
-                            onClick={() => handleEditTransfer(transfer)}
-                            style={styles.editButton}
-                          >
-                            Edit
-                          </button>
-                          <button 
-                            onClick={() => deleteTransfer(transfer._id)}
-                            style={{...styles.deleteButton, marginLeft: '5px'}}
-                          >
-                            Delete
-                          </button>
+                        <td style={styles.td} className="name-cell">{transfer.name}</td>
+                        <td style={styles.td} className="from-cell">{transfer.fromLocation}</td>
+                        <td style={styles.td} className="to-cell">{transfer.toLocation}</td>
+                        <td style={styles.td} className="country-cell">{transfer.country}</td>
+                        <td style={styles.td} className="vehicle-cell">{transfer.vehicleType}</td>
+                        <td style={styles.td} className="capacity-cell">{transfer.capacity} persons</td>
+                        <td style={styles.td} className="rate-cell">{transfer.currency} {transfer.rate}</td>
+                        <td style={styles.td} className="description-cell" title={transfer.description || ''}>
+                          {transfer.description ? (transfer.description.length > 50 ? transfer.description.substring(0, 50) + '...' : transfer.description) : '-'}
+                        </td>
+                        <td style={styles.td} className="actions-cell">
+                          <div className="action-buttons">
+                            <button 
+                              onClick={() => handleEditTransfer(transfer)}
+                              className="edit-btn"
+                              style={styles.editButton}
+                            >
+                              Edit
+                            </button>
+                            <button 
+                              onClick={() => deleteTransfer(transfer._id)}
+                              className="delete-btn"
+                              style={{...styles.deleteButton, marginLeft: '5px'}}
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

@@ -686,6 +686,26 @@
   .leads-table {
     min-width: 1000px;
   }
+  
+  .sightseeings-table {
+    font-size: 14px;
+    min-width: 900px;
+  }
+  
+  .sightseeings-table th,
+  .sightseeings-table td {
+    padding: 8px 12px;
+  }
+  
+  .transfers-table {
+    font-size: 14px;
+    min-width: 950px;
+  }
+  
+  .transfers-table th,
+  .transfers-table td {
+    padding: 8px 12px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -834,6 +854,141 @@
     color: white;
   }
   
+  /* Sightseeings table mobile styles */
+  .sightseeings-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .sightseeings-table {
+    min-width: 1000px;
+    font-size: 14px;
+  }
+  
+  .sightseeings-table th,
+  .sightseeings-table td {
+    padding: 8px 12px;
+    white-space: nowrap;
+  }
+  
+  .sightseeings-table .name-cell {
+    min-width: 150px;
+  }
+  
+  .sightseeings-table .location-cell {
+    min-width: 120px;
+  }
+  
+  .sightseeings-table .country-cell {
+    min-width: 100px;
+  }
+  
+  .sightseeings-table .duration-cell {
+    min-width: 80px;
+  }
+  
+  .sightseeings-table .adult-rate-cell {
+    min-width: 100px;
+  }
+  
+  .sightseeings-table .child-rate-cell {
+    min-width: 100px;
+  }
+  
+  .sightseeings-table .description-cell {
+    min-width: 200px;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .sightseeings-table .actions-cell {
+    min-width: 150px;
+  }
+  
+  /* Transfers table mobile styles */
+  .transfers-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .transfers-table {
+    min-width: 1100px;
+    font-size: 14px;
+  }
+  
+  .transfers-table th,
+  .transfers-table td {
+    padding: 8px 12px;
+    white-space: nowrap;
+  }
+  
+  .transfers-table .name-cell {
+    min-width: 150px;
+  }
+  
+  .transfers-table .from-cell {
+    min-width: 120px;
+  }
+  
+  .transfers-table .to-cell {
+    min-width: 120px;
+  }
+  
+  .transfers-table .country-cell {
+    min-width: 100px;
+  }
+  
+  .transfers-table .vehicle-cell {
+    min-width: 100px;
+  }
+  
+  .transfers-table .capacity-cell {
+    min-width: 80px;
+  }
+  
+  .transfers-table .rate-cell {
+    min-width: 100px;
+  }
+  
+  .transfers-table .description-cell {
+    min-width: 200px;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .transfers-table .actions-cell {
+    min-width: 150px;
+  }
+  
+  /* Shared action buttons for sightseeings and transfers */
+  .action-buttons {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  
+  .action-buttons button {
+    padding: 6px 10px;
+    font-size: 11px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 50px;
+  }
+  
+  .action-buttons .edit-btn {
+    background-color: #ffc107;
+    color: #212529;
+  }
+  
+  .action-buttons .delete-btn {
+    background-color: #dc3545;
+    color: white;
+  }
+  
   /* Filter buttons mobile */
   .filter-buttons {
     display: flex;
@@ -961,17 +1116,108 @@
     font-size: 10px;
   }
   
-  /* Action buttons mobile */
+  /* Sightseeings table mobile styles */
+  .sightseeings-table {
+    font-size: 12px;
+    min-width: 900px;
+  }
+  
+  .sightseeings-table th,
+  .sightseeings-table td {
+    padding: 6px 8px;
+  }
+  
+  .sightseeings-table .name-cell {
+    min-width: 120px;
+  }
+  
+  .sightseeings-table .location-cell {
+    min-width: 100px;
+  }
+  
+  .sightseeings-table .country-cell {
+    min-width: 80px;
+  }
+  
+  .sightseeings-table .duration-cell {
+    min-width: 60px;
+  }
+  
+  .sightseeings-table .adult-rate-cell {
+    min-width: 80px;
+  }
+  
+  .sightseeings-table .child-rate-cell {
+    min-width: 80px;
+  }
+  
+  .sightseeings-table .description-cell {
+    min-width: 150px;
+    max-width: 180px;
+  }
+  
+  .sightseeings-table .actions-cell {
+    min-width: 120px;
+  }
+  
+  /* Transfers table mobile styles */
+  .transfers-table {
+    font-size: 12px;
+    min-width: 950px;
+  }
+  
+  .transfers-table th,
+  .transfers-table td {
+    padding: 6px 8px;
+  }
+  
+  .transfers-table .name-cell {
+    min-width: 120px;
+  }
+  
+  .transfers-table .from-cell {
+    min-width: 100px;
+  }
+  
+  .transfers-table .to-cell {
+    min-width: 100px;
+  }
+  
+  .transfers-table .country-cell {
+    min-width: 80px;
+  }
+  
+  .transfers-table .vehicle-cell {
+    min-width: 80px;
+  }
+  
+  .transfers-table .capacity-cell {
+    min-width: 60px;
+  }
+  
+  .transfers-table .rate-cell {
+    min-width: 80px;
+  }
+  
+  .transfers-table .description-cell {
+    min-width: 150px;
+    max-width: 180px;
+  }
+  
+  .transfers-table .actions-cell {
+    min-width: 120px;
+  }
+  
+  /* Action buttons mobile for sightseeings and transfers */
   .action-buttons {
-    display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 3px;
   }
   
   .action-buttons button {
     width: 100%;
-    padding: 6px 10px;
-    font-size: 12px;
+    padding: 4px 6px;
+    font-size: 10px;
   }
   
   /* Modal mobile */
