@@ -296,6 +296,19 @@
   gap: 16px;
 }
 
+/* Organization info styling in header-left */
+.header-left .org-info {
+  margin-left: 20px;
+  border-left: 1px solid #e2e8f0;
+  padding-left: 20px;
+}
+
+.header-left .org-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+}
+
 .mobile-menu-toggle {
   display: none;
   background: #f8fafc;
