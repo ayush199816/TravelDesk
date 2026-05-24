@@ -1243,7 +1243,8 @@ class PDFGenerator {
         activities.sort((a, b) => (a.order || 0) - (b.order || 0));
         const hasImages = dayImages.length > 0;
         
-        // Add day header
+        // Add day header with proper space management
+        const dayHeaderHeight = 150; // Increased height to account for spacing
         const dayHeader = `
           ${dayIndex > 0 ? '<div style="width: 100%; height: 2px; background: linear-gradient(90deg, ' + quoteTemplate.colors.primary + ' 0%, ' + quoteTemplate.colors.secondary + ' 100%); margin: 30px 0 20px 0; opacity: 0.5;"></div>' : ''}
           <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
@@ -1311,6 +1312,13 @@ class PDFGenerator {
           </div>
         `;
         
+        // Check if we need a new page - either not enough space or too close to bottom
+        if ((currentPageHeight + dayHeaderHeight > maxPageHeight || currentPageHeight > maxPageHeight - 200) && currentPageContent.length > 0) {
+          // Create new page before adding day header
+          allPages.push(currentPageContent.join(''));
+          currentPageContent = [];
+          currentPageHeight = 0;
+        }
         addToPage(dayHeader, 120);
         
         if (activities.length === 0) {
