@@ -1207,7 +1207,9 @@ class PDFGenerator {
         }
         dayImages = [...new Set(dayImages)];
         
+        // Combine and sort activities by order
         const activities = [...(day.sightseeings || []), ...(day.transfers || [])];
+        activities.sort((a, b) => (a.order || 0) - (b.order || 0));
         const hasImages = dayImages.length > 0;
         
         // Add day header
@@ -1234,44 +1236,36 @@ class PDFGenerator {
                 ${(() => {
                   const dayActivities = [];
                   
-                  let sightseeingIndex = 0;
-                  let transferIndex = 0;
-                  let totalItems = Math.max(
-                    day.sightseeings?.length || 0, 
-                    day.transfers?.length || 0
-                  );
+                  // Combine sightseeings and transfers with their order
+                  const allActivities = [];
                   
-                  for (let i = 0; i < totalItems; i++) {
-                    if (day.sightseeings && day.sightseeings[i]) {
-                      const sightseeing = day.sightseeings[i].sightseeing && typeof day.sightseeings[i].sightseeing === 'object' 
-                        ? day.sightseeings[i].sightseeing 
-                        : { name: day.sightseeings[i].name || `Activity ${i + 1}` };
-                      dayActivities.push(sightseeing.name);
-                    }
-                    
-                    if (day.transfers && day.transfers[i]) {
-                      const transfer = day.transfers[i];
-                      const transferName = transfer.transfer?.name || transfer.name || 'Transfer';
-                      dayActivities.push(transferName);
-                    }
-                  }
+                  (day.sightseeings || []).forEach((s, idx) => {
+                    const sightseeing = s.sightseeing && typeof s.sightseeing === 'object' 
+                      ? s.sightseeing 
+                      : { name: s.name || `Activity ${idx + 1}` };
+                    allActivities.push({
+                      name: sightseeing.name,
+                      order: s.order || 0,
+                      type: 'sightseeing'
+                    });
+                  });
                   
-                  if (day.sightseeings && day.sightseeings.length > totalItems) {
-                    for (let i = totalItems; i < day.sightseeings.length; i++) {
-                      const sightseeing = day.sightseeings[i].sightseeing && typeof day.sightseeings[i].sightseeing === 'object' 
-                        ? day.sightseeings[i].sightseeing 
-                        : { name: day.sightseeings[i].name || `Activity ${i + 1}` };
-                      dayActivities.push(sightseeing.name);
-                    }
-                  }
+                  (day.transfers || []).forEach((t, idx) => {
+                    const transferName = t.transfer?.name || t.name || 'Transfer';
+                    allActivities.push({
+                      name: transferName,
+                      order: t.order || 0,
+                      type: 'transfer'
+                    });
+                  });
                   
-                  if (day.transfers && day.transfers.length > totalItems) {
-                    for (let i = totalItems; i < day.transfers.length; i++) {
-                      const transfer = day.transfers[i];
-                      const transferName = transfer.transfer?.name || transfer.name || 'Transfer';
-                      dayActivities.push(transferName);
-                    }
-                  }
+                  // Sort by order field
+                  allActivities.sort((a, b) => a.order - b.order);
+                  
+                  // Extract names in sorted order
+                  allActivities.forEach(activity => {
+                    dayActivities.push(activity.name);
+                  });
                   
                   return dayActivities.length > 0 ? dayActivities.join(' + ') : 'Free day for leisure and exploration';
                 })()}

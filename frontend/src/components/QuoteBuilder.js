@@ -411,7 +411,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
             ...day,
 
-            sightseeings: day.sightseeings.map(item => ({
+            sightseeings: day.sightseeings.map((item, idx) => ({
 
               ...item,
 
@@ -419,17 +419,21 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
               childRate: Math.round((item.childRate / exchangeRates[oldCurrency]) * exchangeRates[newCurrency] * 100) / 100,
 
-              currency: newCurrency
+              currency: newCurrency,
+
+              order: item.order !== undefined ? item.order : idx
 
             })),
 
-            transfers: day.transfers.map(item => ({
+            transfers: day.transfers.map((item, idx) => ({
 
               ...item,
 
               rate: Math.round((item.rate / exchangeRates[oldCurrency]) * exchangeRates[newCurrency] * 100) / 100,
 
-              currency: newCurrency
+              currency: newCurrency,
+
+              order: item.order !== undefined ? item.order : (day.sightseeings.length + idx)
 
             }))
 
@@ -549,9 +553,15 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
           date: new Date(d).toISOString().split('T')[0],
 
-          sightseeings: existingDay?.sightseeings || [],
+          sightseeings: (existingDay?.sightseeings || []).map((item, idx) => ({
+            ...item,
+            order: item.order !== undefined ? item.order : idx
+          })),
 
-          transfers: existingDay?.transfers || [],
+          transfers: (existingDay?.transfers || []).map((item, idx) => ({
+            ...item,
+            order: item.order !== undefined ? item.order : ((existingDay?.sightseeings?.length || 0) + idx)
+          })),
 
           hotels: existingDay?.hotels || []
 
@@ -645,7 +655,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
           ...day,
 
-          sightseeings: day.sightseeings.map(item => ({
+          sightseeings: day.sightseeings.map((item, idx) => ({
 
             ...item,
 
@@ -653,7 +663,9 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
             childCount: item.childCount || quote.childPax || 0,
 
-            includeChild: item.includeChild !== undefined ? item.includeChild : true
+            includeChild: item.includeChild !== undefined ? item.includeChild : true,
+
+            order: item.order !== undefined ? item.order : idx
 
           }))
 
@@ -781,7 +793,9 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
           childCount: prev.childPax,
 
-          includeChild: true
+          includeChild: true,
+
+          order: (newDays[dayIndex].sightseeings.length + (newDays[dayIndex].transfers?.length || 0))
 
         });
 
@@ -883,7 +897,9 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
           vehicleType: transfer.vehicleType,
 
-          capacity: transfer.capacity
+          capacity: transfer.capacity,
+
+          order: (newDays[dayIndex].sightseeings.length + (newDays[dayIndex].transfers?.length || 0))
 
         });
 
@@ -909,6 +925,73 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
     });
 
+  };
+
+  // Function to get all activities for a day combined and sorted by order
+  const getDayActivities = (dayIndex) => {
+    const day = quoteData.days[dayIndex];
+    const activities = [];
+    
+    (day.sightseeings || []).forEach((s, idx) => {
+      activities.push({ ...s, type: 'sightseeing', index: idx, arrayType: 'sightseeings' });
+    });
+    
+    (day.transfers || []).forEach((t, idx) => {
+      activities.push({ ...t, type: 'transfer', index: idx, arrayType: 'transfers' });
+    });
+    
+    return activities.sort((a, b) => (a.order || 0) - (b.order || 0));
+  };
+
+  // Function to move an activity up in order
+  const moveActivityUp = (dayIndex, activityType, activityIndex) => {
+    setQuoteData(prev => {
+      const newDays = [...prev.days];
+      const day = newDays[dayIndex];
+      
+      const activities = getDayActivities(dayIndex);
+      const currentActivity = activities.find(a => a.type === activityType && a.index === activityIndex);
+      
+      if (!currentActivity || currentActivity.order <= 0) return prev;
+      
+      // Find the activity with order - 1
+      const prevActivity = activities.find(a => (a.order || 0) === currentActivity.order - 1);
+      
+      if (prevActivity) {
+        // Swap orders
+        const tempOrder = currentActivity.order;
+        newDays[dayIndex][currentActivity.arrayType][currentActivity.index].order = prevActivity.order;
+        newDays[dayIndex][prevActivity.arrayType][prevActivity.index].order = tempOrder;
+      }
+      
+      return { ...prev, days: newDays };
+    });
+  };
+
+  // Function to move an activity down in order
+  const moveActivityDown = (dayIndex, activityType, activityIndex) => {
+    setQuoteData(prev => {
+      const newDays = [...prev.days];
+      const day = newDays[dayIndex];
+      
+      const activities = getDayActivities(dayIndex);
+      const currentActivity = activities.find(a => a.type === activityType && a.index === activityIndex);
+      const maxOrder = activities.length - 1;
+      
+      if (!currentActivity || currentActivity.order >= maxOrder) return prev;
+      
+      // Find the activity with order + 1
+      const nextActivity = activities.find(a => (a.order || 0) === currentActivity.order + 1);
+      
+      if (nextActivity) {
+        // Swap orders
+        const tempOrder = currentActivity.order;
+        newDays[dayIndex][currentActivity.arrayType][currentActivity.index].order = nextActivity.order;
+        newDays[dayIndex][nextActivity.arrayType][nextActivity.index].order = tempOrder;
+      }
+      
+      return { ...prev, days: newDays };
+    });
   };
 
 
@@ -3455,19 +3538,51 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                                   </div>
 
-                                  <button
+                                  <div style={{display: 'flex', gap: '5px'}}>
+                                    <button
+                                      type="button"
+                                      onClick={() => moveActivityUp(dayIndex, 'sightseeing', sightseeingIndex)}
+                                      disabled={item.order === 0}
+                                      style={{
+                                        ...styles.removeButton,
+                                        opacity: item.order === 0 ? 0.5 : 1,
+                                        cursor: item.order === 0 ? 'not-allowed' : 'pointer',
+                                        padding: '5px 10px',
+                                        fontSize: '14px'
+                                      }}
+                                      title="Move up"
+                                    >
+                                      ↑
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => moveActivityDown(dayIndex, 'sightseeing', sightseeingIndex)}
+                                      disabled={item.order === (day.sightseeings.length + day.transfers.length - 1)}
+                                      style={{
+                                        ...styles.removeButton,
+                                        opacity: item.order === (day.sightseeings.length + day.transfers.length - 1) ? 0.5 : 1,
+                                        cursor: item.order === (day.sightseeings.length + day.transfers.length - 1) ? 'not-allowed' : 'pointer',
+                                        padding: '5px 10px',
+                                        fontSize: '14px'
+                                      }}
+                                      title="Move down"
+                                    >
+                                      ↓
+                                    </button>
+                                    <button
 
-                                    type="button"
+                                      type="button"
 
-                                    style={styles.removeButton}
+                                      style={styles.removeButton}
 
-                                    onClick={() => removeSightseeingFromDay(dayIndex, sightseeingIndex)}
+                                      onClick={() => removeSightseeingFromDay(dayIndex, sightseeingIndex)}
 
-                                  >
+                                    >
 
-                                    Remove
+                                      Remove
 
-                                  </button>
+                                    </button>
+                                  </div>
 
                                 </div>
 
@@ -3739,19 +3854,51 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                                   </div>
 
-                                  <button
+                                  <div style={{display: 'flex', gap: '5px'}}>
+                                    <button
+                                      type="button"
+                                      onClick={() => moveActivityUp(dayIndex, 'transfer', transferIndex)}
+                                      disabled={item.order === 0}
+                                      style={{
+                                        ...styles.removeButton,
+                                        opacity: item.order === 0 ? 0.5 : 1,
+                                        cursor: item.order === 0 ? 'not-allowed' : 'pointer',
+                                        padding: '5px 10px',
+                                        fontSize: '14px'
+                                      }}
+                                      title="Move up"
+                                    >
+                                      ↑
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => moveActivityDown(dayIndex, 'transfer', transferIndex)}
+                                      disabled={item.order === (day.sightseeings.length + day.transfers.length - 1)}
+                                      style={{
+                                        ...styles.removeButton,
+                                        opacity: item.order === (day.sightseeings.length + day.transfers.length - 1) ? 0.5 : 1,
+                                        cursor: item.order === (day.sightseeings.length + day.transfers.length - 1) ? 'not-allowed' : 'pointer',
+                                        padding: '5px 10px',
+                                        fontSize: '14px'
+                                      }}
+                                      title="Move down"
+                                    >
+                                      ↓
+                                    </button>
+                                    <button
 
-                                    type="button"
+                                      type="button"
 
-                                    style={styles.removeButton}
+                                      style={styles.removeButton}
 
-                                    onClick={() => removeTransferFromDay(dayIndex, transferIndex)}
+                                      onClick={() => removeTransferFromDay(dayIndex, transferIndex)}
 
-                                  >
+                                    >
 
-                                    Remove
+                                      Remove
 
-                                  </button>
+                                    </button>
+                                  </div>
 
                                 </div>
 
