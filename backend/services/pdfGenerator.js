@@ -1201,7 +1201,7 @@ class PDFGenerator {
       let allPages = [];
       let currentPageContent = [];
       let currentPageHeight = 0;
-      const maxPageHeight = 1000; // Approximate max content height per page in px
+      const maxPageHeight = 900; // Reduced max content height per page in px for better pagination
       let globalActivityIndex = 1;
       
       const addToPage = (content, height) => {
@@ -1313,7 +1313,7 @@ class PDFGenerator {
         `;
         
         // Check if we need a new page - either not enough space or too close to bottom
-        if ((currentPageHeight + dayHeaderHeight > maxPageHeight || currentPageHeight > maxPageHeight - 200) && currentPageContent.length > 0) {
+        if ((currentPageHeight + dayHeaderHeight > maxPageHeight || currentPageHeight > maxPageHeight - 150) && currentPageContent.length > 0) {
           // Create new page before adding day header
           allPages.push(currentPageContent.join(''));
           currentPageContent = [];
