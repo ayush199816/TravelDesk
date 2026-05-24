@@ -970,31 +970,20 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
   // Function to update activity order directly
   const updateActivityOrder = (dayIndex, activityType, activityIndex, newOrder) => {
-    console.log('Updating order:', { dayIndex, activityType, activityIndex, newOrder });
     setQuoteData(prev => {
       const newDays = [...prev.days];
       const activities = getDayActivities(dayIndex);
       const currentActivity = activities.find(a => a.type === activityType && a.index === activityIndex);
       
-      console.log('Current activity found:', currentActivity);
-      
       if (!currentActivity) return prev;
       
       const orderNumber = parseInt(newOrder);
       
-      console.log('Parsed order number:', orderNumber);
-      
       // Allow orders from 1 to 20
-      if (isNaN(orderNumber) || orderNumber < 1 || orderNumber > 20) {
-        console.log('Invalid order number, returning prev');
-        return prev;
-      }
+      if (isNaN(orderNumber) || orderNumber < 1 || orderNumber > 20) return prev;
       
       // Simply update the activity order (user will manage ordering manually)
       newDays[dayIndex][currentActivity.arrayType][currentActivity.index].order = orderNumber - 1;
-      
-      console.log('Updated order to:', orderNumber - 1);
-      console.log('Updated activity:', newDays[dayIndex][currentActivity.arrayType][currentActivity.index]);
       
       return { ...prev, days: newDays };
     });
@@ -3542,7 +3531,6 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                                     <select
                                       value={(item.order || 0) + 1}
                                       onChange={(e) => {
-                                        console.log('Dropdown onChange:', e.target.value, 'Current order:', item.order);
                                         const originalIndex = findOriginalIndex(dayIndex, 'sightseeing', item);
                                         updateActivityOrder(dayIndex, 'sightseeing', originalIndex, e.target.value);
                                       }}
@@ -3851,7 +3839,6 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                                     <select
                                       value={(item.order || 0) + 1}
                                       onChange={(e) => {
-                                        console.log('Dropdown onChange (transfer):', e.target.value, 'Current order:', item.order);
                                         const originalIndex = findOriginalIndex(dayIndex, 'transfer', item);
                                         updateActivityOrder(dayIndex, 'transfer', originalIndex, e.target.value);
                                       }}
