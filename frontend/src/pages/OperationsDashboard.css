@@ -41,7 +41,7 @@
 /* Floating Sidebar Toggle Button */
 .floating-sidebar-toggle {
   position: fixed;
-  top: 60px;
+  top: 45px;
   left: 60px;
   z-index: 1001;
   background: #667eea;
@@ -285,7 +285,7 @@
 .main-content.sidebar-closed .top-header {
   width: 100vw;
   margin-left: 0;
-  padding-left: 100px; /* Adjusted for button moved up and left */
+  padding-left: 90px; /* Adjusted for button moved up */
   padding-right: 32px;
   box-sizing: border-box;
 }
