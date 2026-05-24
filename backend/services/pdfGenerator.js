@@ -1341,7 +1341,7 @@ class PDFGenerator {
               const fromLocation = item.fromLocation || item.transfer?.fromLocation || 'Pickup Point';
               const toLocation = item.toLocation || item.transfer?.toLocation || 'Drop Point';
               activityData = {
-                name: `${index + 1}. ${this.toTitleCase(transferName)}`,
+                name: this.toTitleCase(transferName),
                 description: item.transfer?.description || item.description || 'Comfortable transfer between locations',
                 duration: item.transfer?.duration || item.duration || 'Flexible timing',
                 location: `${fromLocation} to ${toLocation}`,
@@ -1357,8 +1357,8 @@ class PDFGenerator {
                   location: item.sightseeingLocation || item.location || 'To be confirmed',
                   images: item.images || []
                 };
-              // Apply title case to the name and add order number
-              sightseeingObj.name = `${index + 1}. ${this.toTitleCase(sightseeingObj.name)}`;
+              // Apply title case to the name
+              sightseeingObj.name = this.toTitleCase(sightseeingObj.name);
               activityData = sightseeingObj;
             }
             
