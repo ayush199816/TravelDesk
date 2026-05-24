@@ -952,10 +952,10 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
       
       if (!currentActivity) return prev;
       
-      const maxOrder = activities.length - 1;
       const orderNumber = parseInt(newOrder);
       
-      if (isNaN(orderNumber) || orderNumber < 1 || orderNumber > maxOrder + 1) return prev;
+      // Allow orders from 1 to 20
+      if (isNaN(orderNumber) || orderNumber < 1 || orderNumber > 20) return prev;
       
       // Update the activity order
       newDays[dayIndex][currentActivity.arrayType][currentActivity.index].order = orderNumber - 1;
@@ -3514,20 +3514,21 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                                   <div style={{display: 'flex', gap: '5px', alignItems: 'center'}}>
                                     <label style={{fontSize: '12px', fontWeight: '600'}}>Order:</label>
-                                    <input
-                                      type="number"
-                                      min="1"
-                                      max={day.sightseeings.length + day.transfers.length}
+                                    <select
                                       value={(item.order || 0) + 1}
                                       onChange={(e) => updateActivityOrder(dayIndex, 'sightseeing', sightseeingIndex, e.target.value)}
                                       style={{
-                                        width: '50px',
+                                        width: '60px',
                                         padding: '5px',
                                         border: '1px solid #ced4da',
                                         borderRadius: '4px',
                                         textAlign: 'center'
                                       }}
-                                    />
+                                    >
+                                      {Array.from({length: 20}, (_, i) => (
+                                        <option key={i + 1} value={i + 1}>{i + 1}</option>
+                                      ))}
+                                    </select>
                                     <button
 
                                       type="button"
@@ -3815,20 +3816,21 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                                   <div style={{display: 'flex', gap: '5px', alignItems: 'center'}}>
                                     <label style={{fontSize: '12px', fontWeight: '600'}}>Order:</label>
-                                    <input
-                                      type="number"
-                                      min="1"
-                                      max={day.sightseeings.length + day.transfers.length}
+                                    <select
                                       value={(item.order || 0) + 1}
                                       onChange={(e) => updateActivityOrder(dayIndex, 'transfer', transferIndex, e.target.value)}
                                       style={{
-                                        width: '50px',
+                                        width: '60px',
                                         padding: '5px',
                                         border: '1px solid #ced4da',
                                         borderRadius: '4px',
                                         textAlign: 'center'
                                       }}
-                                    />
+                                    >
+                                      {Array.from({length: 20}, (_, i) => (
+                                        <option key={i + 1} value={i + 1}>{i + 1}</option>
+                                      ))}
+                                    </select>
                                     <button
 
                                       type="button"
