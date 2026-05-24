@@ -41,7 +41,7 @@
 /* Floating Sidebar Toggle Button */
 .floating-sidebar-toggle {
   position: fixed;
-  top: 20px;
+  top: 80px;
   left: 20px;
   z-index: 1001;
   background: #667eea;
@@ -207,7 +207,7 @@
 .main-content.sidebar-closed .page-content {
   width: 100vw; /* Use full viewport width */
   margin-left: 0;
-  padding-left: 24px; /* Account for floating button space */
+  padding-left: 80px; /* Account for floating button space */
 }
 
 /* Adjust table container for full width when sidebar is closed */
