@@ -1278,6 +1278,15 @@ class PDFGenerator {
                   });
                   
                   (day.transfers || []).forEach((t, idx) => {
+                    // Debug: log transfer data structure
+                    console.log(`Transfer ${idx} data:`, {
+                      hasTransfer: !!t.transfer,
+                      transferType: typeof t.transfer,
+                      transferName: t.transfer?.name,
+                      tName: t.name,
+                      fullTransfer: t.transfer
+                    });
+                    
                     // Try to get transfer name from populated data or fallback
                     let transferName = 'Transfer';
                     if (t.transfer && typeof t.transfer === 'object' && t.transfer.name) {
