@@ -203,6 +203,70 @@
   width: 100%; /* Use full available width */
 }
 
+/* Full width when sidebar is closed */
+.main-content.sidebar-closed .page-content {
+  width: 100vw; /* Use full viewport width */
+  margin-left: 0;
+  padding-left: 24px; /* Account for floating button space */
+}
+
+/* Adjust table container for full width when sidebar is closed */
+.main-content.sidebar-closed .leads-table-container {
+  width: 100%;
+  margin: 0;
+}
+
+/* Expand table to use more space when sidebar is closed */
+.main-content.sidebar-closed .leads-table {
+  min-width: 2200px; /* Even wider when sidebar is closed */
+}
+
+/* Wider columns when sidebar is closed */
+.main-content.sidebar-closed .leads-table .lead-number-cell {
+  min-width: 160px;
+}
+
+.main-content.sidebar-closed .leads-table .name-cell {
+  min-width: 220px;
+}
+
+.main-content.sidebar-closed .leads-table .email-cell {
+  min-width: 300px;
+}
+
+.main-content.sidebar-closed .leads-table .phone-cell {
+  min-width: 170px;
+}
+
+.main-content.sidebar-closed .leads-table .status-cell {
+  min-width: 160px;
+}
+
+.main-content.sidebar-closed .leads-table .assigned-cell {
+  min-width: 220px;
+}
+
+.main-content.sidebar-closed .leads-table .requirements-cell {
+  min-width: 360px;
+  max-width: 450px;
+}
+
+.main-content.sidebar-closed .leads-table .country-cell {
+  min-width: 160px;
+}
+
+.main-content.sidebar-closed .leads-table .followup-cell {
+  min-width: 160px;
+}
+
+.main-content.sidebar-closed .leads-table .travel-date-cell {
+  min-width: 160px;
+}
+
+.main-content.sidebar-closed .leads-table .actions-cell {
+  min-width: 260px;
+}
+
 /* Top Header */
 .top-header {
   background: white;
