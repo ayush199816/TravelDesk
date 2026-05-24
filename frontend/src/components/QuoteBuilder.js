@@ -150,6 +150,10 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
   const [filteredTransfers, setFilteredTransfers] = useState({});
 
+  // Dropdown visibility states
+  const [showSightseeingDropdown, setShowSightseeingDropdown] = useState({});
+  const [showTransferDropdown, setShowTransferDropdown] = useState({});
+
   const [filteredHotels, setFilteredHotels] = useState([]);
 
   const [showTempHotelForm, setShowTempHotelForm] = useState(false);
@@ -3304,43 +3308,77 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                         <div>
                           <div style={{marginBottom: '15px'}}>
 
-                            {/* Single Searchable Sightseeing Dropdown */}
-                            <div style={{marginBottom: '10px'}}>
-                              <select
-                                id={`sightseeing-select-${dayIndex}`}
+                            {/* Custom Searchable Sightseeing Dropdown */}
+                            <div style={{position: 'relative', marginBottom: '10px'}}>
+                              <input
+                                type="text"
+                                placeholder="🔍 Search and select sightseeing..."
+                                value={sightseeingSearch}
+                                onChange={(e) => setSightseeingSearch(e.target.value)}
+                                onFocus={() => setShowSightseeingDropdown(prev => ({...prev, [dayIndex]: true}))}
+                                onBlur={() => {
+                                  // Delay hiding to allow click on option
+                                  setTimeout(() => {
+                                    setShowSightseeingDropdown(prev => ({...prev, [dayIndex]: false}));
+                                  }, 200);
+                                }}
                                 style={{...styles.input, width: '100%'}}
-                                onChange={(e) => {
-                                  const value = e.target.value;
-                                  if (value) {
-                                    const sightseeing = filteredSightseeings.find(s => s._id === value);
-                                    if (sightseeing) {
-                                      addSightseeingToDay(dayIndex, sightseeing, sightseeing.childRate || 0);
-                                      setSightseeingSearch('');
-                                    }
-                                    e.target.value = '';
-                                  }
-                                }}
-                                onInput={(e) => {
-                                  setSightseeingSearch(e.target.value);
-                                }}
-                                value=""
-                              >
-                                <option value="">🔍 Search and select sightseeing...</option>
-                                {filteredSightseeings.map(sightseeing => {
-                                  const convertedAdultRate = sightseeing.currency === quoteData.currency ?
-                                    sightseeing.rate :
-                                    Math.round((sightseeing.rate / exchangeRates[sightseeing.currency]) * exchangeRates[quoteData.currency] * 100) / 100;
-                                  const convertedChildRate = sightseeing.currency === quoteData.currency ?
-                                    (sightseeing.childRate || 0) :
-                                    Math.round(((sightseeing.childRate || 0) / exchangeRates[sightseeing.currency]) * exchangeRates[quoteData.currency] * 100) / 100;
+                              />
+                              
+                              {showSightseeingDropdown[dayIndex] && (
+                                <div style={{
+                                  position: 'absolute',
+                                  top: '100%',
+                                  left: 0,
+                                  right: 0,
+                                  backgroundColor: 'white',
+                                  border: '1px solid #ddd',
+                                  borderTop: 'none',
+                                  maxHeight: '200px',
+                                  overflowY: 'auto',
+                                  zIndex: 1000,
+                                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                                }}>
+                                  {filteredSightseeings.length === 0 ? (
+                                    <div style={{padding: '10px', color: '#666'}}>
+                                      No sightseeings found
+                                    </div>
+                                  ) : (
+                                    filteredSightseeings.map(sightseeing => {
+                                      const convertedAdultRate = sightseeing.currency === quoteData.currency ?
+                                        sightseeing.rate :
+                                        Math.round((sightseeing.rate / exchangeRates[sightseeing.currency]) * exchangeRates[quoteData.currency] * 100) / 100;
+                                      const convertedChildRate = sightseeing.currency === quoteData.currency ?
+                                        (sightseeing.childRate || 0) :
+                                        Math.round(((sightseeing.childRate || 0) / exchangeRates[sightseeing.currency]) * exchangeRates[quoteData.currency] * 100) / 100;
 
-                                  return (
-                                    <option key={sightseeing._id} value={sightseeing._id}>
-                                      {sightseeing.name} - Adult: {quoteData.currency} {convertedAdultRate}, Child: {quoteData.currency} {convertedChildRate}
-                                    </option>
-                                  );
-                                })}
-                              </select>
+                                      return (
+                                        <div
+                                          key={sightseeing._id}
+                                          onClick={() => {
+                                            addSightseeingToDay(dayIndex, sightseeing, sightseeing.childRate || 0);
+                                            setSightseeingSearch('');
+                                            setShowSightseeingDropdown(prev => ({...prev, [dayIndex]: false}));
+                                          }}
+                                          style={{
+                                            padding: '10px',
+                                            cursor: 'pointer',
+                                            borderBottom: '1px solid #eee',
+                                            backgroundColor: 'white'
+                                          }}
+                                          onMouseEnter={(e) => e.target.style.backgroundColor = '#f5f5f5'}
+                                          onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+                                        >
+                                          <div style={{fontWeight: 'bold'}}>{sightseeing.name}</div>
+                                          <div style={{fontSize: '12px', color: '#666'}}>
+                                            Adult: {quoteData.currency} {convertedAdultRate}, Child: {quoteData.currency} {convertedChildRate}
+                                          </div>
+                                        </div>
+                                      );
+                                    })
+                                  )}
+                                </div>
+                              )}
                             </div>
 
                           </div>
@@ -3518,44 +3556,77 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                           <div style={{marginBottom: '15px'}}>
 
-                            {/* Single Searchable Transfer Dropdown */}
+                            {/* Custom Searchable Transfer Dropdown */}
                             
-                            <select
-                              id={`transfer-select-${dayIndex}`}
-                              style={{...styles.input, width: '100%'}}
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                if (value) {
-                                  const transfer = (filteredTransfers[dayIndex] || availableTransfers).find(t => t._id === value);
-                                  if (transfer) {
-                                    addTransferToDay(dayIndex, transfer);
-                                    setTransferSearch(prev => ({
-                                      ...prev,
-                                      [dayIndex]: ''
-                                    }));
-                                  }
-                                  e.target.value = '';
-                                }
-                              }}
-                              onInput={(e) => {
-                                setTransferSearch(prev => ({...prev, [dayIndex]: e.target.value}));
-                              }}
-                              value=""
-                            >
-                              <option value="">🔍 Search and select transfer...</option>
-                              {(filteredTransfers[dayIndex] || availableTransfers).map(transfer => {
-                                // Convert rate to quote currency for display
-                                const convertedRate = transfer.currency === quoteData.currency ? 
-                                  transfer.rate : 
-                                  Math.round((transfer.rate / exchangeRates[transfer.currency]) * exchangeRates[quoteData.currency] * 100) / 100;
-                                
-                                return (
-                                  <option key={transfer._id} value={transfer._id}>
-                                    {transfer.name} - {quoteData.currency} {convertedRate}
-                                  </option>
-                                );
-                              })}
-                            </select>
+                            <div style={{position: 'relative', marginBottom: '10px'}}>
+                              <input
+                                type="text"
+                                placeholder="🔍 Search and select transfer..."
+                                value={transferSearch[dayIndex] || ''}
+                                onChange={(e) => setTransferSearch(prev => ({...prev, [dayIndex]: e.target.value}))}
+                                onFocus={() => setShowTransferDropdown(prev => ({...prev, [dayIndex]: true}))}
+                                onBlur={() => {
+                                  // Delay hiding to allow click on option
+                                  setTimeout(() => {
+                                    setShowTransferDropdown(prev => ({...prev, [dayIndex]: false}));
+                                  }, 200);
+                                }}
+                                style={{...styles.input, width: '100%'}}
+                              />
+                              
+                              {showTransferDropdown[dayIndex] && (
+                                <div style={{
+                                  position: 'absolute',
+                                  top: '100%',
+                                  left: 0,
+                                  right: 0,
+                                  backgroundColor: 'white',
+                                  border: '1px solid #ddd',
+                                  borderTop: 'none',
+                                  maxHeight: '200px',
+                                  overflowY: 'auto',
+                                  zIndex: 1000,
+                                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                                }}>
+                                  {(filteredTransfers[dayIndex] || availableTransfers).length === 0 ? (
+                                    <div style={{padding: '10px', color: '#666'}}>
+                                      No transfers found
+                                    </div>
+                                  ) : (
+                                    (filteredTransfers[dayIndex] || availableTransfers).map(transfer => {
+                                      // Convert rate to quote currency for display
+                                      const convertedRate = transfer.currency === quoteData.currency ? 
+                                        transfer.rate : 
+                                        Math.round((transfer.rate / exchangeRates[transfer.currency]) * exchangeRates[quoteData.currency] * 100) / 100;
+                                      
+                                      return (
+                                        <div
+                                          key={transfer._id}
+                                          onClick={() => {
+                                            addTransferToDay(dayIndex, transfer);
+                                            setTransferSearch(prev => ({...prev, [dayIndex]: ''}));
+                                            setShowTransferDropdown(prev => ({...prev, [dayIndex]: false}));
+                                          }}
+                                          style={{
+                                            padding: '10px',
+                                            cursor: 'pointer',
+                                            borderBottom: '1px solid #eee',
+                                            backgroundColor: 'white'
+                                          }}
+                                          onMouseEnter={(e) => e.target.style.backgroundColor = '#f5f5f5'}
+                                          onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+                                        >
+                                          <div style={{fontWeight: 'bold'}}>{transfer.name}</div>
+                                          <div style={{fontSize: '12px', color: '#666'}}>
+                                            {quoteData.currency} {convertedRate}
+                                          </div>
+                                        </div>
+                                      );
+                                    })
+                                  )}
+                                </div>
+                              )}
+                            </div>
 
                             
 
