@@ -943,52 +943,36 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
     return activities.sort((a, b) => (a.order || 0) - (b.order || 0));
   };
 
-  // Function to move an activity up in order
-  const moveActivityUp = (dayIndex, activityType, activityIndex) => {
+  // Function to update activity order directly
+  const updateActivityOrder = (dayIndex, activityType, activityIndex, newOrder) => {
     setQuoteData(prev => {
       const newDays = [...prev.days];
-      const day = newDays[dayIndex];
-      
       const activities = getDayActivities(dayIndex);
       const currentActivity = activities.find(a => a.type === activityType && a.index === activityIndex);
       
-      if (!currentActivity || currentActivity.order <= 0) return prev;
+      if (!currentActivity) return prev;
       
-      // Find the activity with order - 1
-      const prevActivity = activities.find(a => (a.order || 0) === currentActivity.order - 1);
-      
-      if (prevActivity) {
-        // Swap orders
-        const tempOrder = currentActivity.order;
-        newDays[dayIndex][currentActivity.arrayType][currentActivity.index].order = prevActivity.order;
-        newDays[dayIndex][prevActivity.arrayType][prevActivity.index].order = tempOrder;
-      }
-      
-      return { ...prev, days: newDays };
-    });
-  };
-
-  // Function to move an activity down in order
-  const moveActivityDown = (dayIndex, activityType, activityIndex) => {
-    setQuoteData(prev => {
-      const newDays = [...prev.days];
-      const day = newDays[dayIndex];
-      
-      const activities = getDayActivities(dayIndex);
-      const currentActivity = activities.find(a => a.type === activityType && a.index === activityIndex);
       const maxOrder = activities.length - 1;
+      const orderNumber = parseInt(newOrder);
       
-      if (!currentActivity || currentActivity.order >= maxOrder) return prev;
+      if (isNaN(orderNumber) || orderNumber < 1 || orderNumber > maxOrder + 1) return prev;
       
-      // Find the activity with order + 1
-      const nextActivity = activities.find(a => (a.order || 0) === currentActivity.order + 1);
+      // Update the activity order
+      newDays[dayIndex][currentActivity.arrayType][currentActivity.index].order = orderNumber - 1;
       
-      if (nextActivity) {
-        // Swap orders
-        const tempOrder = currentActivity.order;
-        newDays[dayIndex][currentActivity.arrayType][currentActivity.index].order = nextActivity.order;
-        newDays[dayIndex][nextActivity.arrayType][nextActivity.index].order = tempOrder;
-      }
+      // Reorder all other activities to maintain consistency
+      const allActivities = getDayActivities(dayIndex);
+      allActivities.forEach((activity, idx) => {
+        if (activity.type !== activityType || activity.index !== activityIndex) {
+          // Shift other activities if needed
+          const currentObj = newDays[dayIndex][activity.arrayType][activity.index];
+          if (currentObj.order >= orderNumber - 1 && activity.arrayType === currentActivity.arrayType && activity.index < currentActivity.index) {
+            currentObj.order = currentObj.order + 1;
+          } else if (currentObj.order < orderNumber - 1 && activity.arrayType === currentActivity.arrayType && activity.index > currentActivity.index) {
+            currentObj.order = currentObj.order - 1;
+          }
+        }
+      });
       
       return { ...prev, days: newDays };
     });
@@ -3288,7 +3272,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                   
 
-                  <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px'}}>
+                  <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '20px'}}>
 
                     {/* Sightseeings for this day */}
 
