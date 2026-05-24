@@ -8,7 +8,7 @@
 
 /* Sidebar Navigation */
 .sidebar {
-  width: 320px;
+  width: 340px; /* Increased from 320px to ensure full visibility */
   background: #f8f9fa;
   border-right: 1px solid #e9ecef;
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
@@ -276,7 +276,7 @@
 
 /* When sidebar is open, add margin to main content */
 .sidebar-open ~ .main-content {
-  margin-left: 320px;
+  margin-left: 340px; /* Updated to match new sidebar width */
 }
 
 /* Top Header */
@@ -385,7 +385,7 @@
 
 /* Hide floating button when sidebar is open */
 .sidebar-open ~ .main-content .floating-menu-toggle {
-  transform: translateX(320px);
+  transform: translateX(340px); /* Updated to match new sidebar width */
 }
 
 /* Mobile responsive for floating button */
@@ -403,7 +403,7 @@
   }
   
   .sidebar-open ~ .main-content .floating-menu-toggle {
-    transform: translateX(280px);
+    transform: translateX(300px); /* Adjusted for mobile */
   }
 }
 
@@ -421,7 +421,7 @@
   }
   
   .sidebar-open ~ .main-content .floating-menu-toggle {
-    transform: translateX(260px);
+    transform: translateX(280px); /* Adjusted for small mobile */
   }
 }
 
