@@ -3302,126 +3302,51 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                       ) : (
 
                         <div>
-
                           <div style={{marginBottom: '15px'}}>
 
-                            {/* Unified Activity Dropdown */}
-
-                            <select
-
-                              id={`activity-select-${dayIndex}`}
-
-                              style={{...styles.input, width: '100%', marginBottom: '8px'}}
-
-                              onChange={(e) => {
-
-                                const value = e.target.value;
-
-                                if (value) {
-
-                                  const [type, id] = value.split(':');
-
-                                  if (type === 'sightseeing') {
-
-                                    const sightseeing = filteredSightseeings.find(s => s._id === id);
-
+                            {/* Searchable Sightseeing Dropdown */}
+                            <div style={{marginBottom: '10px'}}>
+                              <input
+                                type="text"
+                                placeholder="🔍 Search sightseeings..."
+                                value={sightseeingSearch}
+                                onChange={(e) => setSightseeingSearch(e.target.value)}
+                                style={{...styles.input, width: '100%', marginBottom: '8px'}}
+                              />
+                              <select
+                                id={`sightseeing-select-${dayIndex}`}
+                                style={{...styles.input, width: '100%'}}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  if (value) {
+                                    const sightseeing = filteredSightseeings.find(s => s._id === value);
                                     if (sightseeing) {
-
                                       addSightseeingToDay(dayIndex, sightseeing, sightseeing.childRate || 0);
-
                                       setSightseeingSearch('');
-
                                     }
-
-                                  } else if (type === 'transfer') {
-
-                                    const transfer = (filteredTransfers[dayIndex] || availableTransfers).find(t => t._id === id);
-
-                                    if (transfer) {
-
-                                      addTransferToDay(dayIndex, transfer);
-
-                                      setTransferSearch(prev => ({...prev, [dayIndex]: ''}));
-
-                                    }
-
+                                    e.target.value = '';
                                   }
-
-                                  e.target.value = '';
-
-                                }
-
-                              }}
-
-                            >
-
-                              <option value="">🔍 Add Activity...</option>
-
-                              <optgroup label="Sightseeings">
-
+                                }}
+                              >
+                                <option value="">Select sightseeing...</option>
                                 {filteredSightseeings.map(sightseeing => {
-
-                                // Convert rates to quote currency for display
-
-                                const convertedAdultRate = sightseeing.currency === quoteData.currency ? 
-
-                                  sightseeing.rate : 
-
-                                  Math.round((sightseeing.rate / exchangeRates[sightseeing.currency]) * exchangeRates[quoteData.currency] * 100) / 100;
-
-                                const convertedChildRate = sightseeing.currency === quoteData.currency ? 
-
-                                  (sightseeing.childRate || 0) : 
-
-                                  Math.round(((sightseeing.childRate || 0) / exchangeRates[sightseeing.currency]) * exchangeRates[quoteData.currency] * 100) / 100;
-
-                                
-
-                                return (
-
-                                  <option key={sightseeing._id} value={`sightseeing:${sightseeing._id}`}>
-
-                                    {sightseeing.name} - Adult: {quoteData.currency} {convertedAdultRate}, Child: {quoteData.currency} {convertedChildRate}
-
-                                  </option>
-
-                                );
-
-                              })}
-
-                              </optgroup>
-
-                              <optgroup label="Transfers">
-
-                                {(filteredTransfers[dayIndex] || availableTransfers).map(transfer => {
-
-                                  const convertedRate = transfer.currency === quoteData.currency ? 
-
-                                    transfer.rate : 
-
-                                    Math.round((transfer.rate / exchangeRates[transfer.currency]) * exchangeRates[quoteData.currency] * 100) / 100;
-
-                                  
+                                  const convertedAdultRate = sightseeing.currency === quoteData.currency ?
+                                    sightseeing.rate :
+                                    Math.round((sightseeing.rate / exchangeRates[sightseeing.currency]) * exchangeRates[quoteData.currency] * 100) / 100;
+                                  const convertedChildRate = sightseeing.currency === quoteData.currency ?
+                                    (sightseeing.childRate || 0) :
+                                    Math.round(((sightseeing.childRate || 0) / exchangeRates[sightseeing.currency]) * exchangeRates[quoteData.currency] * 100) / 100;
 
                                   return (
-
-                                    <option key={transfer._id} value={`transfer:${transfer._id}`}>
-
-                                      {transfer.name} - {quoteData.currency} {convertedRate}
-
+                                    <option key={sightseeing._id} value={sightseeing._id}>
+                                      {sightseeing.name} - Adult: {quoteData.currency} {convertedAdultRate}, Child: {quoteData.currency} {convertedChildRate}
                                     </option>
-
                                   );
-
                                 })}
-
-                              </optgroup>
-
-                            </select>
-
-                            
-
+                              </select>
                             </div>
+
+                          </div>
 
                           
 
@@ -3597,12 +3522,20 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                           <div style={{marginBottom: '15px'}}>
 
                             {/* Dropdown Search */}
-
+                            
+                            <input
+                              type="text"
+                              placeholder="🔍 Search transfers..."
+                              value={transferSearch[dayIndex] || ''}
+                              onChange={(e) => setTransferSearch(prev => ({...prev, [dayIndex]: e.target.value}))}
+                              style={{...styles.input, width: '100%', marginBottom: '8px'}}
+                            />
+                            
                             <select
 
                               id={`transfer-select-${dayIndex}`}
 
-                              style={{...styles.input, width: '100%', marginBottom: '8px'}}
+                              style={{...styles.input, width: '100%'}}
 
                               onChange={(e) => {
 
@@ -3634,7 +3567,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                             >
 
-                              <option value="">🔍 Search transfers... {transferSearch[dayIndex] && `(searching: ${transferSearch[dayIndex]})`}</option>
+                              <option value="">Select transfer...</option>
 
                               {(filteredTransfers[dayIndex] || availableTransfers).map(transfer => {
 
