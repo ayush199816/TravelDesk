@@ -5,6 +5,7 @@ import api from '../api/axios';
 import QuoteBuilder from '../components/QuoteBuilder';
 import QuoteInvoiceSectionSimple from '../components/QuoteInvoiceSectionSimple';
 import QuoteSupplierSection from '../components/QuoteSupplierSection';
+import './LeadDetailPage.css';
 
 const LeadDetailPage = () => {
   const { user, logout } = useContext(AuthContext);
@@ -949,34 +950,29 @@ const LeadDetailPage = () => {
 
   if (loading) {
     return (
-      <div style={styles.container}>
-        <nav style={styles.nav}>
-          <div style={styles.navLinks}>
-            <span style={styles.navLink}>Lead Details</span>
+      <div className="lead-detail-page">
+        <nav className="nav">
+          <div className="nav-links">
+            <span className="nav-link">Lead Details</span>
           </div>
-          <div style={styles.userInfo}>
+          <div className="user-info">
             <span style={{marginRight: '10px'}}>{user?.name}</span>
-            <button onClick={toggleMenu} style={styles.menuButton}>☰</button>
+            <button onClick={toggleMenu} className="menu-button">☰</button>
           </div>
-          <div style={styles.dropdown}>
+          <div className={`dropdown ${menuOpen ? 'show' : ''}`}>
             <div style={{marginBottom: '10px', fontSize: '16px', color: '#666'}}>
               {user?.name}
             </div>
-            <button onClick={handleLogout} style={{
-              padding: '8px 16px',
-              backgroundColor: '#dc3545',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              width: '100%',
-            }}>
+            <button onClick={handleLogout} className="share-cancel-btn">
               Logout
             </button>
           </div>
         </nav>
-        <div style={styles.mainContent}>
-          <div style={styles.loading}>Loading lead details...</div>
+        <div className="main-content">
+          <div className="loading-state">
+            <div className="loading-spinner">⟳</div>
+            <div>Loading lead details...</div>
+          </div>
         </div>
       </div>
     );
@@ -984,159 +980,125 @@ const LeadDetailPage = () => {
 
   if (error) {
     return (
-      <div style={styles.container}>
-        <nav style={styles.nav}>
-          <div style={styles.navLinks}>
-            <span style={styles.navLink}>Lead Details</span>
+      <div className="lead-detail-page">
+        <nav className="nav">
+          <div className="nav-links">
+            <span className="nav-link">Lead Details</span>
           </div>
-          <div style={styles.userInfo}>
+          <div className="user-info">
             <span style={{marginRight: '10px'}}>{user?.name}</span>
-            <button onClick={toggleMenu} style={styles.menuButton}>☰</button>
+            <button onClick={toggleMenu} className="menu-button">☰</button>
           </div>
-          <div style={styles.dropdown}>
+          <div className={`dropdown ${menuOpen ? 'show' : ''}`}>
             <div style={{marginBottom: '10px', fontSize: '16px', color: '#666'}}>
               {user?.name}
             </div>
-            <button onClick={handleLogout} style={{
-              padding: '8px 16px',
-              backgroundColor: '#dc3545',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              width: '100%',
-            }}>
+            <button onClick={handleLogout} className="share-cancel-btn">
               Logout
             </button>
           </div>
         </nav>
-        <div style={styles.mainContent}>
-          <button onClick={() => navigate(-1)} style={styles.backButton}>← Back</button>
-          <div style={styles.error}>{error}</div>
+        <div className="main-content">
+          <button onClick={() => navigate(-1)} className="back-button">← Back</button>
+          <div className="error-state">
+            <div className="error-message">{error}</div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={styles.container}>
-      <nav style={styles.nav}>
-        <div style={styles.navLinks}>
-          <span style={styles.navLink}>Lead Details</span>
+    <div className="lead-detail-page">
+      <nav className="nav">
+        <div className="nav-links">
+          <span className="nav-link">Lead Details</span>
         </div>
-        <div style={styles.userInfo}>
+        <div className="user-info">
           <span style={{marginRight: '10px'}}>{user?.name}</span>
-          <button onClick={toggleMenu} style={styles.menuButton}>☰</button>
+          <button onClick={toggleMenu} className="menu-button">☰</button>
         </div>
-        <div style={styles.dropdown}>
+        <div className={`dropdown ${menuOpen ? 'show' : ''}`}>
           <div style={{marginBottom: '10px', fontSize: '16px', color: '#666'}}>
             {user?.name}
           </div>
-          <button onClick={handleLogout} style={{
-            padding: '8px 16px',
-            backgroundColor: '#dc3545',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            width: '100%',
-          }}>
+          <button onClick={handleLogout} className="share-cancel-btn">
             Logout
           </button>
         </div>
       </nav>
       
-      <div style={styles.mainContent}>
-        <button onClick={() => navigate(-1)} style={styles.backButton}>← Back</button>
+      <div className="main-content">
+        <button onClick={() => navigate(-1)} className="back-button">← Back</button>
         
-        <div style={styles.contentContainer}>
+        <div className="content-container">
           {/* Lead Details Section */}
-          <div style={styles.leadCard}>
-          <div style={styles.leadHeader}>
+          <div className="lead-card">
+          <div className="lead-header">
             <div>
-              <h1 style={styles.leadNumber}>{lead.leadNumber}</h1>
+              <h1 className="lead-number">{lead.leadNumber}</h1>
               <button 
                 onClick={handleCreateQuote}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: quotes.length >= 3 ? '#6c757d' : '#28a745',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: quotes.length >= 3 ? 'not-allowed' : 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginTop: '5px',
-                  opacity: quotes.length >= 3 ? 0.6 : 1
-                }}
+                className={`create-quote-btn ${quotes.length >= 3 ? 'disabled' : ''}`}
                 disabled={quotes.length >= 3}
               >
                 {quotes.length >= 3 ? 'Max Quotes Reached' : 'Give Quotation'}
               </button>
             </div>
-            <span style={{...styles.statusBadge, backgroundColor: getStatusColor(lead.status)}}>
+            <span className="status-badge" style={{backgroundColor: getStatusColor(lead.status)}}>
               {lead.status}
             </span>
           </div>
           
-          <div style={styles.detailsGrid}>
-            <div style={styles.detailGroup}>
-              <div style={styles.detailLabel}>Name</div>
-              <div style={styles.detailValue}>{lead.name}</div>
+          <div className="details-grid">
+            <div className="detail-group">
+              <div className="detail-label">Name</div>
+              <div className="detail-value">{lead.name}</div>
             </div>
             
-            <div style={styles.detailGroup}>
-              <div style={styles.detailLabel}>Email</div>
-              <div style={styles.detailValue}>{lead.email}</div>
+            <div className="detail-group">
+              <div className="detail-label">Email</div>
+              <div className="detail-value">{lead.email}</div>
             </div>
             
-            <div style={styles.detailGroup}>
-              <div style={styles.detailLabel}>Phone</div>
-              <div style={styles.detailValue}>{lead.phone}</div>
+            <div className="detail-group">
+              <div className="detail-label">Phone</div>
+              <div className="detail-value">{lead.phone}</div>
             </div>
             
-            <div style={styles.detailGroup}>
-              <div style={styles.detailLabel}>Assigned To</div>
-              <div style={styles.detailValue}>
+            <div className="detail-group">
+              <div className="detail-label">Assigned To</div>
+              <div className="detail-value">
                 {lead.assignedTo ? `${lead.assignedTo.name} (${lead.assignedTo.email})` : 'Unassigned'}
               </div>
             </div>
             
-            <div style={styles.detailGroup}>
-              <div style={styles.detailLabel}>Date of Travel</div>
-              <div style={styles.detailValue}>
+            <div className="detail-group">
+              <div className="detail-label">Date of Travel</div>
+              <div className="detail-value">
                 {lead.dateOfTravel ? new Date(lead.dateOfTravel).toLocaleDateString() : 'Not set'}
               </div>
             </div>
             
-            <div style={styles.detailGroup}>
-              <div style={styles.detailLabel}>Travel To Country</div>
-              <div style={styles.detailValue}>{lead.travelToCountry || 'Not set'}</div>
+            <div className="detail-group">
+              <div className="detail-label">Travel To Country</div>
+              <div className="detail-value">{lead.travelToCountry || 'Not set'}</div>
             </div>
             
-            <div style={styles.detailGroup}>
-              <div style={styles.detailLabel}>Next Follow Up Date</div>
-              <div style={styles.detailValue}>
+            <div className="detail-group">
+              <div className="detail-label">Next Follow Up Date</div>
+              <div className="detail-value">
                 {lead.nextFollowUpDate ? new Date(lead.nextFollowUpDate).toLocaleDateString() : 'Not set'}
               </div>
             </div>
             
-            <div style={styles.detailGroup}>
-              <div style={styles.detailLabel}>Tags</div>
-              <div style={styles.detailValue}>
+            <div className="detail-group">
+              <div className="detail-label">Tags</div>
+              <div className="detail-value">
                 {lead.tags && lead.tags.length > 0 ? (
-                  <div style={{display: 'flex', flexWrap: 'wrap', gap: '8px'}}>
+                  <div className="tags-container">
                     {lead.tags.map((tag, index) => (
-                      <span key={index} style={{
-                        backgroundColor: '#e3f2fd',
-                        color: '#1976d2',
-                        padding: '6px 12px',
-                        borderRadius: '16px',
-                        fontSize: '13px',
-                        fontWeight: '500',
-                        border: '1px solid #bbdefb',
-                        display: 'inline-block'
-                      }}>
+                      <span key={index} className="tag">
                         {tag}
                       </span>
                     ))}
@@ -1148,25 +1110,25 @@ const LeadDetailPage = () => {
             </div>
           </div>
           
-          <div style={styles.section}>
-            <h3 style={styles.sectionTitle}>Requirements</h3>
-            <p style={styles.detailValue}>{lead.requirements || 'No requirements specified'}</p>
+          <div className="requirements-section">
+            <h3 className="requirements-title">Requirements</h3>
+            <p className="requirements-text">{lead.requirements || 'No requirements specified'}</p>
           </div>
           
-          <div style={styles.section}>
-            <h3 style={styles.sectionTitle}>Latest Comment</h3>
-            <p style={styles.detailValue}>{lead.latestComment || 'No comments'}</p>
+          <div className="notes-section">
+            <h3 className="notes-title">Latest Comment</h3>
+            <p className="notes-text">{lead.latestComment || 'No comments'}</p>
           </div>
           
-          <div style={styles.section}>
-            <h3 style={styles.sectionTitle}>Notes</h3>
-            <p style={styles.detailValue}>{lead.notes || 'No notes'}</p>
+          <div className="notes-section">
+            <h3 className="notes-title">Notes</h3>
+            <p className="notes-text">{lead.notes || 'No notes'}</p>
           </div>
           
-          <div style={styles.section}>
-            <h3 style={styles.sectionTitle}>Invoices ({invoices.length})</h3>
+          <div className="requirements-section">
+            <h3 className="requirements-title">Invoices ({invoices.length})</h3>
             {invoices.length === 0 ? (
-              <p style={styles.detailValue}>No invoices generated yet</p>
+              <p className="requirements-text">No invoices generated yet</p>
             ) : (
               <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
                 {invoices.map((invoice) => (
@@ -1421,15 +1383,12 @@ const LeadDetailPage = () => {
           )}
           
           {/* Quotes Section */}
-          <div style={styles.quotesSection}>
-            <div style={styles.quotesHeader}>
-              <h2 style={styles.quotesTitle}>Quotes ({quotes.length}/3)</h2>
+          <div className="quotes-section">
+            <div className="quotes-header">
+              <h2 className="quotes-title">Quotes ({quotes.length}/3)</h2>
               <button 
                 onClick={handleCreateQuote}
-                style={{
-                  ...styles.createQuoteButton,
-                  ...(quotes.length >= 3 ? styles.disabledButton : {})
-                }}
+                className={`create-quote-btn ${quotes.length >= 3 ? 'disabled' : ''}`}
                 disabled={quotes.length >= 3}
               >
                 {quotes.length >= 3 ? '+ Delete Quote to Create New' : '+ Create Quote'}
@@ -1437,33 +1396,26 @@ const LeadDetailPage = () => {
             </div>
             
             {quotes.length === 0 ? (
-              <div style={{
-                textAlign: 'center',
-                padding: '40px',
-                color: '#666',
-                background: '#f8f9fa',
-                borderRadius: '10px',
-                border: '2px dashed #dee2e6'
-              }}>
+              <div className="loading-state">
                 <div style={{fontSize: '16px', marginBottom: '10px'}}>No quotes created yet</div>
                 <div style={{fontSize: '14px'}}>Create your first quote for this lead</div>
               </div>
             ) : (
               quotes.map((quote, index) => (
-                <div key={quote._id} style={styles.quoteCard}>
-                  <div style={styles.quoteHeader}>
-                    <h3 style={styles.quoteTitle}>Quote {index + 1}</h3>
-                    <div style={styles.quoteActions}>
+                <div key={quote._id} className="quote-card">
+                  <div className="quote-header">
+                    <h3 className="quote-title">Quote {index + 1}</h3>
+                    <div className="quote-actions">
                       <button 
                         onClick={() => handleShareQuote(quote, index)}
-                        style={{...styles.quoteButton, ...styles.shareButton}}
+                        className="quote-button share-btn"
                         title="Share Quote"
                       >
                         📱
                       </button>
                       <button 
                         onClick={() => handleDownloadPDF(quote, index)}
-                        style={{...styles.quoteButton, ...styles.pdfButton}}
+                        className="quote-button pdf-btn"
                         title="Download PDF"
                         disabled={downloadingPDF}
                       >
@@ -1471,14 +1423,14 @@ const LeadDetailPage = () => {
                       </button>
                       <button 
                         onClick={() => handleEditQuote(quote)}
-                        style={{...styles.quoteButton, ...styles.editButton}}
+                        className="quote-button edit-btn"
                         title="Edit Quote"
                       >
                         ✏️
                       </button>
                       <button 
                         onClick={() => handleDeleteQuote(quote._id)}
-                        style={{...styles.quoteButton, ...styles.deleteButton}}
+                        className="quote-button delete-btn"
                         title="Delete Quote"
                       >
                         🗑️
@@ -1544,106 +1496,92 @@ const LeadDetailPage = () => {
         )}
         
         {showShareModal && (
-          <div style={styles.shareModal}>
-            <div style={styles.shareModalContent}>
-              <div style={styles.shareModalHeader}>
-                <h3 style={styles.shareModalTitle}>Quote Message - Quote {currentQuoteIndex + 1}</h3>
+          <div className="share-modal">
+            <div className="share-modal-content">
+              <div className="share-modal-header">
+                <h3 className="share-modal-title">Quote Message - Quote {currentQuoteIndex + 1}</h3>
                 <button
                   onClick={() => setShowShareModal(false)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    fontSize: '24px',
-                    cursor: 'pointer',
-                    color: '#666'
-                  }}
+                  className="close-button"
                 >
                   ×
                 </button>
               </div>
               
-              <div style={styles.shareModalBody}>
-                <div style={{marginBottom: '15px'}}>
+              <div className="share-modal-body">
+                <div className="share-options">
                   <h4 style={{marginBottom: '10px', fontSize: '14px', fontWeight: '600'}}>Include in Message:</h4>
-                  <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px'}}>
-                    <label style={{display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', cursor: 'pointer'}}>
-                      <input
-                        type="checkbox"
-                        checked={shareOptions.hotels}
-                        onChange={(e) => setShareOptions(prev => ({...prev, hotels: e.target.checked}))}
-                        style={{margin: 0}}
-                      />
-                      🏨 Hotels
-                    </label>
-                    <label style={{display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', cursor: 'pointer'}}>
-                      <input
-                        type="checkbox"
-                        checked={shareOptions.flights}
-                        onChange={(e) => setShareOptions(prev => ({...prev, flights: e.target.checked}))}
-                        style={{margin: 0}}
-                      />
-                      ✈️ Flights
-                    </label>
-                    <label style={{display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', cursor: 'pointer'}}>
-                      <input
-                        type="checkbox"
-                        checked={shareOptions.transportation}
-                        onChange={(e) => setShareOptions(prev => ({...prev, transportation: e.target.checked}))}
-                        style={{margin: 0}}
-                      />
-                      🚖 Transportation & Activities
-                    </label>
-                    <label style={{display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', cursor: 'pointer'}}>
-                      <input
-                        type="checkbox"
-                        checked={shareOptions.inclusions}
-                        onChange={(e) => setShareOptions(prev => ({...prev, inclusions: e.target.checked}))}
-                        style={{margin: 0}}
-                      />
-                      ✅ Inclusions
-                    </label>
-                    <label style={{display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', cursor: 'pointer'}}>
-                      <input
-                        type="checkbox"
-                        checked={shareOptions.exclusions}
-                        onChange={(e) => setShareOptions(prev => ({...prev, exclusions: e.target.checked}))}
-                        style={{margin: 0}}
-                      />
-                      ❌ Exclusions
-                    </label>
-                    <label style={{display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', cursor: 'pointer', gridColumn: 'span 2'}}>
-                      <input
-                        type="checkbox"
-                        checked={shareOptions.dayWiseItinerary}
-                        onChange={(e) => setShareOptions(prev => ({...prev, dayWiseItinerary: e.target.checked}))}
-                        style={{margin: 0}}
-                      />
-                      📅 Day-wise Itinerary
-                    </label>
+                  <div className="share-option">
+                    <input
+                      type="checkbox"
+                      checked={shareOptions.hotels}
+                      onChange={(e) => setShareOptions(prev => ({...prev, hotels: e.target.checked}))}
+                    />
+                    <label>🏨 Hotels</label>
+                  </div>
+                  <div className="share-option">
+                    <input
+                      type="checkbox"
+                      checked={shareOptions.flights}
+                      onChange={(e) => setShareOptions(prev => ({...prev, flights: e.target.checked}))}
+                    />
+                    <label>✈️ Flights</label>
+                  </div>
+                  <div className="share-option">
+                    <input
+                      type="checkbox"
+                      checked={shareOptions.transportation}
+                      onChange={(e) => setShareOptions(prev => ({...prev, transportation: e.target.checked}))}
+                    />
+                    <label>🚖 Transportation & Activities</label>
+                  </div>
+                  <div className="share-option">
+                    <input
+                      type="checkbox"
+                      checked={shareOptions.inclusions}
+                      onChange={(e) => setShareOptions(prev => ({...prev, inclusions: e.target.checked}))}
+                    />
+                    <label>✅ Inclusions</label>
+                  </div>
+                  <div className="share-option">
+                    <input
+                      type="checkbox"
+                      checked={shareOptions.exclusions}
+                      onChange={(e) => setShareOptions(prev => ({...prev, exclusions: e.target.checked}))}
+                    />
+                    <label>❌ Exclusions</label>
+                  </div>
+                  <div className="share-option">
+                    <input
+                      type="checkbox"
+                      checked={shareOptions.dayWiseItinerary}
+                      onChange={(e) => setShareOptions(prev => ({...prev, dayWiseItinerary: e.target.checked}))}
+                    />
+                    <label>📅 Day-wise Itinerary</label>
                   </div>
                 </div>
                 
-                <div style={styles.shareMessageContent}>
+                <div className="share-message">
                   {shareMessage}
                 </div>
               </div>
               
-              <div style={styles.shareModalFooter}>
+              <div className="share-modal-footer">
                 <button
                   onClick={handleShareOnWhatsApp}
-                  style={{...styles.shareActionButton, ...styles.whatsappShareButton}}
+                  className="share-send-btn"
                 >
                   📱 Share on WhatsApp
                 </button>
                 <button
                   onClick={handleCopyMessage}
-                  style={{...styles.shareActionButton, ...styles.copyShareButton}}
+                  className="share-cancel-btn"
                 >
                   📋 Copy Message
                 </button>
                 <button
                   onClick={() => setShowShareModal(false)}
-                  style={{...styles.shareActionButton, ...styles.cancelButton}}
+                  className="share-cancel-btn"
                 >
                   Cancel
                 </button>
