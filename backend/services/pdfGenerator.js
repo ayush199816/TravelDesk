@@ -9,6 +9,8 @@ const Lead = require('../models/Lead');
 const Organization = require('../models/Organization');
 const PDFTemplate = require('../models/PDFTemplate');
 const QuoteTemplate = require('../models/QuoteTemplate');
+const Sightseeing = require('../models/Sightseeing');
+const Transfer = require('../models/Transfer');
 
 class PDFGenerator {
   constructor() {
@@ -381,6 +383,20 @@ class PDFGenerator {
                     imagesCount: sightseeingDetails.images ? sightseeingDetails.images.length : 0,
                     firstImage: sightseeingDetails.images && sightseeingDetails.images.length > 0 ? sightseeingDetails.images[0] : 'none'
                   });
+                }
+              }
+            }
+          }
+          
+          // Populate transfer data for each day
+          if (day.transfers && day.transfers.length > 0) {
+            for (let transferItem of day.transfers) {
+              if (transferItem.transfer && typeof transferItem.transfer === 'string') {
+                // Fetch transfer details from database
+                const transferDetails = await Transfer.findById(transferItem.transfer);
+                if (transferDetails) {
+                  transferItem.transfer = transferDetails.toObject();
+                  console.log(`Populated transfer: ${transferDetails.name}`);
                 }
               }
             }
