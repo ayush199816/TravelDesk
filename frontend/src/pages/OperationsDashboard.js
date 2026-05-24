@@ -1118,27 +1118,27 @@ const OperationsDashboard = () => {
     }
 
     return (
-      <div style={{overflowX: 'auto'}}>
-        <table style={styles.table}>
+      <div className="leads-table-container">
+        <table className="leads-table" style={styles.table}>
           <thead>
             <tr>
-              <th style={styles.th}>Lead Number</th>
-              <th style={styles.th}>Name</th>
-              <th style={styles.th}>Email</th>
-              <th style={styles.th}>Phone</th>
-              <th style={styles.th}>Status</th>
-              <th style={styles.th}>Assigned To</th>
-              <th style={styles.th}>Requirements</th>
-              <th style={styles.th}>Country Travelling To</th>
-              <th style={styles.th}>Next Follow-up</th>
-              <th style={styles.th}>Travel Date</th>
-              <th style={styles.th}>Actions</th>
+              <th style={styles.th} className="lead-number-cell">Lead Number</th>
+              <th style={styles.th} className="name-cell">Name</th>
+              <th style={styles.th} className="email-cell">Email</th>
+              <th style={styles.th} className="phone-cell">Phone</th>
+              <th style={styles.th} className="status-cell">Status</th>
+              <th style={styles.th} className="assigned-cell">Assigned To</th>
+              <th style={styles.th} className="requirements-cell">Requirements</th>
+              <th style={styles.th} className="country-cell">Country Travelling To</th>
+              <th style={styles.th} className="followup-cell">Next Follow-up</th>
+              <th style={styles.th} className="travel-date-cell">Travel Date</th>
+              <th style={styles.th} className="actions-cell">Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredLeads.map(lead => (
               <tr key={lead._id}>
-                <td style={styles.td}>
+                <td style={styles.td} className="lead-number-cell">
                   <button
                     onClick={() => navigate(`/lead/${lead.leadNumber}`)}
                     style={{
@@ -1154,10 +1154,10 @@ const OperationsDashboard = () => {
                     {lead.leadNumber}
                   </button>
                 </td>
-                <td style={styles.td}>{lead.name}</td>
-                <td style={styles.td}>{lead.email}</td>
-                <td style={styles.td}>{lead.phone}</td>
-                <td style={styles.td}>
+                <td style={styles.td} className="name-cell">{lead.name}</td>
+                <td style={styles.td} className="email-cell">{lead.email}</td>
+                <td style={styles.td} className="phone-cell">{lead.phone}</td>
+                <td style={styles.td} className="status-cell">
                   <select
                     value={lead.status}
                     onChange={(e) => updateLeadStatus(lead._id, e.target.value)}
@@ -1165,7 +1165,8 @@ const OperationsDashboard = () => {
                       padding: '5px',
                       borderRadius: '3px',
                       border: '1px solid #ddd',
-                      fontSize: '12px'
+                      fontSize: '12px',
+                      width: '100%'
                     }}
                   >
                     {leadStatuses.map(status => (
@@ -1175,9 +1176,11 @@ const OperationsDashboard = () => {
                     ))}
                   </select>
                 </td>
-                <td style={styles.td}>{lead.assignedTo?.name || 'Unassigned'}</td>
-                <td style={styles.td}>{lead.requirements || '-'}</td>
-                <td style={styles.td}>
+                <td style={styles.td} className="assigned-cell">{lead.assignedTo?.name || 'Unassigned'}</td>
+                <td style={styles.td} className="requirements-cell" title={lead.requirements || ''}>
+                  {lead.requirements ? (lead.requirements.length > 50 ? lead.requirements.substring(0, 50) + '...' : lead.requirements) : '-'}
+                </td>
+                <td style={styles.td} className="country-cell">
                   {lead.travelToCountry ? (
                     <span style={{
                       backgroundColor: '#e3f2fd',
@@ -1185,7 +1188,9 @@ const OperationsDashboard = () => {
                       padding: '4px 8px',
                       borderRadius: '12px',
                       fontSize: '12px',
-                      fontWeight: '500'
+                      fontWeight: '500',
+                      display: 'inline-block',
+                      whiteSpace: 'nowrap'
                     }}>
                       {lead.travelToCountry}
                     </span>
@@ -1193,53 +1198,29 @@ const OperationsDashboard = () => {
                     <span style={{ color: '#6c757d', fontStyle: 'italic' }}>Not specified</span>
                   )}
                 </td>
-                <td style={styles.td}>{lead.nextFollowUpDate || '-'}</td>
-                <td style={styles.td}>{lead.dateOfTravel || '-'}</td>
-                <td style={styles.td}>
-                  <button 
-                    onClick={() => handleEditLead(lead)}
-                    style={{
-                      padding: '4px 8px',
-                      backgroundColor: '#007bff',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '3px',
-                      cursor: 'pointer',
-                      fontSize: '12px',
-                      marginRight: '5px'
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button 
-                    onClick={() => navigate(`/lead/${lead.leadNumber}`)}
-                    style={{
-                      padding: '4px 8px',
-                      backgroundColor: '#28a745',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '3px',
-                      cursor: 'pointer',
-                      fontSize: '12px',
-                      marginRight: '5px'
-                    }}
-                  >
-                    Quote
-                  </button>
-                  <button 
-                    onClick={() => handleDeleteLead(lead._id)}
-                    style={{
-                      padding: '4px 8px',
-                      backgroundColor: '#dc3545',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '3px',
-                      cursor: 'pointer',
-                      fontSize: '12px'
-                    }}
-                  >
-                    Delete
-                  </button>
+                <td style={styles.td} className="followup-cell">{lead.nextFollowUpDate || '-'}</td>
+                <td style={styles.td} className="travel-date-cell">{lead.dateOfTravel || '-'}</td>
+                <td style={styles.td} className="actions-cell">
+                  <div className="lead-action-buttons">
+                    <button 
+                      onClick={() => handleEditLead(lead)}
+                      className="edit-btn"
+                    >
+                      Edit
+                    </button>
+                    <button 
+                      onClick={() => navigate(`/lead/${lead.leadNumber}`)}
+                      className="quote-btn"
+                    >
+                      Quote
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteLead(lead._id)}
+                      className="delete-btn"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

@@ -682,6 +682,10 @@
   .leads-table td {
     padding: 8px 12px;
   }
+  
+  .leads-table {
+    min-width: 1000px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -740,7 +744,94 @@
   }
   
   .leads-table {
-    min-width: 800px;
+    min-width: 1200px; /* Increased min-width for leads table */
+    font-size: 14px;
+  }
+  
+  /* Lead table specific mobile styles */
+  .leads-table th,
+  .leads-table td {
+    padding: 8px 12px;
+    white-space: nowrap;
+  }
+  
+  .leads-table .lead-number-cell {
+    min-width: 120px;
+  }
+  
+  .leads-table .name-cell {
+    min-width: 150px;
+  }
+  
+  .leads-table .email-cell {
+    min-width: 200px;
+  }
+  
+  .leads-table .phone-cell {
+    min-width: 130px;
+  }
+  
+  .leads-table .status-cell {
+    min-width: 120px;
+  }
+  
+  .leads-table .assigned-cell {
+    min-width: 150px;
+  }
+  
+  .leads-table .requirements-cell {
+    min-width: 200px;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .leads-table .country-cell {
+    min-width: 120px;
+  }
+  
+  .leads-table .followup-cell {
+    min-width: 120px;
+  }
+  
+  .leads-table .travel-date-cell {
+    min-width: 120px;
+  }
+  
+  .leads-table .actions-cell {
+    min-width: 180px;
+  }
+  
+  /* Lead action buttons mobile */
+  .lead-action-buttons {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  
+  .lead-action-buttons button {
+    padding: 6px 10px;
+    font-size: 11px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 50px;
+  }
+  
+  .lead-action-buttons .edit-btn {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .lead-action-buttons .quote-btn {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .lead-action-buttons .delete-btn {
+    background-color: #dc3545;
+    color: white;
   }
   
   /* Filter buttons mobile */
@@ -812,6 +903,62 @@
   .leads-table th,
   .leads-table td {
     padding: 6px 8px;
+  }
+  
+  .leads-table .lead-number-cell {
+    min-width: 100px;
+  }
+  
+  .leads-table .name-cell {
+    min-width: 120px;
+  }
+  
+  .leads-table .email-cell {
+    min-width: 150px;
+  }
+  
+  .leads-table .phone-cell {
+    min-width: 100px;
+  }
+  
+  .leads-table .status-cell {
+    min-width: 100px;
+  }
+  
+  .leads-table .assigned-cell {
+    min-width: 120px;
+  }
+  
+  .leads-table .requirements-cell {
+    min-width: 150px;
+    max-width: 180px;
+  }
+  
+  .leads-table .country-cell {
+    min-width: 100px;
+  }
+  
+  .leads-table .followup-cell {
+    min-width: 100px;
+  }
+  
+  .leads-table .travel-date-cell {
+    min-width: 100px;
+  }
+  
+  .leads-table .actions-cell {
+    min-width: 150px;
+  }
+  
+  .lead-action-buttons {
+    flex-direction: column;
+    gap: 3px;
+  }
+  
+  .lead-action-buttons button {
+    width: 100%;
+    padding: 4px 6px;
+    font-size: 10px;
   }
   
   /* Action buttons mobile */
