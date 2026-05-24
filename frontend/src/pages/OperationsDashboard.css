@@ -41,7 +41,7 @@
 /* Floating Sidebar Toggle Button */
 .floating-sidebar-toggle {
   position: fixed;
-  top: 80px;
+  top: 20px;
   left: 20px;
   z-index: 1001;
   background: #667eea;
@@ -207,7 +207,7 @@
 .main-content.sidebar-closed .page-content {
   width: 100vw; /* Use full viewport width */
   margin-left: 0;
-  padding-left: 80px; /* Account for floating button space */
+  padding-left: 24px; /* Account for floating button space */
 }
 
 /* Adjust table container for full width when sidebar is closed */
@@ -285,6 +285,11 @@
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+/* Adjust header when sidebar is closed */
+.main-content.sidebar-closed .header-left {
+  padding-left: 60px; /* Shift title to the right when sidebar is closed */
 }
 
 .mobile-menu-toggle {
