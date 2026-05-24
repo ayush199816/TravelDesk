@@ -3274,11 +3274,11 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                   <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '20px'}}>
 
-                    {/* Sightseeings for this day */}
+                    {/* Day Activities for this day */}
 
                     <div>
 
-                      <h5 style={{marginBottom: '10px', fontSize: '16px'}}>Sightseeings</h5>
+                      <h5 style={{marginBottom: '10px', fontSize: '16px'}}>Day Activities</h5>
 
                       {loading ? (
 
@@ -3294,11 +3294,11 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                           <div style={{marginBottom: '15px'}}>
 
-                            {/* Dropdown Search */}
+                            {/* Unified Activity Dropdown */}
 
                             <select
 
-                              id={`sightseeing-select-${dayIndex}`}
+                              id={`activity-select-${dayIndex}`}
 
                               style={{...styles.input, width: '100%', marginBottom: '8px'}}
 
@@ -3308,13 +3308,31 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                                 if (value) {
 
-                                  const sightseeing = filteredSightseeings.find(s => s._id === value);
+                                  const [type, id] = value.split(':');
 
-                                  if (sightseeing) {
+                                  if (type === 'sightseeing') {
 
-                                    addSightseeingToDay(dayIndex, sightseeing, sightseeing.childRate || 0);
+                                    const sightseeing = filteredSightseeings.find(s => s._id === id);
 
-                                    setSightseeingSearch('');
+                                    if (sightseeing) {
+
+                                      addSightseeingToDay(dayIndex, sightseeing, sightseeing.childRate || 0);
+
+                                      setSightseeingSearch('');
+
+                                    }
+
+                                  } else if (type === 'transfer') {
+
+                                    const transfer = (filteredTransfers[dayIndex] || availableTransfers).find(t => t._id === id);
+
+                                    if (transfer) {
+
+                                      addTransferToDay(dayIndex, transfer);
+
+                                      setTransferSearch(prev => ({...prev, [dayIndex]: ''}));
+
+                                    }
 
                                   }
 
@@ -3326,9 +3344,11 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                             >
 
-                              <option value="">🔍 Search sightseeings... {sightseeingSearch && `(searching: ${sightseeingSearch})`}</option>
+                              <option value="">🔍 Add Activity...</option>
 
-                              {filteredSightseeings.map(sightseeing => {
+                              <optgroup label="Sightseeings">
+
+                                {filteredSightseeings.map(sightseeing => {
 
                                 // Convert rates to quote currency for display
 
@@ -3348,7 +3368,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                                 return (
 
-                                  <option key={sightseeing._id} value={sightseeing._id}>
+                                  <option key={sightseeing._id} value={`sightseeing:${sightseeing._id}`}>
 
                                     {sightseeing.name} - Adult: {quoteData.currency} {convertedAdultRate}, Child: {quoteData.currency} {convertedChildRate}
 
@@ -3358,69 +3378,39 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                               })}
 
+                              </optgroup>
+
+                              <optgroup label="Transfers">
+
+                                {(filteredTransfers[dayIndex] || availableTransfers).map(transfer => {
+
+                                  const convertedRate = transfer.currency === quoteData.currency ? 
+
+                                    transfer.rate : 
+
+                                    Math.round((transfer.rate / exchangeRates[transfer.currency]) * exchangeRates[quoteData.currency] * 100) / 100;
+
+                                  
+
+                                  return (
+
+                                    <option key={transfer._id} value={`transfer:${transfer._id}`}>
+
+                                      {transfer.name} - {quoteData.currency} {convertedRate}
+
+                                    </option>
+
+                                  );
+
+                                })}
+
+                              </optgroup>
+
                             </select>
 
                             
 
-                            <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
-
-                              <input
-
-                                type="text"
-
-                                placeholder="Type to filter sightseeings..."
-
-                                value={sightseeingSearch}
-
-                                onChange={(e) => setSightseeingSearch(e.target.value)}
-
-                                style={{
-
-                                  ...styles.input,
-
-                                  flex: '1'
-
-                                }}
-
-                              />
-
-                              
-
-                              {sightseeingSearch && (
-
-                                <button
-
-                                  type="button"
-
-                                  onClick={() => setSightseeingSearch('')}
-
-                                  style={{
-
-                                    padding: '8px 16px',
-
-                                    backgroundColor: '#dc3545',
-
-                                    color: 'white',
-
-                                    border: 'none',
-
-                                    borderRadius: '4px',
-
-                                    cursor: 'pointer'
-
-                                  }}
-
-                                >
-
-                                  Clear
-
-                                </button>
-
-                              )}
-
                             </div>
-
-                          </div>
 
                           
 
