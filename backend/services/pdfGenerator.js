@@ -1289,9 +1289,9 @@ class PDFGenerator {
                   // Sort by order field
                   allActivities.sort((a, b) => a.order - b.order);
                   
-                  // Extract names in sorted order
-                  allActivities.forEach(activity => {
-                    dayActivities.push(activity.name);
+                  // Extract names with order numbers in sorted order
+                  allActivities.forEach((activity, index) => {
+                    dayActivities.push(`${index + 1}. ${activity.name}`);
                   });
                   
                   return dayActivities.length > 0 ? dayActivities.join(' + ') : 'Free day for leisure and exploration';
@@ -1322,7 +1322,7 @@ class PDFGenerator {
             addToPage(imageContent, 200);
           }
           
-          activities.forEach((item) => {
+          activities.forEach((item, index) => {
             const isTransfer = item.transfer || item.fromLocation || item.toLocation;
             
             let activityData;
@@ -1331,7 +1331,7 @@ class PDFGenerator {
               const fromLocation = item.fromLocation || item.transfer?.fromLocation || 'Pickup Point';
               const toLocation = item.toLocation || item.transfer?.toLocation || 'Drop Point';
               activityData = {
-                name: this.toTitleCase(transferName),
+                name: `${index + 1}. ${this.toTitleCase(transferName)}`,
                 description: item.transfer?.description || item.description || 'Comfortable transfer between locations',
                 duration: item.transfer?.duration || item.duration || 'Flexible timing',
                 location: `${fromLocation} to ${toLocation}`,
@@ -1347,8 +1347,8 @@ class PDFGenerator {
                   location: item.sightseeingLocation || item.location || 'To be confirmed',
                   images: item.images || []
                 };
-              // Apply title case to the name
-              sightseeingObj.name = this.toTitleCase(sightseeingObj.name);
+              // Apply title case to the name and add order number
+              sightseeingObj.name = `${index + 1}. ${this.toTitleCase(sightseeingObj.name)}`;
               activityData = sightseeingObj;
             }
             
