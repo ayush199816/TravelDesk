@@ -14,10 +14,12 @@
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: fixed;
+  top: 0;
+  left: 0;
   height: 100vh;
   z-index: 1000;
-  overflow-y: auto;
-  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
   transform: translateX(-100%); /* Hidden by default */
 }
 
@@ -33,12 +35,14 @@
   border-bottom: 1px solid #e9ecef;
   background: #f8f9fa;
   position: relative;
+  flex-shrink: 0;
 }
 
 .brand-logo {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .logo-icon {
@@ -61,6 +65,11 @@
   font-weight: 700;
   color: #1e293b;
   letter-spacing: -0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .sidebar-toggle {
@@ -83,7 +92,7 @@
   padding: 24px 16px;
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 120px); /* Use min-height instead of height */
+  flex: 1; /* Take remaining space */
   overflow-y: auto;
   overflow-x: hidden;
 }
