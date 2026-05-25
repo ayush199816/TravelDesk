@@ -551,6 +551,27 @@ ${hotel.name}, ${hotel.city} – ${room.numberOfRooms} x ${room.roomName}`;
       });
     }
 
+    // Add flights section
+    if (quote.flights && quote.flights.length > 0) {
+      message += `
+
+✈️ Flights:
+`;
+      quote.flights.forEach((flight, flightIndex) => {
+        const departureDate = new Date(flight.departureDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const arrivalDate = new Date(flight.arrivalDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        
+        message += `Day ${flightIndex + 1} (${departureDate}): ${flight.airline} ${flight.flightNumber} - ${flight.departureCity} to ${flight.arrivalCity}
+`;
+        message += `Departure: ${departureDate} ${flight.departureTime} | Arrival: ${arrivalDate} ${flight.arrivalTime}`;
+        if (flight.pnr) {
+          message += ` | PNR: ${flight.pnr}`;
+        }
+        message += `
+`;
+      });
+    }
+
     // Add brief itinerary
     if (quote.days && quote.days.length > 0) {
       message += `
