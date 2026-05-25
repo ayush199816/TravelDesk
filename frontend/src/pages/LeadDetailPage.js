@@ -22,6 +22,9 @@ const LeadDetailPage = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareMessage, setShareMessage] = useState('');
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailMessage, setEmailMessage] = useState('');
+  const [emailSubject, setEmailSubject] = useState('');
   const [shareOptions, setShareOptions] = useState({
     hotels: true,
     flights: true,
@@ -505,6 +508,116 @@ const LeadDetailPage = () => {
     return message;
   }, [lead, user.organization.name, shareOptions]);
 
+  const formatEmailMessage = useCallback((quote, index) => {
+    const quoteId = `QT-${lead.leadNumber}-${index + 1}`;
+    const startDate = new Date(quote.travelStartDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const endDate = new Date(quote.travelEndDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const nights = Math.ceil((new Date(quote.travelEndDate) - new Date(quote.travelStartDate)) / (1000 * 60 * 60 * 24));
+    const days = nights + 1;
+    
+    // Calculate cost breakdown
+    const totalAmount = quote.total || 0;
+    const flightTotal = quote.flights ? quote.flights.reduce((sum, flight) => sum + (flight.price || 0), 0) : 0;
+    const tcsAmount = quote.tcsAmount || 0;
+    const packageCost = totalAmount - tcsAmount - flightTotal;
+    
+    let message = `Dear ${lead.name},
+Greetings from ${user.organization.name}!
+
+Thank you for choosing us to plan your upcoming vacation. Our sales team has carefully curated a personalized itinerary for your ${nights} Nights / ${days} Days ${quote.country} package starting on ${startDate}.
+
+Please find a quick overview of your travel details below:
+
+📋 Trip Summary:
+Destination: ${quote.country}
+Travelers: ${quote.adultPax} Adult${quote.adultPax > 1 ? 's' : ''}${quote.childPax > 0 ? `, ${quote.childPax} Child${quote.childPax > 1 ? 'ren' : ''}` : ''}
+Duration: ${nights} Nights / ${days} Days
+Travel Dates: ${startDate} – ${endDate}`;
+
+    // Add accommodation details
+    if (quote.hotels && quote.hotels.length > 0) {
+      message += `
+Accommodation: `;
+      quote.hotels.forEach((hotel, hotelIndex) => {
+        if (hotel.rooms && hotel.rooms.length > 0) {
+          hotel.rooms.forEach((room, roomIndex) => {
+            message += `${hotel.name}, ${hotel.city} – ${room.numberOfRooms} x ${room.roomName}`;
+            if (hotel.isTemporary) {
+              message += ` (Includes Breakfast)`;
+            } else {
+              message += ` (⭐${hotel.starRating || 3} Star${room.breakfastIncluded ? ' - Includes Breakfast' : ''})`;
+            }
+          });
+        }
+      });
+    }
+
+    // Add brief itinerary
+    if (quote.days && quote.days.length > 0) {
+      message += `
+
+🗓️ Brief Itinerary:`;
+      quote.days.forEach((day, dayIndex) => {
+        const dayDate = new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        
+        let dayActivities = [];
+        
+        // Add sightseeings
+        if (day.sightseeings && day.sightseeings.length > 0) {
+          day.sightseeings.forEach(item => {
+            const sightseeing = item.sightseeing && typeof item.sightseeing === 'object' 
+              ? item.sightseeing 
+              : { name: item.name || 'Sightseeing', location: item.location || '' };
+            dayActivities.push(sightseeing.name);
+          });
+        }
+        
+        // Add transfers
+        if (day.transfers && day.transfers.length > 0) {
+          day.transfers.forEach(item => {
+            const transfer = item.transfer && typeof item.transfer === 'object' 
+              ? item.transfer 
+              : { name: item.name || 'Transfer', fromLocation: item.fromLocation || '', toLocation: item.toLocation || '' };
+            dayActivities.push(transfer.name);
+          });
+        }
+        
+        if (dayActivities.length > 0) {
+          message += `
+Day ${dayIndex + 1} (${dayDate}): ${dayActivities.join(' – ')}`;
+        }
+      });
+    }
+
+    // Add payment information
+    message += `
+
+💳 Commercials & Payment Information
+The total package cost is ${quote.currency} ${Math.round(totalAmount).toLocaleString()}/-`;
+    
+    if (tcsAmount > 0) {
+      message += ` (exclusive of a 2% TCS amount of ${quote.currency} ${Math.round(tcsAmount).toLocaleString()})`;
+    }
+    
+    message += `.
+
+To confirm your booking and secure the blocked rooms and transfers, please provide us with your final approval. You can initiate the payment using the bank details provided below:
+
+(I have also attached the Google Pay QR code/screenshot to this email for a quick and seamless transaction.)
+
+Once the payment is processed, please share a screenshot of the transaction confirmation. 
+
+We will immediately proceed with issuing your travel vouchers, hotel confirmations, and detailed itinerary.
+
+Please look through the attached quote and let us know if you would like to make any modifications to the services. Looking forward to your green light!
+
+Warm regards,
+The Booking Team 
+${user.organization.name}`;
+
+    return message;
+  }, [lead, user.organization.name]);
+
   const handleShareQuote = (quote, index) => {
     setCurrentQuoteIndex(index);
     setShowShareModal(true);
@@ -537,13 +650,6 @@ const LeadDetailPage = () => {
     window.open(whatsappUrl, '_blank');
   };
 
-  const handleShareViaEmail = () => {
-    const subject = encodeURIComponent(`Quote Details - QT-${lead.leadNumber}-${currentQuoteIndex + 1}`);
-    const body = encodeURIComponent(shareMessage);
-    const mailtoUrl = `mailto:?subject=${subject}&body=${body}`;
-    window.open(mailtoUrl, '_blank');
-  };
-
   const handleCopyMessage = async () => {
     try {
       await navigator.clipboard.writeText(shareMessage);
@@ -557,6 +663,38 @@ const LeadDetailPage = () => {
       document.execCommand('copy');
       document.body.removeChild(textArea);
       alert('Message copied to clipboard!');
+    }
+  };
+
+  const handleShareEmail = (quote, index) => {
+    setCurrentQuoteIndex(index);
+    const message = formatEmailMessage(quote, index);
+    const subject = `Travel Quote - ${quote.country} Package - ${new Date(quote.travelStartDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric'})}`;
+    setEmailMessage(message);
+    setEmailSubject(subject);
+    setShowEmailModal(true);
+  };
+
+  const handleSendEmail = () => {
+    const subject = encodeURIComponent(emailSubject);
+    const body = encodeURIComponent(emailMessage);
+    const mailtoUrl = `mailto:?subject=${subject}&body=${body}`;
+    window.open(mailtoUrl, '_blank');
+  };
+
+  const handleCopyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(emailMessage);
+      alert('Email message copied to clipboard!');
+    } catch (err) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = emailMessage;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      alert('Email message copied to clipboard!');
     }
   };
 
@@ -1421,6 +1559,13 @@ const LeadDetailPage = () => {
                         📱
                       </button>
                       <button 
+                        onClick={() => handleShareEmail(quote, index)}
+                        className="quote-button email-btn"
+                        title="Email Quote"
+                      >
+                        ✉️
+                      </button>
+                      <button 
                         onClick={() => handleDownloadPDF(quote, index)}
                         className="quote-button pdf-btn"
                         title="Download PDF"
@@ -1581,12 +1726,6 @@ const LeadDetailPage = () => {
                   📱 Share on WhatsApp
                 </button>
                 <button
-                  onClick={handleShareViaEmail}
-                  className="share-send-btn email-share-btn"
-                >
-                  📧 Share via Email
-                </button>
-                <button
                   onClick={handleCopyMessage}
                   className="share-cancel-btn"
                 >
@@ -1595,6 +1734,128 @@ const LeadDetailPage = () => {
                 <button
                   onClick={() => setShowShareModal(false)}
                   className="share-cancel-btn"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Email Share Modal */}
+        {showEmailModal && (
+          <div className="email-modal">
+            <div className="email-modal-content">
+              <div className="email-modal-header">
+                <h3 className="email-modal-title">Email Quote - Quote {currentQuoteIndex + 1}</h3>
+                <button
+                  onClick={() => setShowEmailModal(false)}
+                  className="close-button"
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '24px',
+                    cursor: 'pointer',
+                    padding: '0',
+                    width: '30px',
+                    height: '30px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+              
+              <div className="email-modal-body">
+                <div className="email-subject">
+                  <label style={{display: 'block', marginBottom: '5px', fontSize: '14px', fontWeight: '600'}}>Subject:</label>
+                  <input
+                    type="text"
+                    value={emailSubject}
+                    onChange={(e) => setEmailSubject(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      border: '1px solid #ced4da',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      marginBottom: '15px'
+                    }}
+                  />
+                </div>
+                
+                <div className="email-message">
+                  <label style={{display: 'block', marginBottom: '5px', fontSize: '14px', fontWeight: '600'}}>Message:</label>
+                  <textarea
+                    value={emailMessage}
+                    onChange={(e) => setEmailMessage(e.target.value)}
+                    style={{
+                      width: '100%',
+                      minHeight: '400px',
+                      padding: '15px',
+                      border: '1px solid #ced4da',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontFamily: 'inherit',
+                      resize: 'vertical',
+                      whiteSpace: 'pre-wrap',
+                      lineHeight: '1.4'
+                    }}
+                  />
+                </div>
+              </div>
+              
+              <div className="email-modal-footer">
+                <button
+                  onClick={handleSendEmail}
+                  className="email-send-btn"
+                  style={{
+                    backgroundColor: '#007bff',
+                    color: 'white',
+                    border: 'none',
+                    padding: '10px 20px',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  ✉️ Open Email Client
+                </button>
+                <button
+                  onClick={handleCopyEmail}
+                  className="email-copy-btn"
+                  style={{
+                    backgroundColor: '#6c757d',
+                    color: 'white',
+                    border: 'none',
+                    padding: '10px 20px',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  📋 Copy Message
+                </button>
+                <button
+                  onClick={() => setShowEmailModal(false)}
+                  className="email-cancel-btn"
+                  style={{
+                    backgroundColor: '#dc3545',
+                    color: 'white',
+                    border: 'none',
+                    padding: '10px 20px',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    cursor: 'pointer'
+                  }}
                 >
                   Cancel
                 </button>
