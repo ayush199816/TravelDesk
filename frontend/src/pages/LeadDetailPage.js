@@ -509,7 +509,6 @@ const LeadDetailPage = () => {
   }, [lead, user.organization.name, shareOptions]);
 
   const formatEmailMessage = useCallback((quote, index) => {
-    const quoteId = `QT-${lead.leadNumber}-${index + 1}`;
     const startDate = new Date(quote.travelStartDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     const endDate = new Date(quote.travelEndDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     const nights = Math.ceil((new Date(quote.travelEndDate) - new Date(quote.travelStartDate)) / (1000 * 60 * 60 * 24));
@@ -519,7 +518,6 @@ const LeadDetailPage = () => {
     const totalAmount = quote.total || 0;
     const flightTotal = quote.flights ? quote.flights.reduce((sum, flight) => sum + (flight.price || 0), 0) : 0;
     const tcsAmount = quote.tcsAmount || 0;
-    const packageCost = totalAmount - tcsAmount - flightTotal;
     
     let message = `Dear ${lead.name},
 Greetings from ${user.organization.name}!
