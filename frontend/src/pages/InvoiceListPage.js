@@ -27,24 +27,6 @@ const InvoiceListPage = () => {
   });
   const [paymentLoading, setPaymentLoading] = useState(false);
 
-  const handleDeleteInvoice = async (invoiceId, invoiceNumber) => {
-    const statusWarning = invoice.status !== 'draft' ? 
-      `WARNING: This invoice is currently in "${invoice.status}" status. Deleting it will remove all payment records and cannot be undone.\n\n` : '';
-    
-    if (window.confirm(`${statusWarning}Are you sure you want to delete invoice ${invoiceNumber}? This action cannot be undone.`)) {
-      try {
-        await api.delete(`/invoices/${invoiceId}`);
-        // Refresh the invoices list
-        fetchInvoices();
-        // Show success message
-        alert(`Invoice ${invoiceNumber} deleted successfully`);
-      } catch (error) {
-        const errorMessage = error.response?.data?.message || 'Error deleting invoice';
-        setError(errorMessage);
-      }
-    }
-  };
-
   useEffect(() => {
     fetchInvoices();
   }, []);
@@ -246,7 +228,6 @@ const InvoiceListPage = () => {
                             size="sm" 
                             variant="outline-primary"
                             onClick={() => handleDownloadPDF(invoice._id, invoice.invoiceNumber)}
-                            title="Download PDF"
                           >
                             <i className="bi bi-download"></i>
                           </Button>
@@ -255,17 +236,8 @@ const InvoiceListPage = () => {
                             variant="outline-success"
                             onClick={() => openPaymentModal(invoice)}
                             disabled={invoice.status === 'fully_paid' ? 'true' : undefined}
-                            title="Record Payment"
                           >
                             <i className="bi bi-credit-card"></i>
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline-danger"
-                            onClick={() => handleDeleteInvoice(invoice._id, invoice.invoiceNumber)}
-                            title="Delete Invoice"
-                          >
-                            <i className="bi bi-trash"></i>
                           </Button>
                         </div>
                       </td>
