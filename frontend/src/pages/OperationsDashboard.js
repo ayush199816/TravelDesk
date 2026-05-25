@@ -445,6 +445,34 @@ const OperationsDashboard = () => {
     }
   }, [user.organization._id]);
 
+  // Helper function to get quote status for a lead
+  const getQuoteStatusForLead = useCallback((leadId) => {
+    const leadQuotes = quotes.filter(quote => quote.lead === leadId);
+    if (leadQuotes.length === 0) {
+      return { status: 'No Quote', isConverted: false };
+    }
+    
+    // Check if any quote is converted
+    const convertedQuote = leadQuotes.find(quote => quote.isConverted);
+    if (convertedQuote) {
+      return { status: 'Converted', isConverted: true };
+    }
+    
+    // Check if any quote is accepted
+    const acceptedQuote = leadQuotes.find(quote => quote.status === 'accepted');
+    if (acceptedQuote) {
+      return { status: 'Accepted', isConverted: true };
+    }
+    
+    // Check if any quote is sent
+    const sentQuote = leadQuotes.find(quote => quote.status === 'sent');
+    if (sentQuote) {
+      return { status: 'Sent', isConverted: false };
+    }
+    
+    return { status: 'Draft', isConverted: false };
+  }, [quotes]);
+
   const fetchOrganizationData = useCallback(async () => {
     try {
       const response = await api.get(`/organizations/${user.organization._id}`);
@@ -1127,6 +1155,7 @@ const OperationsDashboard = () => {
               <th className="email-cell">Email</th>
               <th className="phone-cell">Phone</th>
               <th className="status-cell">Status</th>
+              <th className="quote-status-cell">Quote Status</th>
               <th className="assigned-cell">Assigned To</th>
               <th className="requirements-cell">Requirements</th>
               <th className="country-cell">Country Travelling To</th>
@@ -1161,6 +1190,16 @@ const OperationsDashboard = () => {
                       </option>
                     ))}
                   </select>
+                </td>
+                <td className="quote-status-cell">
+                  {(() => {
+                    const quoteStatus = getQuoteStatusForLead(lead._id);
+                    return (
+                      <span className={`quote-status-badge ${quoteStatus.status.toLowerCase().replace(' ', '-')}`}>
+                        {quoteStatus.status}
+                      </span>
+                    );
+                  })()}
                 </td>
                 <td className="assigned-cell">{lead.assignedTo?.name || 'Unassigned'}</td>
                 <td className="requirements-cell" title={lead.requirements || ''}>

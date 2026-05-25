@@ -226,6 +226,10 @@
   min-width: 160px;
 }
 
+.main-content.sidebar-closed .leads-table .quote-status-cell {
+  min-width: 160px;
+}
+
 .main-content.sidebar-closed .leads-table .name-cell {
   min-width: 220px;
 }
@@ -689,6 +693,50 @@
 
 .leads-table .status-cell {
   min-width: 150px;
+}
+
+.leads-table .quote-status-cell {
+  min-width: 140px;
+}
+
+.leads-table .quote-status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.leads-table .quote-status-badge.no-quote {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+}
+
+.leads-table .quote-status-badge.draft {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.leads-table .quote-status-badge.sent {
+  background-color: #cce5ff;
+  color: #004085;
+  border: 1px solid #99ccff;
+}
+
+.leads-table .quote-status-badge.accepted {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.leads-table .quote-status-badge.converted {
+  background-color: #28a745;
+  color: white;
+  border: 1px solid #28a745;
 }
 
 .leads-table .assigned-cell {
@@ -1275,6 +1323,19 @@
     min-width: 120px;
   }
   
+  .leads-table .quote-status-cell {
+    min-width: 110px;
+  }
+  
+  .leads-table .quote-status-badge {
+    padding: 2px 6px;
+    font-size: 11px;
+  }
+  
+  .leads-table .status-cell {
+    min-width: 120px;
+  }
+  
   .leads-table .assigned-cell {
     min-width: 150px;
   }
@@ -1609,6 +1670,15 @@
   
   .leads-table .status-cell {
     min-width: 100px;
+  }
+  
+  .leads-table .quote-status-cell {
+    min-width: 90px;
+  }
+  
+  .leads-table .quote-status-badge {
+    padding: 2px 4px;
+    font-size: 10px;
   }
   
   .leads-table .assigned-cell {

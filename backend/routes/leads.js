@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Lead = require('../models/Lead');
+const Quote = require('../models/Quote');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
 
@@ -133,6 +134,19 @@ router.put('/:id', auth, async (req, res) => {
     const lead = await Lead.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after' })
       .populate('editHistory.editedBy', 'name email')
       .populate('assignedTo', 'name email');
+    
+    // If lead status was changed to 'converted', update associated quotes
+    if (req.body.status === 'converted' && originalLead.status !== 'converted') {
+      await Quote.updateMany(
+        { lead: req.params.id, organization: originalLead.organization },
+        { 
+          status: 'accepted',
+          isConverted: true,
+          convertedAt: new Date(),
+          convertedBy: req.userType === 'user' ? req.user._id : null
+        }
+      );
+    }
     
     res.json(lead);
   } catch (error) {
