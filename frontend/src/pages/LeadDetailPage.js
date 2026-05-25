@@ -534,14 +534,16 @@ Travelers: ${quote.adultPax} Adult${quote.adultPax > 1 ? 's' : ''}${quote.childP
 Duration: ${nights} Nights / ${days} Days
 Travel Dates: ${startDate} – ${endDate}`;
 
-    // Add accommodation details
+    // Add accommodation details separately
     if (quote.hotels && quote.hotels.length > 0) {
       message += `
-Accommodation: `;
+
+Accommodation:`;
       quote.hotels.forEach((hotel, hotelIndex) => {
         if (hotel.rooms && hotel.rooms.length > 0) {
           hotel.rooms.forEach((room, roomIndex) => {
-            message += `${hotel.name}, ${hotel.city} – ${room.numberOfRooms} x ${room.roomName}`;
+            message += `
+${hotel.name}, ${hotel.city} – ${room.numberOfRooms} x ${room.roomName}`;
             if (hotel.isTemporary) {
               message += ` (Includes Breakfast)`;
             } else {
