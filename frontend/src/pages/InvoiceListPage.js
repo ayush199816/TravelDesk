@@ -27,6 +27,21 @@ const InvoiceListPage = () => {
   });
   const [paymentLoading, setPaymentLoading] = useState(false);
 
+  const handleDeleteInvoice = async (invoiceId, invoiceNumber) => {
+    if (window.confirm(`Are you sure you want to delete invoice ${invoiceNumber}? This action cannot be undone.`)) {
+      try {
+        await api.delete(`/invoices/${invoiceId}`);
+        // Refresh the invoices list
+        fetchInvoices();
+        // Show success message (optional, could use a toast notification)
+        alert(`Invoice ${invoiceNumber} deleted successfully`);
+      } catch (error) {
+        const errorMessage = error.response?.data?.message || 'Error deleting invoice';
+        setError(errorMessage);
+      }
+    }
+  };
+
   useEffect(() => {
     fetchInvoices();
   }, []);
@@ -48,27 +63,6 @@ const InvoiceListPage = () => {
       await downloadInvoicePDF(invoiceId, invoiceNumber);
     } catch (error) {
       setError('Error downloading PDF');
-    }
-  };
-
-  const handleDeleteInvoice = async (invoiceId) => {
-    if (window.confirm('Are you sure you want to delete this quote? This action cannot be undone and will also delete the associated invoice.')) {
-      try {
-        // Get the invoice to find the associated quote
-        const invoice = invoices.find(inv => inv._id === invoiceId);
-        if (invoice && invoice.quote) {
-          // Delete the associated quote
-          await api.delete(`/quotes/${invoice.quote._id}`);
-          // Remove invoice from local state
-          setInvoices(invoices.filter(inv => inv._id !== invoiceId));
-          // Show success message
-          alert('Quote and associated invoice deleted successfully!');
-        } else {
-          setError('No associated quote found for this invoice');
-        }
-      } catch (error) {
-        setError('Error deleting quote: ' + (error.response?.data?.message || error.message));
-      }
     }
   };
 
@@ -249,6 +243,7 @@ const InvoiceListPage = () => {
                             size="sm" 
                             variant="outline-primary"
                             onClick={() => handleDownloadPDF(invoice._id, invoice.invoiceNumber)}
+                            title="Download PDF"
                           >
                             <i className="bi bi-download"></i>
                           </Button>
@@ -257,14 +252,16 @@ const InvoiceListPage = () => {
                             variant="outline-success"
                             onClick={() => openPaymentModal(invoice)}
                             disabled={invoice.status === 'fully_paid' ? 'true' : undefined}
+                            title="Record Payment"
                           >
                             <i className="bi bi-credit-card"></i>
                           </Button>
                           <Button 
                             size="sm" 
                             variant="outline-danger"
-                            onClick={() => handleDeleteInvoice(invoice._id)}
-                            title="Delete Quote"
+                            onClick={() => handleDeleteInvoice(invoice._id, invoice.invoiceNumber)}
+                            disabled={invoice.status !== 'draft' ? 'true' : undefined}
+                            title={invoice.status !== 'draft' ? 'Only draft invoices can be deleted' : 'Delete Invoice'}
                           >
                             <i className="bi bi-trash"></i>
                           </Button>
