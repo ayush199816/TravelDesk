@@ -298,11 +298,7 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(404).json({ message: 'Invoice not found' });
     }
     
-    // Only allow deletion of draft invoices
-    if (invoice.status !== 'draft') {
-      return res.status(400).json({ message: 'Cannot delete invoice that is not in draft status' });
-    }
-    
+    // Allow deletion of any invoice (removed draft-only restriction)
     await Invoice.findByIdAndDelete(req.params.id);
     
     res.json({ message: 'Invoice deleted successfully' });

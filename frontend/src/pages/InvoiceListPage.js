@@ -28,12 +28,15 @@ const InvoiceListPage = () => {
   const [paymentLoading, setPaymentLoading] = useState(false);
 
   const handleDeleteInvoice = async (invoiceId, invoiceNumber) => {
-    if (window.confirm(`Are you sure you want to delete invoice ${invoiceNumber}? This action cannot be undone.`)) {
+    const statusWarning = invoice.status !== 'draft' ? 
+      `WARNING: This invoice is currently in "${invoice.status}" status. Deleting it will remove all payment records and cannot be undone.\n\n` : '';
+    
+    if (window.confirm(`${statusWarning}Are you sure you want to delete invoice ${invoiceNumber}? This action cannot be undone.`)) {
       try {
         await api.delete(`/invoices/${invoiceId}`);
         // Refresh the invoices list
         fetchInvoices();
-        // Show success message (optional, could use a toast notification)
+        // Show success message
         alert(`Invoice ${invoiceNumber} deleted successfully`);
       } catch (error) {
         const errorMessage = error.response?.data?.message || 'Error deleting invoice';
@@ -260,8 +263,7 @@ const InvoiceListPage = () => {
                             size="sm" 
                             variant="outline-danger"
                             onClick={() => handleDeleteInvoice(invoice._id, invoice.invoiceNumber)}
-                            disabled={invoice.status !== 'draft' ? 'true' : undefined}
-                            title={invoice.status !== 'draft' ? 'Only draft invoices can be deleted' : 'Delete Invoice'}
+                            title="Delete Invoice"
                           >
                             <i className="bi bi-trash"></i>
                           </Button>
