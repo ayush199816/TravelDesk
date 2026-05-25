@@ -51,6 +51,27 @@ const InvoiceListPage = () => {
     }
   };
 
+  const handleDeleteInvoice = async (invoiceId) => {
+    if (window.confirm('Are you sure you want to delete this quote? This action cannot be undone and will also delete the associated invoice.')) {
+      try {
+        // Get the invoice to find the associated quote
+        const invoice = invoices.find(inv => inv._id === invoiceId);
+        if (invoice && invoice.quote) {
+          // Delete the associated quote
+          await api.delete(`/quotes/${invoice.quote._id}`);
+          // Remove invoice from local state
+          setInvoices(invoices.filter(inv => inv._id !== invoiceId));
+          // Show success message
+          alert('Quote and associated invoice deleted successfully!');
+        } else {
+          setError('No associated quote found for this invoice');
+        }
+      } catch (error) {
+        setError('Error deleting quote: ' + (error.response?.data?.message || error.message));
+      }
+    }
+  };
+
   const handlePaymentSubmit = async () => {
     if (!paymentForm.cycleNumber || !paymentForm.utrNumber) {
       setError('Please fill in all payment details');
@@ -238,6 +259,14 @@ const InvoiceListPage = () => {
                             disabled={invoice.status === 'fully_paid' ? 'true' : undefined}
                           >
                             <i className="bi bi-credit-card"></i>
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline-danger"
+                            onClick={() => handleDeleteInvoice(invoice._id)}
+                            title="Delete Quote"
+                          >
+                            <i className="bi bi-trash"></i>
                           </Button>
                         </div>
                       </td>
