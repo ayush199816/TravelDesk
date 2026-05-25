@@ -447,39 +447,20 @@ const OperationsDashboard = () => {
 
   // Helper function to get quote status for a lead
   const getQuoteStatusForLead = useCallback((leadId) => {
-    console.log('🔍 Looking for quotes for lead:', leadId);
-    console.log('📋 Available quotes:', quotes.map(q => ({
-      id: q._id,
-      leadId: q.lead,
-      leadIdType: typeof q.lead,
-      quoteNumber: q.quoteNumber
-    })));
-    
     const leadQuotes = quotes.filter(quote => {
       // Handle both string and ObjectId comparisons
       const quoteLeadId = quote.lead;
       const matches = quoteLeadId === leadId || quoteLeadId?.toString() === leadId || quoteLeadId?._id?.toString() === leadId;
-      console.log(`🔍 Quote ${quote.quoteNumber}: lead=${quoteLeadId}, target=${leadId}, matches=${matches}`);
       return matches;
     });
-    
-    console.log('✅ Found quotes for lead:', leadId, leadQuotes.length);
     
     if (leadQuotes.length === 0) {
       return { status: 'No Quote', isConverted: false, convertedAt: null };
     }
     
-    console.log('🔍 Debugging quotes for lead:', leadId, leadQuotes.map(q => ({
-      id: q._id,
-      status: q.status,
-      isConverted: q.isConverted,
-      convertedAt: q.convertedAt
-    })));
-    
     // Check if any quote is converted (using isConverted flag)
     const convertedQuote = leadQuotes.find(quote => quote.isConverted);
     if (convertedQuote) {
-      console.log('✅ Found converted quote:', convertedQuote._id);
       return { 
         status: 'Converted', 
         isConverted: true, 
@@ -490,18 +471,15 @@ const OperationsDashboard = () => {
     // Check if any quote is accepted
     const acceptedQuote = leadQuotes.find(quote => quote.status === 'accepted');
     if (acceptedQuote) {
-      console.log('✅ Found accepted quote:', acceptedQuote._id);
       return { status: 'Accepted', isConverted: true, convertedAt: acceptedQuote.convertedAt };
     }
     
     // Check if any quote is sent
     const sentQuote = leadQuotes.find(quote => quote.status === 'sent');
     if (sentQuote) {
-      console.log('✅ Found sent quote:', sentQuote._id);
       return { status: 'Sent', isConverted: false, convertedAt: null };
     }
     
-    console.log('✅ No special status found, returning Draft');
     return { status: 'Draft', isConverted: false, convertedAt: null };
   }, [quotes]);
 
@@ -1021,16 +999,13 @@ const OperationsDashboard = () => {
 
   const updateLeadStatus = async (leadId, newStatus) => {
     try {
-      console.log('🔄 Updating lead status:', { leadId, newStatus });
       await api.put(`/leads/${leadId}`, { status: newStatus });
-      console.log('✅ Lead status updated, refreshing data...');
       fetchLeads();
       // Also refresh quotes to update quote status badges
       fetchQuotes();
       // Show success message
       alert('Lead status updated successfully!');
     } catch (error) {
-      console.error('❌ Error updating lead status:', error);
       alert('Error updating lead status: ' + (error.response?.data?.message || error.message));
     }
   };
