@@ -482,6 +482,14 @@
   font-size: 14px;
 }
 
+.email-share-btn {
+  background: #007bff;
+}
+
+.email-share-btn:hover {
+  background: #0056b3;
+}
+
 /* Loading and error states */
 .loading-state,
 .error-state {

@@ -537,6 +537,13 @@ const LeadDetailPage = () => {
     window.open(whatsappUrl, '_blank');
   };
 
+  const handleShareViaEmail = () => {
+    const subject = encodeURIComponent(`Quote Details - QT-${lead.leadNumber}-${currentQuoteIndex + 1}`);
+    const body = encodeURIComponent(shareMessage);
+    const mailtoUrl = `mailto:?subject=${subject}&body=${body}`;
+    window.open(mailtoUrl, '_blank');
+  };
+
   const handleCopyMessage = async () => {
     try {
       await navigator.clipboard.writeText(shareMessage);
@@ -1572,6 +1579,12 @@ const LeadDetailPage = () => {
                   className="share-send-btn"
                 >
                   📱 Share on WhatsApp
+                </button>
+                <button
+                  onClick={handleShareViaEmail}
+                  className="share-send-btn email-share-btn"
+                >
+                  📧 Share via Email
                 </button>
                 <button
                   onClick={handleCopyMessage}
