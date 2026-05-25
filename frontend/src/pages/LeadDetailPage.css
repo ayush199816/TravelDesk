@@ -446,12 +446,17 @@
 .share-message {
   width: 100%;
   min-height: 100px;
-  padding: 10px;
+  max-height: 400px;
+  padding: 15px;
   border: 1px solid #ced4da;
   border-radius: 6px;
   font-size: 14px;
+  font-family: 'Courier New', monospace;
+  background-color: #f8f9fa;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  line-height: 1.4;
   resize: vertical;
-  font-family: inherit;
 }
 
 .share-modal-footer {
@@ -480,14 +485,6 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
-}
-
-.email-share-btn {
-  background: #007bff;
-}
-
-.email-share-btn:hover {
-  background: #0056b3;
 }
 
 /* Loading and error states */
