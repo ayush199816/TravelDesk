@@ -447,7 +447,24 @@ const OperationsDashboard = () => {
 
   // Helper function to get quote status for a lead
   const getQuoteStatusForLead = useCallback((leadId) => {
-    const leadQuotes = quotes.filter(quote => quote.lead === leadId);
+    console.log('🔍 Looking for quotes for lead:', leadId);
+    console.log('📋 Available quotes:', quotes.map(q => ({
+      id: q._id,
+      leadId: q.lead,
+      leadIdType: typeof q.lead,
+      quoteNumber: q.quoteNumber
+    })));
+    
+    const leadQuotes = quotes.filter(quote => {
+      // Handle both string and ObjectId comparisons
+      const quoteLeadId = quote.lead;
+      const matches = quoteLeadId === leadId || quoteLeadId?.toString() === leadId || quoteLeadId?._id?.toString() === leadId;
+      console.log(`🔍 Quote ${quote.quoteNumber}: lead=${quoteLeadId}, target=${leadId}, matches=${matches}`);
+      return matches;
+    });
+    
+    console.log('✅ Found quotes for lead:', leadId, leadQuotes.length);
+    
     if (leadQuotes.length === 0) {
       return { status: 'No Quote', isConverted: false, convertedAt: null };
     }
