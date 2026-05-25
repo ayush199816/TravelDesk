@@ -449,28 +449,32 @@ const OperationsDashboard = () => {
   const getQuoteStatusForLead = useCallback((leadId) => {
     const leadQuotes = quotes.filter(quote => quote.lead === leadId);
     if (leadQuotes.length === 0) {
-      return { status: 'No Quote', isConverted: false };
+      return { status: 'No Quote', isConverted: false, convertedAt: null };
     }
     
     // Check if any quote is converted
     const convertedQuote = leadQuotes.find(quote => quote.isConverted);
     if (convertedQuote) {
-      return { status: 'Converted', isConverted: true };
+      return { 
+        status: 'Converted', 
+        isConverted: true, 
+        convertedAt: convertedQuote.convertedAt 
+      };
     }
     
     // Check if any quote is accepted
     const acceptedQuote = leadQuotes.find(quote => quote.status === 'accepted');
     if (acceptedQuote) {
-      return { status: 'Accepted', isConverted: true };
+      return { status: 'Accepted', isConverted: true, convertedAt: acceptedQuote.convertedAt };
     }
     
     // Check if any quote is sent
     const sentQuote = leadQuotes.find(quote => quote.status === 'sent');
     if (sentQuote) {
-      return { status: 'Sent', isConverted: false };
+      return { status: 'Sent', isConverted: false, convertedAt: null };
     }
     
-    return { status: 'Draft', isConverted: false };
+    return { status: 'Draft', isConverted: false, convertedAt: null };
   }, [quotes]);
 
   const fetchOrganizationData = useCallback(async () => {
@@ -991,8 +995,12 @@ const OperationsDashboard = () => {
     try {
       await api.put(`/leads/${leadId}`, { status: newStatus });
       fetchLeads();
+      // Also refresh quotes to update quote status badges
+      fetchQuotes();
+      // Show success message
+      alert('Lead status updated successfully!');
     } catch (error) {
-      // Error updating lead status
+      alert('Error updating lead status: ' + (error.response?.data?.message || error.message));
     }
   };
 
@@ -1194,9 +1202,16 @@ const OperationsDashboard = () => {
                 <td className="quote-status-cell">
                   {(() => {
                     const quoteStatus = getQuoteStatusForLead(lead._id);
+                    const displayText = quoteStatus.convertedAt 
+                      ? `${quoteStatus.status} (${new Date(quoteStatus.convertedAt).toLocaleDateString()})`
+                      : quoteStatus.status;
+                    
                     return (
-                      <span className={`quote-status-badge ${quoteStatus.status.toLowerCase().replace(' ', '-')}`}>
-                        {quoteStatus.status}
+                      <span 
+                        className={`quote-status-badge ${quoteStatus.status.toLowerCase().replace(' ', '-')}`}
+                        title={quoteStatus.convertedAt ? `Converted on ${new Date(quoteStatus.convertedAt).toLocaleString()}` : quoteStatus.status}
+                      >
+                        {displayText}
                       </span>
                     );
                   })()}
