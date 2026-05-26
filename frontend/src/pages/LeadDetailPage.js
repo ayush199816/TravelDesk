@@ -270,7 +270,7 @@ const LeadDetailPage = () => {
     if (quote.leadProviderCommission > 0) {
       const commissionBase = (quote.sightseeingTotal || 0) + (quote.transferTotal || 0) + (quote.hotelTotal || 0);
       const commissionAmount = commissionBase * (quote.leadProviderCommission / 100);
-      message += `* Lead Provider Commission (${quote.leadProviderCommission}%): ${Math.round(commissionAmount).toLocaleString()} ${quote.currency}\n`;
+      message += `* Lead Provider Commission (${quote.leadProviderCommission}%): ${Math.round(commissionAmount).toLocaleString()} ${quote.currency} (included in total)\n`;
     }
 
     // Show Flight Cost if exists
@@ -629,7 +629,7 @@ The total package cost is ${quote.currency} ${Math.round(totalAmount).toLocaleSt
     if (quote.leadProviderCommission > 0) {
       const commissionBase = (quote.sightseeingTotal || 0) + (quote.transferTotal || 0) + (quote.hotelTotal || 0);
       const commissionAmount = commissionBase * (quote.leadProviderCommission / 100);
-      message += ` (plus ${quote.leadProviderCommission}% lead provider commission of ${quote.currency} ${Math.round(commissionAmount).toLocaleString()})`;
+      message += ` (including ${quote.leadProviderCommission}% lead provider commission of ${quote.currency} ${Math.round(commissionAmount).toLocaleString()})`;
     }
     
     message += `.

@@ -1595,10 +1595,10 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
     // Calculate discount
     const discountValue = parseFloat(quoteData.discountValue) || 0;
     const discountAmount = quoteData.discountType === 'percentage'
-      ? (markupSubtotal + taxAmount + tcsAmount) * (discountValue / 100)
+      ? (markupSubtotal + taxAmount + tcsAmount + leadProviderCommissionAmount) * (discountValue / 100)
       : discountValue;
 
-    const total = markupSubtotal + taxAmount + tcsAmount - discountAmount;
+    const total = markupSubtotal + taxAmount + tcsAmount + leadProviderCommissionAmount - discountAmount;
 
     
 
