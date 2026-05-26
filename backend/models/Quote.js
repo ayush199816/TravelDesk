@@ -109,8 +109,10 @@ const quoteSchema = new mongoose.Schema({
   taxRate: { type: Number, default: 0 }, // Tax percentage
   taxCalculationType: { type: String, enum: ['markup', 'total'], default: 'markup' }, // Tax calculation base
   taxAmount: { type: Number, default: 0 },
-  tcsEnabled: { type: Boolean, default: false }, // TCS 2.5% enabled
+  tcsEnabled: { type: Boolean, default: false }, // TCS 2% enabled
   tcsAmount: { type: Number, default: 0 }, // TCS amount
+  leadProviderCommission: { type: Number, default: 0 }, // Lead provider commission percentage
+  leadProviderCommissionAmount: { type: Number, default: 0 }, // Calculated commission amount
   total: { type: Number, required: true },
   currency: { type: String, default: 'USD' },
   

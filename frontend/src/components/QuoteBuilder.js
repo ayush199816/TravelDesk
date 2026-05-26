@@ -116,7 +116,8 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
     taxCalculationType: 'markup', // 'markup' or 'total'
 
-    tcsEnabled: false, // TCS 2.5% checkbox
+    tcsEnabled: false, // TCS 2% checkbox
+    leadProviderCommission: 0, // Lead provider commission percentage
 
     currency: user.organization?.currency || 'USD',
 
@@ -632,6 +633,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
         taxCalculationType: quote.taxCalculationType || 'markup',
 
         tcsEnabled: quote.tcsEnabled || false,
+        leadProviderCommission: quote.leadProviderCommission || 0,
 
         currency: quote.currency || user.organization?.currency || 'USD',
 
@@ -1580,11 +1582,15 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
     
 
-    // Calculate TCS (2.5%) if enabled on Subtotal + Markup + Tax
+    // Calculate TCS (2%) if enabled on Subtotal + Markup + Tax
 
     const tcsBase = markupSubtotal + taxAmount;
 
-    const tcsAmount = quoteData.tcsEnabled ? tcsBase * 0.025 : 0;
+    const tcsAmount = quoteData.tcsEnabled ? tcsBase * 0.02 : 0;
+
+    // Calculate lead provider commission (sightseeing + transfers + hotels)
+    const commissionBase = totals.sightseeingTotal + totals.transferTotal + totals.hotelTotal;
+    const leadProviderCommissionAmount = commissionBase * (quoteData.leadProviderCommission / 100);
 
     // Calculate discount
     const discountValue = parseFloat(quoteData.discountValue) || 0;
@@ -1619,6 +1625,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
       taxAmount: isNaN(taxAmount) ? 0 : taxAmount,
 
       tcsAmount: isNaN(tcsAmount) ? 0 : tcsAmount,
+      leadProviderCommissionAmount: isNaN(leadProviderCommissionAmount) ? 0 : leadProviderCommissionAmount,
 
       total: isNaN(total) ? 0 : total 
 
@@ -4032,7 +4039,35 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                   />
 
-                  <label style={{margin: 0, fontSize: '14px', cursor: 'pointer'}}>Add TCS 2.5%</label>
+                  <label style={{margin: 0, fontSize: '14px', cursor: 'pointer'}}>Add TCS 2%</label>
+
+                </div>
+
+                <div style={styles.formGroup}>
+
+                  <label style={styles.label}>Lead Provider Commission (%)</label>
+
+                  <input
+
+                    type="number"
+
+                    name="leadProviderCommission"
+
+                    value={quoteData.leadProviderCommission || 0}
+
+                    onChange={handleInputChange}
+
+                    min="0"
+
+                    max="100"
+
+                    step="0.1"
+
+                    style={styles.input}
+
+                    placeholder="Enter commission percentage"
+
+                  />
 
                 </div>
 
@@ -4228,11 +4263,37 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                 }}>
 
-                  <div style={{fontSize: '12px', color: '#6c757d', marginBottom: '5px'}}>TCS (2.5%)</div>
+                  <div style={{fontSize: '12px', color: '#6c757d', marginBottom: '5px'}}>TCS (2%)</div>
 
                   <div style={{fontSize: '18px', fontWeight: 'bold', color: '#fd7e14'}}>
 
                     +{quoteData.currency} {(totals.tcsAmount || 0).toFixed(2)}
+
+                  </div>
+
+                </div>
+
+              )}
+
+              {quoteData.leadProviderCommission > 0 && (
+
+                <div style={{
+
+                  backgroundColor: 'white',
+
+                  padding: '15px',
+
+                  borderRadius: '6px',
+
+                  border: '1px solid #dee2e6'
+
+                }}>
+
+                  <div style={{fontSize: '12px', color: '#6c757d', marginBottom: '5px'}}>Lead Provider Commission</div>
+
+                  <div style={{fontSize: '18px', fontWeight: 'bold', color: '#6f42c1'}}>
+
+                    +{quoteData.currency} {((totals.sightseeingTotal + totals.transferTotal + totals.hotelTotal) * (quoteData.leadProviderCommission / 100)).toFixed(2)}
 
                   </div>
 
