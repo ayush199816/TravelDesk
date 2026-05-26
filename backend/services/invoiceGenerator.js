@@ -237,10 +237,10 @@ const generateInvoiceHTML = async (invoiceId) => {
       </div>
       
       <div class="financial-summary">
-        <!-- Package Cost (includes sightseeing + transfers + hotels + flights) -->
+        <!-- Package Cost (includes sightseeing + transfers + hotels + flights + commission) -->
         <div class="financial-row">
           <span>Package Cost:</span>
-          <span>${invoice.currency} ${(quote.subtotal || 0).toLocaleString('en-IN')}</span>
+          <span>${invoice.currency} ${((quote.subtotal || 0) + (invoice.commissionAmount || 0)).toLocaleString('en-IN')}</span>
         </div>
         ${invoice.markupAmount > 0 ? `
         <div class="financial-row">
@@ -258,12 +258,6 @@ const generateInvoiceHTML = async (invoiceId) => {
         <div class="financial-row">
           <span>TCS (2%):</span>
           <span>${invoice.currency} ${invoice.tcsAmount.toLocaleString('en-IN')}</span>
-        </div>
-        ` : ''}
-        ${invoice.commissionAmount > 0 ? `
-        <div class="financial-row">
-          <span>Lead Provider Commission:</span>
-          <span>${invoice.currency} ${invoice.commissionAmount.toLocaleString('en-IN')}</span>
         </div>
         ` : ''}
         <div class="financial-row total">
