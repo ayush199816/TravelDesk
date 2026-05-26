@@ -91,6 +91,10 @@ const invoiceSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  commissionAmount: {
+    type: Number,
+    default: 0
+  },
   finalAmount: {
     type: Number,
     required: true

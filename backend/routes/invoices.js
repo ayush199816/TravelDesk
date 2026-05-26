@@ -90,7 +90,8 @@ router.post('/', auth, async (req, res) => {
     // Use actual tax and TCS amounts from quote
     const taxAmount = quote.taxAmount || 0;
     const tcsAmount = quote.tcsAmount || 0;
-    const finalAmount = packageAmount + taxAmount + tcsAmount;
+    const commissionAmount = quote.leadProviderCommissionAmount || 0;
+    const finalAmount = packageAmount + taxAmount + tcsAmount + commissionAmount;
     const remainingAmount = finalAmount - firstCycleAmount;
     const cycleAmount = Math.round(remainingAmount / (totalCycles - 1));
     
@@ -112,6 +113,7 @@ router.post('/', auth, async (req, res) => {
       markupAmount: quote.markupAmount || 0,
       taxAmount: taxAmount || 0,
       tcsAmount: tcsAmount || 0,
+      commissionAmount: commissionAmount || 0,
       finalAmount: finalAmount || 0,
       currency: quote.currency || 'INR',
       totalCycles: totalCycles || 1,
