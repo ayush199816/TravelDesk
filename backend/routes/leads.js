@@ -50,6 +50,10 @@ router.post('/', auth, async (req, res) => {
     const Organization = require('../models/Organization');
     const organization = await Organization.findById(req.body.organization);
     
+    if (!organization) {
+      return res.status(400).json({ message: 'Organization not found' });
+    }
+    
     // Validate lead status against organization's configured statuses
     if (organization && organization.leadStatuses && organization.leadStatuses.length > 0) {
       if (!organization.leadStatuses.includes(req.body.status)) {
@@ -60,7 +64,29 @@ router.post('/', auth, async (req, res) => {
       }
     }
     
-    const lead = new Lead(req.body);
+    // If leadCounter is not initialized, set it to current max lead number
+    let nextCounter = organization.leadCounter || 0;
+    if (nextCounter === 0) {
+      const Lead = require('../models/Lead');
+      const latestLead = await Lead.findOne({ organization: organization._id }).sort({ leadNumber: -1 });
+      if (latestLead && latestLead.leadNumber) {
+        const match = latestLead.leadNumber.match(/LN-(\d{4})/);
+        if (match) {
+          nextCounter = parseInt(match[1], 10);
+        }
+      }
+    }
+    
+    // Generate next lead number atomically
+    nextCounter = nextCounter + 1;
+    const leadNumber = `LN-${nextCounter.toString().padStart(4, '0')}`;
+    
+    // Update organization's leadCounter
+    await Organization.findByIdAndUpdate(organization._id, { leadCounter: nextCounter });
+    
+    // Create lead with generated leadNumber (ignore any provided by frontend)
+    const leadData = { ...req.body, leadNumber };
+    const lead = new Lead(leadData);
     const savedLead = await lead.save();
     res.status(201).json(savedLead);
   } catch (error) {
