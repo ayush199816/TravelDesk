@@ -266,13 +266,6 @@ const LeadDetailPage = () => {
       message += `* TCS (2%): ${Math.round(tcsAmount).toLocaleString()} ${quote.currency}\n`;
     }
 
-    // Show Lead Provider Commission if exists
-    if (quote.leadProviderCommission > 0) {
-      const commissionBase = (quote.sightseeingTotal || 0) + (quote.transferTotal || 0) + (quote.hotelTotal || 0);
-      const commissionAmount = commissionBase * (quote.leadProviderCommission / 100);
-      message += `* Lead Provider Commission (${quote.leadProviderCommission}%): ${Math.round(commissionAmount).toLocaleString()} ${quote.currency} (included in total)\n`;
-    }
-
     // Show Flight Cost if exists
     if (flightTotal > 0) {
       message += `* Flight Cost: ${Math.round(flightTotal).toLocaleString()} ${quote.currency}\n`;
@@ -624,12 +617,6 @@ The total package cost is ${quote.currency} ${Math.round(totalAmount).toLocaleSt
     
     if (tcsAmount > 0) {
       message += ` (exclusive of a 2% TCS amount of ${quote.currency} ${Math.round(tcsAmount).toLocaleString()})`;
-    }
-
-    if (quote.leadProviderCommission > 0) {
-      const commissionBase = (quote.sightseeingTotal || 0) + (quote.transferTotal || 0) + (quote.hotelTotal || 0);
-      const commissionAmount = commissionBase * (quote.leadProviderCommission / 100);
-      message += ` (including ${quote.leadProviderCommission}% lead provider commission of ${quote.currency} ${Math.round(commissionAmount).toLocaleString()})`;
     }
     
     message += `.
