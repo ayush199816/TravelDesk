@@ -18,10 +18,26 @@ const InvoiceCreationFormSimple = ({ quote, onInvoiceCreated, onCancel }) => {
   // Calculate remaining cycle amount
   const calculateRemainingAmount = () => {
     const packageAmount = (quote.subtotal || 0) + (quote.markupAmount || 0);
-    // Use actual tax and TCS amounts from quote
     const taxAmount = quote.taxAmount || 0;
-    const tcsAmount = quote.tcsAmount || 0;
-    const totalAmount = packageAmount + taxAmount + tcsAmount;
+    
+    // Calculate TCS if not present in quote
+    let tcsAmount = quote.tcsAmount || 0;
+    if (quote.tcsEnabled && !tcsAmount) {
+      const markupSubtotal = packageAmount + taxAmount;
+      tcsAmount = markupSubtotal * 0.02; // 2% TCS
+    }
+    
+    // Calculate commission if not present in quote
+    let commissionAmount = quote.leadProviderCommissionAmount || 0;
+    if (quote.leadProviderCommission && !commissionAmount) {
+      const commissionBase = (quote.sightseeingTotal || 0) + (quote.transferTotal || 0) + (quote.hotelTotal || 0);
+      commissionAmount = commissionBase * (quote.leadProviderCommission / 100);
+    }
+    
+    // Use the quote's total if available, otherwise calculate
+    const calculatedTotal = packageAmount + taxAmount + tcsAmount + commissionAmount;
+    const totalAmount = quote.total || calculatedTotal;
+    
     const remainingAmount = totalAmount - formData.firstCycleAmount;
     const cycleAmount = Math.round(remainingAmount / (formData.totalCycles - 1));
     
@@ -29,6 +45,7 @@ const InvoiceCreationFormSimple = ({ quote, onInvoiceCreated, onCancel }) => {
       packageAmount,
       taxAmount,
       tcsAmount,
+      commissionAmount,
       totalAmount,
       remainingAmount,
       cycleAmount
@@ -230,8 +247,14 @@ const InvoiceCreationFormSimple = ({ quote, onInvoiceCreated, onCancel }) => {
             )}
             {calculations.tcsAmount > 0 && (
               <div style={{ flex: 1, minWidth: '120px' }}>
-                <small style={{ color: '#666' }}>TCS (2.5%)</small>
+                <small style={{ color: '#666' }}>TCS (2%)</small>
                 <div style={{ fontWeight: 'bold' }}>₹{calculations.tcsAmount.toLocaleString('en-IN')}</div>
+              </div>
+            )}
+            {calculations.commissionAmount > 0 && (
+              <div style={{ flex: 1, minWidth: '120px' }}>
+                <small style={{ color: '#666' }}>Lead Provider Commission</small>
+                <div style={{ fontWeight: 'bold' }}>₹{calculations.commissionAmount.toLocaleString('en-IN')}</div>
               </div>
             )}
             <div style={{ flex: 1, minWidth: '120px' }}>
