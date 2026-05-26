@@ -256,8 +256,14 @@ const generateInvoiceHTML = async (invoiceId) => {
         ` : ''}
         ${invoice.tcsAmount > 0 ? `
         <div class="financial-row">
-          <span>TCS (2.5%):</span>
+          <span>TCS (2%):</span>
           <span>${invoice.currency} ${invoice.tcsAmount.toLocaleString('en-IN')}</span>
+        </div>
+        ` : ''}
+        ${invoice.commissionAmount > 0 ? `
+        <div class="financial-row">
+          <span>Lead Provider Commission:</span>
+          <span>${invoice.currency} ${invoice.commissionAmount.toLocaleString('en-IN')}</span>
         </div>
         ` : ''}
         <div class="financial-row total">
