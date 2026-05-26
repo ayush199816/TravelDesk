@@ -48,6 +48,7 @@ router.get('/my-leads', auth, async (req, res) => {
 router.post('/', auth, async (req, res) => {
   try {
     const Organization = require('../models/Organization');
+    const Lead = require('../models/Lead');
     const organization = await Organization.findById(req.body.organization);
     
     if (!organization) {
@@ -64,10 +65,9 @@ router.post('/', auth, async (req, res) => {
       }
     }
     
-    // If leadCounter is not initialized, set it to current max lead number
+    // Ensure leadCounter is initialized to the current max lead number
     let nextCounter = organization.leadCounter || 0;
     if (nextCounter === 0) {
-      const Lead = require('../models/Lead');
       const latestLead = await Lead.findOne({ organization: organization._id }).sort({ leadNumber: -1 });
       if (latestLead && latestLead.leadNumber) {
         const match = latestLead.leadNumber.match(/LN-(\d{4})/);
@@ -75,20 +75,51 @@ router.post('/', auth, async (req, res) => {
           nextCounter = parseInt(match[1], 10);
         }
       }
+      // Update the organization's counter immediately
+      await Organization.findByIdAndUpdate(organization._id, { leadCounter: nextCounter });
     }
     
-    // Generate next lead number atomically
-    nextCounter = nextCounter + 1;
-    const leadNumber = `LN-${nextCounter.toString().padStart(4, '0')}`;
+    // Try to create lead with incremented counter; if duplicate, increment and retry
+    let leadNumber;
+    let attempts = 0;
+    const maxAttempts = 10;
     
-    // Update organization's leadCounter
-    await Organization.findByIdAndUpdate(organization._id, { leadCounter: nextCounter });
+    while (attempts < maxAttempts) {
+      attempts++;
+      leadNumber = `LN-${(nextCounter + 1).toString().padStart(4, '0')}`;
+      
+      try {
+        // Check if this leadNumber already exists
+        const existing = await Lead.findOne({ leadNumber });
+        if (existing) {
+          // It exists, increment counter and try again
+          nextCounter++;
+          continue;
+        }
+        
+        // Update organization's leadCounter to the new value
+        await Organization.findByIdAndUpdate(organization._id, { leadCounter: nextCounter + 1 });
+        
+        // Create lead with generated leadNumber (ignore any provided by frontend)
+        const leadData = { ...req.body, leadNumber };
+        const lead = new Lead(leadData);
+        const savedLead = await lead.save();
+        return res.status(201).json(savedLead);
+        
+      } catch (saveError) {
+        // If it's a duplicate key error, try again with next number
+        if (saveError.code === 11000 && saveError.keyPattern?.leadNumber) {
+          nextCounter++;
+          continue;
+        }
+        // For other errors, re-throw
+        throw saveError;
+      }
+    }
     
-    // Create lead with generated leadNumber (ignore any provided by frontend)
-    const leadData = { ...req.body, leadNumber };
-    const lead = new Lead(leadData);
-    const savedLead = await lead.save();
-    res.status(201).json(savedLead);
+    // If we get here, we couldn't find a unique leadNumber after maxAttempts
+    res.status(500).json({ message: 'Unable to generate unique lead number after multiple attempts' });
+    
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
