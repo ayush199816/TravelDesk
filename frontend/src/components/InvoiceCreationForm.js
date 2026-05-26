@@ -19,14 +19,18 @@ const InvoiceCreationForm = ({ quote, onInvoiceCreated }) => {
   // Calculate remaining cycle amount
   const calculateRemainingAmount = () => {
     const packageAmount = (quote.subtotal || 0) + (quote.markupAmount || 0);
-    const taxAmount = Math.round(packageAmount * 0.025);
-    const totalAmount = packageAmount + taxAmount;
+    const taxAmount = quote.taxAmount || 0;
+    const tcsAmount = quote.tcsAmount || 0;
+    const commissionAmount = quote.leadProviderCommissionAmount || 0;
+    const totalAmount = packageAmount + taxAmount + tcsAmount + commissionAmount;
     const remainingAmount = totalAmount - formData.firstCycleAmount;
     const cycleAmount = Math.round(remainingAmount / (formData.totalCycles - 1));
     
     return {
       packageAmount,
       taxAmount,
+      tcsAmount,
+      commissionAmount,
       totalAmount,
       remainingAmount,
       cycleAmount
@@ -154,16 +158,26 @@ const InvoiceCreationForm = ({ quote, onInvoiceCreated }) => {
               <div className="fw-bold">₹{calculations.packageAmount.toLocaleString('en-IN')}</div>
             </Col>
             <Col md={3}>
-              <small className="text-muted">Tax (2.5%)</small>
+              <small className="text-muted">Tax Amount</small>
               <div className="fw-bold">₹{calculations.taxAmount.toLocaleString('en-IN')}</div>
             </Col>
             <Col md={3}>
-              <small className="text-muted">Total Amount</small>
-              <div className="fw-bold text-primary">₹{calculations.totalAmount.toLocaleString('en-IN')}</div>
+              <small className="text-muted">TCS (2%)</small>
+              <div className="fw-bold">₹{calculations.tcsAmount.toLocaleString('en-IN')}</div>
             </Col>
             <Col md={3}>
+              <small className="text-muted">Lead Provider Commission</small>
+              <div className="fw-bold">₹{calculations.commissionAmount.toLocaleString('en-IN')}</div>
+            </Col>
+          </Row>
+          <Row className="mt-2">
+            <Col md={6}>
+              <small className="text-muted">Total Amount</small>
+              <div className="fw-bold text-primary fs-5">₹{calculations.totalAmount.toLocaleString('en-IN')}</div>
+            </Col>
+            <Col md={6}>
               <small className="text-muted">Remaining Cycles</small>
-              <div className="fw-bold">₹{calculations.cycleAmount.toLocaleString('en-IN')} each</div>
+              <div className="fw-bold text-success">₹{calculations.cycleAmount.toLocaleString('en-IN')} each</div>
             </Col>
           </Row>
         </div>
