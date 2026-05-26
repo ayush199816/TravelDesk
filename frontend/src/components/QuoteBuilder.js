@@ -1582,23 +1582,21 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
     
 
-    // Calculate TCS (2%) if enabled on Subtotal + Markup + Tax
-
-    const tcsBase = markupSubtotal + taxAmount;
-
-    const tcsAmount = quoteData.tcsEnabled ? tcsBase * 0.02 : 0;
-
     // Calculate lead provider commission (sightseeing + transfers + hotels)
     const commissionBase = sightseeingTotal + transferTotal + hotelTotal;
     const leadProviderCommissionAmount = commissionBase * (quoteData.leadProviderCommission / 100);
 
+    // Calculate TCS (2%) if enabled on Subtotal + Markup + Tax + Commission
+    const tcsBase = markupSubtotal + taxAmount + leadProviderCommissionAmount;
+    const tcsAmount = quoteData.tcsEnabled ? tcsBase * 0.02 : 0;
+
     // Calculate discount
     const discountValue = parseFloat(quoteData.discountValue) || 0;
     const discountAmount = quoteData.discountType === 'percentage'
-      ? (markupSubtotal + taxAmount + tcsAmount + leadProviderCommissionAmount) * (discountValue / 100)
+      ? (markupSubtotal + taxAmount + leadProviderCommissionAmount + tcsAmount) * (discountValue / 100)
       : discountValue;
 
-    const total = markupSubtotal + taxAmount + tcsAmount + leadProviderCommissionAmount - discountAmount;
+    const total = markupSubtotal + taxAmount + leadProviderCommissionAmount + tcsAmount - discountAmount;
 
     
 
