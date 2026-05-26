@@ -1589,7 +1589,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
     const tcsAmount = quoteData.tcsEnabled ? tcsBase * 0.02 : 0;
 
     // Calculate lead provider commission (sightseeing + transfers + hotels)
-    const commissionBase = totals.sightseeingTotal + totals.transferTotal + totals.hotelTotal;
+    const commissionBase = sightseeingTotal + transferTotal + hotelTotal;
     const leadProviderCommissionAmount = commissionBase * (quoteData.leadProviderCommission / 100);
 
     // Calculate discount
