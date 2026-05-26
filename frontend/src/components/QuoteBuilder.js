@@ -1143,9 +1143,8 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
     setQuoteData(prev => {
 
-      // Check if hotel already exists
-
-      const existingHotel = prev.hotels.find(h => h.hotel === hotel._id || (h.isTemporary && hotel.isTemporary && h.name === hotel.name));
+      // Check if hotel already exists (only check for regular hotels, allow all temporary hotels)
+      const existingHotel = !hotel.isTemporary && prev.hotels.find(h => h.hotel === hotel._id);
 
       if (existingHotel) {
 
