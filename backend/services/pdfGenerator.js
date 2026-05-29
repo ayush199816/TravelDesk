@@ -1410,6 +1410,11 @@ class PDFGenerator {
                       <div style="color: white; font-size: 14px; font-weight: bold;">${dailyActivityIndex}</div>
                     </div>
                     <div style="flex: 1;">
+                      ${item.pickupTime ? `
+                      <div style="margin-bottom: 4px; font-size: 10px; color: ${quoteTemplate.colors.primary}; font-weight: 600; font-family: ${quoteTemplate.fonts.body};">
+                        🕐 Pickup: ${item.pickupTime}
+                      </div>
+                      ` : ''}
                       <h3 style="margin: 0 0 4px 0; font-size: ${quoteTemplate.fontSizes.activity - 1}px; color: ${quoteTemplate.colors.text}; font-weight: bold; font-family: ${quoteTemplate.fonts.activity};">${activityData.name}</h3>
                       <p style="margin: 0 0 5px 0; font-size: ${quoteTemplate.fontSizes.description - 2}px; line-height: 1.2; color: ${quoteTemplate.colors.muted}; font-family: ${quoteTemplate.fonts.body};">${activityData.description || 'Experience this wonderful activity with professional guidance and create lasting memories.'}</p>
                       

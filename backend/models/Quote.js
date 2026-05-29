@@ -29,6 +29,7 @@ const quoteSchema = new mongoose.Schema({
       childCount: { type: Number, default: 0 },
       includeChild: { type: Boolean, default: true },
       order: { type: Number, default: 0 },
+      pickupTime: { type: String },
       whatToBring: [{ type: String }],
       whatIsIncluded: [{ type: String }],
       whatIsExcluded: [{ type: String }]
@@ -42,7 +43,8 @@ const quoteSchema = new mongoose.Schema({
       toLocation: { type: String },
       vehicleType: { type: String },
       capacity: { type: Number },
-      order: { type: Number, default: 0 }
+      order: { type: Number, default: 0 },
+      pickupTime: { type: String }
     }],
     hotels: [{
       hotel: { type: mongoose.Schema.Types.ObjectId, ref: 'Hotel', required: true },

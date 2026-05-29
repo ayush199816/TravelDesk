@@ -851,9 +851,31 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
         sightseeing.childCount = value ? quoteData.childPax : 0;
 
+      } else if (field === 'pickupTime') {
+
+        sightseeing.pickupTime = value;
+
       }
 
       
+
+      return { ...prev, days: newDays };
+
+    });
+
+  };
+
+  
+
+  const updateTransferPickupTime = (dayIndex, transferIndex, value) => {
+
+    setQuoteData(prev => {
+
+      const newDays = [...prev.days];
+
+      const transfer = newDays[dayIndex].transfers[transferIndex];
+
+      transfer.pickupTime = value;
 
       return { ...prev, days: newDays };
 
@@ -3435,6 +3457,11 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                                   <div>
 
+                                    {item.pickupTime && (
+                                      <div style={{fontSize: '12px', color: '#007bff', fontWeight: '600', marginBottom: '4px'}}>
+                                        🕐 Pickup: {item.pickupTime}
+                                      </div>
+                                    )}
                                     <strong>{displayName}</strong><br />
 
                                     <small style={{color: '#6c757d'}}>
@@ -3490,6 +3517,26 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                                       )}
 
+                                    </div>
+
+                                    <div style={{marginTop: '5px'}}>
+                                      <label style={{fontSize: '11px', color: '#6c757d', display: 'flex', alignItems: 'center', gap: '5px'}}>
+                                        <span>Pickup Time:</span>
+                                        <input
+                                          type="time"
+                                          value={item.pickupTime || ''}
+                                          onChange={(e) => {
+                                            const originalIndex = findOriginalIndex(dayIndex, 'sightseeing', item);
+                                            updateSightseeingPax(dayIndex, originalIndex, 'pickupTime', e.target.value);
+                                          }}
+                                          style={{
+                                            padding: '3px 6px',
+                                            fontSize: '11px',
+                                            border: '1px solid #ced4da',
+                                            borderRadius: '4px'
+                                          }}
+                                        />
+                                      </label>
                                     </div>
 
                                   </div>
@@ -3718,6 +3765,11 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                                   <div>
 
+                                    {item.pickupTime && (
+                                      <div style={{fontSize: '12px', color: '#007bff', fontWeight: '600', marginBottom: '4px'}}>
+                                        🕐 Pickup: {item.pickupTime}
+                                      </div>
+                                    )}
                                     <strong>{displayName}</strong><br />
 
                                     <small style={{color: '#6c757d'}}>
@@ -3733,6 +3785,26 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                                       Rate: {quoteData.currency} {item.rate}
 
                                     </small>
+
+                                    <div style={{marginTop: '5px'}}>
+                                      <label style={{fontSize: '11px', color: '#6c757d', display: 'flex', alignItems: 'center', gap: '5px'}}>
+                                        <span>Pickup Time:</span>
+                                        <input
+                                          type="time"
+                                          value={item.pickupTime || ''}
+                                          onChange={(e) => {
+                                            const originalIndex = findOriginalIndex(dayIndex, 'transfer', item);
+                                            updateTransferPickupTime(dayIndex, originalIndex, e.target.value);
+                                          }}
+                                          style={{
+                                            padding: '3px 6px',
+                                            fontSize: '11px',
+                                            border: '1px solid #ced4da',
+                                            borderRadius: '4px'
+                                          }}
+                                        />
+                                      </label>
+                                    </div>
 
                                   </div>
 
