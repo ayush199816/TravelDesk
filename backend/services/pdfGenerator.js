@@ -1412,6 +1412,34 @@ class PDFGenerator {
                     <div style="flex: 1;">
                       <h3 style="margin: 0 0 6px 0; font-size: ${quoteTemplate.fontSizes.activity}px; color: ${quoteTemplate.colors.text}; font-weight: bold; font-family: ${quoteTemplate.fonts.activity};">${activityData.name}</h3>
                       <p style="margin: 0 0 8px 0; font-size: ${quoteTemplate.fontSizes.description}px; line-height: 1.4; color: ${quoteTemplate.colors.muted}; font-family: ${quoteTemplate.fonts.body};">${activityData.description || 'Experience this wonderful activity with professional guidance and create lasting memories.'}</p>
+                      
+                      ${activityData.whatToBring && activityData.whatToBring.length > 0 ? `
+                      <div style="margin: 10px 0; padding: 10px; background-color: #f8f9fa; border-radius: 6px; border-left: 3px solid ${quoteTemplate.colors.primary};">
+                        <div style="font-weight: bold; font-size: 12px; color: ${quoteTemplate.colors.text}; margin-bottom: 6px;">What to Bring:</div>
+                        <ul style="margin: 0; padding-left: 20px; font-size: 11px; color: ${quoteTemplate.colors.muted};">
+                          ${activityData.whatToBring.map(item => `<li style="margin: 2px 0;">${item}</li>`).join('')}
+                        </ul>
+                      </div>
+                      ` : ''}
+                      
+                      ${activityData.whatIsIncluded && activityData.whatIsIncluded.length > 0 ? `
+                      <div style="margin: 10px 0; padding: 10px; background-color: #e8f5e9; border-radius: 6px; border-left: 3px solid #4caf50;">
+                        <div style="font-weight: bold; font-size: 12px; color: #2e7d32; margin-bottom: 6px;">What is Included:</div>
+                        <ul style="margin: 0; padding-left: 20px; font-size: 11px; color: ${quoteTemplate.colors.muted};">
+                          ${activityData.whatIsIncluded.map(item => `<li style="margin: 2px 0;">${item}</li>`).join('')}
+                        </ul>
+                      </div>
+                      ` : ''}
+                      
+                      ${activityData.whatIsExcluded && activityData.whatIsExcluded.length > 0 ? `
+                      <div style="margin: 10px 0; padding: 10px; background-color: #ffebee; border-radius: 6px; border-left: 3px solid #f44336;">
+                        <div style="font-weight: bold; font-size: 12px; color: #c62828; margin-bottom: 6px;">What is Excluded:</div>
+                        <ul style="margin: 0; padding-left: 20px; font-size: 11px; color: ${quoteTemplate.colors.muted};">
+                          ${activityData.whatIsExcluded.map(item => `<li style="margin: 2px 0;">${item}</li>`).join('')}
+                        </ul>
+                      </div>
+                      ` : ''}
+                      
                       <div style="display: flex; gap: 15px; font-size: ${quoteTemplate.fontSizes.details}px; color: ${quoteTemplate.colors.muted}; padding-top: 6px; border-top: 1px solid ${quoteTemplate.borders.activity}; font-family: ${quoteTemplate.fonts.body};">
                         <span style="display: flex; align-items: center;"><strong>Location:</strong> ${activityData.location || 'Location TBD'}</span>
                         <span style="display: flex; align-items: center;"><strong>Duration:</strong> ${activityData.duration || 'Flexible'}</span>

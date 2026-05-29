@@ -3,6 +3,9 @@ const mongoose = require('mongoose');
 const sightseeingSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String, required: true },
+  whatToBring: [{ type: String }], // Array of items to bring
+  whatIsIncluded: [{ type: String }], // Array of included items
+  whatIsExcluded: [{ type: String }], // Array of excluded items
   rate: { type: Number, required: true },
   childRate: { type: Number, default: 0 },
   currency: { type: String, default: 'USD' },
