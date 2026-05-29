@@ -1513,7 +1513,7 @@ class PDFGenerator {
                 }
               }
               
-              const packageCost = sightseeingTotal + transferTotal + hotelTotal + (quote.markupAmount || 0) - (quote.discountAmount || 0) + (quote.taxAmount || 0);
+              const packageCost = sightseeingTotal + transferTotal + hotelTotal + (quote.markupAmount || 0) - (quote.discountAmount || 0) + (quote.taxAmount || 0) + (quote.leadProviderCommissionAmount || 0);
               
               // Update quote with calculated flight total for consistency
               quote.flightTotal = flightTotal;
@@ -1547,7 +1547,7 @@ class PDFGenerator {
               if (tcsAmount > 0) {
                 tableRows += `
                   <tr>
-                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">TCS (2.5%)</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">TCS (2%)</td>
                     <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; text-align: right;">${quote.currency || 'USD'} ${tcsAmount.toLocaleString('en-IN')}</td>
                   </tr>
                 `;
