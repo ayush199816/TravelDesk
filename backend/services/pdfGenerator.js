@@ -771,7 +771,7 @@ class PDFGenerator {
                   })()}
                 </div>
                 <div style="font-size: 18px; color: ${quoteTemplate.colors.primary}; font-weight: bold; margin-top: 10px;">
-                  <strong>Total: ${quote.currency} ${quote.total?.toLocaleString('en-IN') || '0'}/- (inc. Tax ${quote.currency} ${(quote.taxAmount || 0).toLocaleString('en-IN')})</strong>
+                  <strong>Total: ${quote.currency} ${quote.total?.toLocaleString('en-IN') || '0'}/-</strong>
                 </div>
               </td>
             </tr>
