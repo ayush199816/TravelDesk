@@ -751,23 +751,27 @@ class PDFGenerator {
                 <div style="margin-bottom: 10px; font-size: 14px;">
                   <strong>Price (${quote.currency}):</strong><br/>
                   ${(() => {
-                    // Simplified calculation: package cost divided by total passengers
+                    // Calculate package cost (total minus flights)
                     const packageCost = (quote.total || 0) - (quote.flightTotal || 0);
-                    const totalPassengers = quote.adultPax + quote.childPax;
-                    const perPersonPrice = totalPassengers > 0 ? Math.round(packageCost / totalPassengers) : 0;
                     
-                    return quote.adultPax > 0 && perPersonPrice > 0 ? `
-                      * ${perPersonPrice.toLocaleString('en-IN')} / Person (Package) x ${quote.adultPax} Adults<br/>
-                    ` : '';
-                  })()}
-                  ${(() => {
-                    const packageCost = (quote.total || 0) - (quote.flightTotal || 0);
-                    const totalPassengers = quote.adultPax + quote.childPax;
-                    const perPersonPrice = totalPassengers > 0 ? Math.round(packageCost / totalPassengers) : 0;
+                    // Calculate per person pricing with adult/child split
+                    // Adults pay full price, children pay 70% of adult price (common industry practice)
+                    const adultRatio = 1;
+                    const childRatio = 0.7;
+                    const totalRatio = (quote.adultPax * adultRatio) + (quote.childPax * childRatio);
                     
-                    return quote.childPax > 0 && perPersonPrice > 0 ? `
-                      * ${perPersonPrice.toLocaleString('en-IN')} / Child (Package) x ${quote.childPax} Children<br/>
-                    ` : '';
+                    const basePrice = totalRatio > 0 ? packageCost / totalRatio : 0;
+                    const adultPrice = Math.round(basePrice * adultRatio);
+                    const childPrice = Math.round(basePrice * childRatio);
+                    
+                    let priceText = '';
+                    if (quote.adultPax > 0 && adultPrice > 0) {
+                      priceText += `* ${adultPrice.toLocaleString('en-IN')} / Person (Package) x ${quote.adultPax} Adults<br/>`;
+                    }
+                    if (quote.childPax > 0 && childPrice > 0) {
+                      priceText += `* ${childPrice.toLocaleString('en-IN')} / Child (Package) x ${quote.childPax} Children<br/>`;
+                    }
+                    return priceText;
                   })()}
                 </div>
                 <div style="font-size: 18px; color: ${quoteTemplate.colors.primary}; font-weight: bold; margin-top: 10px;">
