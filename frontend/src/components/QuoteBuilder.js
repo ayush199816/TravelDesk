@@ -3459,7 +3459,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                                     {item.pickupTime && (
                                       <div style={{fontSize: '12px', color: '#007bff', fontWeight: '600', marginBottom: '4px'}}>
-                                        🕐 Pickup: {item.pickupTime}
+                                        <span style={{display: 'inline-block', width: '10px', height: '10px', background: '#007bff', borderRadius: '50%', marginRight: '4px', verticalAlign: 'middle'}}></span>Pickup: {item.pickupTime}
                                       </div>
                                     )}
                                     <strong>{displayName}</strong><br />
@@ -3767,7 +3767,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                                     {item.pickupTime && (
                                       <div style={{fontSize: '12px', color: '#007bff', fontWeight: '600', marginBottom: '4px'}}>
-                                        🕐 Pickup: {item.pickupTime}
+                                        <span style={{display: 'inline-block', width: '10px', height: '10px', background: '#007bff', borderRadius: '50%', marginRight: '4px', verticalAlign: 'middle'}}></span>Pickup: {item.pickupTime}
                                       </div>
                                     )}
                                     <strong>{displayName}</strong><br />

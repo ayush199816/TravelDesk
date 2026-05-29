@@ -1412,7 +1412,7 @@ class PDFGenerator {
                     <div style="flex: 1;">
                       ${item.pickupTime ? `
                       <div style="margin-bottom: 4px; font-size: 10px; color: ${quoteTemplate.colors.primary}; font-weight: 600; font-family: ${quoteTemplate.fonts.body};">
-                        🕐 Pickup: ${item.pickupTime}
+                        <span style="display: inline-block; width: 12px; height: 12px; background: ${quoteTemplate.colors.primary}; border-radius: 50%; margin-right: 4px; vertical-align: middle;"></span>Pickup: ${item.pickupTime}
                       </div>
                       ` : ''}
                       <h3 style="margin: 0 0 4px 0; font-size: ${quoteTemplate.fontSizes.activity - 1}px; color: ${quoteTemplate.colors.text}; font-weight: bold; font-family: ${quoteTemplate.fonts.activity};">${activityData.name}</h3>
@@ -1421,7 +1421,7 @@ class PDFGenerator {
                       ${activityData.whatToBring && activityData.whatToBring.length > 0 ? `
                       <div style="margin: 4px 0; padding: 4px 8px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 6px; border: 1px solid #dee2e6;">
                         <div style="display: flex; align-items: center; font-weight: 600; font-size: 10px; color: ${quoteTemplate.colors.text}; margin-bottom: 2px;">
-                          <span style="margin-right: 4px; font-size: 12px;">🎒</span>What to Bring
+                          <span style="display: inline-block; width: 10px; height: 10px; background: #6c757d; border-radius: 50%; margin-right: 4px;"></span>What to Bring
                         </div>
                         <div style="display: flex; flex-wrap: wrap; gap: 3px;">
                           ${activityData.whatToBring.slice(0, 4).map(item => `<span style="font-size: 9px; color: ${quoteTemplate.colors.muted}; background: white; padding: 1px 4px; border-radius: 3px; border: 1px solid #e0e0e0;">${item}</span>`).join('')}
@@ -1433,7 +1433,7 @@ class PDFGenerator {
                       ${activityData.whatIsIncluded && activityData.whatIsIncluded.length > 0 ? `
                       <div style="margin: 4px 0; padding: 4px 8px; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-radius: 6px; border: 1px solid #a5d6a7;">
                         <div style="display: flex; align-items: center; font-weight: 600; font-size: 10px; color: #2e7d32; margin-bottom: 2px;">
-                          <span style="margin-right: 4px; font-size: 12px;">✅</span>What is Included
+                          <span style="display: inline-block; width: 10px; height: 10px; background: #4caf50; border-radius: 50%; margin-right: 4px;"></span>What is Included
                         </div>
                         <div style="display: flex; flex-wrap: wrap; gap: 3px;">
                           ${activityData.whatIsIncluded.slice(0, 4).map(item => `<span style="font-size: 9px; color: #1b5e20; background: white; padding: 1px 4px; border-radius: 3px; border: 1px solid #a5d6a7;">${item}</span>`).join('')}
@@ -1445,7 +1445,7 @@ class PDFGenerator {
                       ${activityData.whatIsExcluded && activityData.whatIsExcluded.length > 0 ? `
                       <div style="margin: 4px 0; padding: 4px 8px; background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); border-radius: 6px; border: 1px solid #ef9a9a;">
                         <div style="display: flex; align-items: center; font-weight: 600; font-size: 10px; color: #c62828; margin-bottom: 2px;">
-                          <span style="margin-right: 4px; font-size: 12px;">❌</span>What is Excluded
+                          <span style="display: inline-block; width: 10px; height: 10px; background: #f44336; border-radius: 50%; margin-right: 4px;"></span>What is Excluded
                         </div>
                         <div style="display: flex; flex-wrap: wrap; gap: 3px;">
                           ${activityData.whatIsExcluded.slice(0, 4).map(item => `<span style="font-size: 9px; color: #b71c1c; background: white; padding: 1px 4px; border-radius: 3px; border: 1px solid #ef9a9a;">${item}</span>`).join('')}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
-import { Button, Form, Card, Table, Modal, Alert, Spinner } from 'react-bootstrap';
+import { Button, Form, Table, Modal, Alert, Spinner } from 'react-bootstrap';
 
 const ManagerSightseeingPage = () => {
   const [sightseeings, setSightseeings] = useState([]);
