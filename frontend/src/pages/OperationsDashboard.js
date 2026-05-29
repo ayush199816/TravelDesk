@@ -699,6 +699,9 @@ const OperationsDashboard = () => {
   const [sightseeingFormData, setSightseeingFormData] = useState({
     name: '',
     description: '',
+    whatToBring: '',
+    whatIsIncluded: '',
+    whatIsExcluded: '',
     rate: '',
     childRate: '',
     currency: organizationData?.currency || 'USD',
@@ -1015,9 +1018,16 @@ const OperationsDashboard = () => {
     try {
       const formData = new FormData();
       
-      // Add form data
+      // Add form data - convert array fields to JSON
       Object.keys(sightseeingFormData).forEach(key => {
-        formData.append(key, sightseeingFormData[key]);
+        if (key === 'whatToBring' || key === 'whatIsIncluded' || key === 'whatIsExcluded') {
+          // Convert textarea lines to array
+          const value = sightseeingFormData[key];
+          const arrayValue = value.split('\n').filter(item => item.trim());
+          formData.append(key, JSON.stringify(arrayValue));
+        } else {
+          formData.append(key, sightseeingFormData[key]);
+        }
       });
       
       // Add organization
@@ -1049,6 +1059,9 @@ const OperationsDashboard = () => {
       setSightseeingFormData({
         name: '',
         description: '',
+        whatToBring: '',
+        whatIsIncluded: '',
+        whatIsExcluded: '',
         rate: '',
         childRate: '',
         currency: organizationData?.currency || 'USD',
@@ -1123,6 +1136,9 @@ const OperationsDashboard = () => {
     setSightseeingFormData({
       name: sightseeing.name,
       description: sightseeing.description,
+      whatToBring: sightseeing.whatToBring?.join('\n') || '',
+      whatIsIncluded: sightseeing.whatIsIncluded?.join('\n') || '',
+      whatIsExcluded: sightseeing.whatIsExcluded?.join('\n') || '',
       rate: sightseeing.rate,
       childRate: sightseeing.childRate || '',
       currency: sightseeing.currency,
@@ -3325,6 +3341,39 @@ const styles = {
                       required
                     />
                   </div>
+                  <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
+                    <label style={styles.label}>What to Bring (one item per line)</label>
+                    <textarea
+                      name="whatToBring"
+                      value={sightseeingFormData.whatToBring}
+                      onChange={handleSightseeingFormChange}
+                      style={styles.textarea}
+                      placeholder="Comfortable Clothing&#10;Comfortable Shoes&#10;Camera"
+                      rows="3"
+                    />
+                  </div>
+                  <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
+                    <label style={styles.label}>What is Included (one item per line)</label>
+                    <textarea
+                      name="whatIsIncluded"
+                      value={sightseeingFormData.whatIsIncluded}
+                      onChange={handleSightseeingFormChange}
+                      style={styles.textarea}
+                      placeholder="Transfers&#10;Guide&#10;Entrance fees"
+                      rows="3"
+                    />
+                  </div>
+                  <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
+                    <label style={styles.label}>What is Excluded (one item per line)</label>
+                    <textarea
+                      name="whatIsExcluded"
+                      value={sightseeingFormData.whatIsExcluded}
+                      onChange={handleSightseeingFormChange}
+                      style={styles.textarea}
+                      placeholder="Lunch&#10;Personal expenses&#10;Tips"
+                      rows="3"
+                    />
+                  </div>
                   
                   {/* Image Upload Section */}
                   <div style={{marginBottom: '20px'}}>
@@ -3420,6 +3469,9 @@ const styles = {
                     setSightseeingFormData({
                       name: '',
                       description: '',
+                      whatToBring: '',
+                      whatIsIncluded: '',
+                      whatIsExcluded: '',
                       rate: '',
                       currency: organizationData?.currency || 'USD',
                       duration: '',

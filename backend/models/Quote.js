@@ -28,7 +28,10 @@ const quoteSchema = new mongoose.Schema({
       adultCount: { type: Number, default: 1 },
       childCount: { type: Number, default: 0 },
       includeChild: { type: Boolean, default: true },
-      order: { type: Number, default: 0 }
+      order: { type: Number, default: 0 },
+      whatToBring: [{ type: String }],
+      whatIsIncluded: [{ type: String }],
+      whatIsExcluded: [{ type: String }]
     }],
     transfers: [{
       transfer: { type: mongoose.Schema.Types.ObjectId, ref: 'Transfer', required: true },

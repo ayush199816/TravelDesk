@@ -1410,40 +1410,49 @@ class PDFGenerator {
                       <div style="color: white; font-size: 14px; font-weight: bold;">${dailyActivityIndex}</div>
                     </div>
                     <div style="flex: 1;">
-                      <h3 style="margin: 0 0 6px 0; font-size: ${quoteTemplate.fontSizes.activity}px; color: ${quoteTemplate.colors.text}; font-weight: bold; font-family: ${quoteTemplate.fonts.activity};">${activityData.name}</h3>
-                      <p style="margin: 0 0 8px 0; font-size: ${quoteTemplate.fontSizes.description}px; line-height: 1.4; color: ${quoteTemplate.colors.muted}; font-family: ${quoteTemplate.fonts.body};">${activityData.description || 'Experience this wonderful activity with professional guidance and create lasting memories.'}</p>
+                      <h3 style="margin: 0 0 4px 0; font-size: ${quoteTemplate.fontSizes.activity - 1}px; color: ${quoteTemplate.colors.text}; font-weight: bold; font-family: ${quoteTemplate.fonts.activity};">${activityData.name}</h3>
+                      <p style="margin: 0 0 5px 0; font-size: ${quoteTemplate.fontSizes.description - 2}px; line-height: 1.2; color: ${quoteTemplate.colors.muted}; font-family: ${quoteTemplate.fonts.body};">${activityData.description || 'Experience this wonderful activity with professional guidance and create lasting memories.'}</p>
                       
                       ${activityData.whatToBring && activityData.whatToBring.length > 0 ? `
-                      <div style="margin: 10px 0; padding: 10px; background-color: #f8f9fa; border-radius: 6px; border-left: 3px solid ${quoteTemplate.colors.primary};">
-                        <div style="font-weight: bold; font-size: 12px; color: ${quoteTemplate.colors.text}; margin-bottom: 6px;">What to Bring:</div>
-                        <ul style="margin: 0; padding-left: 20px; font-size: 11px; color: ${quoteTemplate.colors.muted};">
-                          ${activityData.whatToBring.map(item => `<li style="margin: 2px 0;">${item}</li>`).join('')}
-                        </ul>
+                      <div style="margin: 4px 0; padding: 4px 8px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 6px; border: 1px solid #dee2e6;">
+                        <div style="display: flex; align-items: center; font-weight: 600; font-size: 10px; color: ${quoteTemplate.colors.text}; margin-bottom: 2px;">
+                          <span style="margin-right: 4px; font-size: 12px;">🎒</span>What to Bring
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 3px;">
+                          ${activityData.whatToBring.slice(0, 4).map(item => `<span style="font-size: 9px; color: ${quoteTemplate.colors.muted}; background: white; padding: 1px 4px; border-radius: 3px; border: 1px solid #e0e0e0;">${item}</span>`).join('')}
+                          ${activityData.whatToBring.length > 4 ? `<span style="font-size: 9px; color: ${quoteTemplate.colors.primary}; font-weight: 500;">+${activityData.whatToBring.length - 4}</span>` : ''}
+                        </div>
                       </div>
                       ` : ''}
                       
                       ${activityData.whatIsIncluded && activityData.whatIsIncluded.length > 0 ? `
-                      <div style="margin: 10px 0; padding: 10px; background-color: #e8f5e9; border-radius: 6px; border-left: 3px solid #4caf50;">
-                        <div style="font-weight: bold; font-size: 12px; color: #2e7d32; margin-bottom: 6px;">What is Included:</div>
-                        <ul style="margin: 0; padding-left: 20px; font-size: 11px; color: ${quoteTemplate.colors.muted};">
-                          ${activityData.whatIsIncluded.map(item => `<li style="margin: 2px 0;">${item}</li>`).join('')}
-                        </ul>
+                      <div style="margin: 4px 0; padding: 4px 8px; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-radius: 6px; border: 1px solid #a5d6a7;">
+                        <div style="display: flex; align-items: center; font-weight: 600; font-size: 10px; color: #2e7d32; margin-bottom: 2px;">
+                          <span style="margin-right: 4px; font-size: 12px;">✅</span>What is Included
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 3px;">
+                          ${activityData.whatIsIncluded.slice(0, 4).map(item => `<span style="font-size: 9px; color: #1b5e20; background: white; padding: 1px 4px; border-radius: 3px; border: 1px solid #a5d6a7;">${item}</span>`).join('')}
+                          ${activityData.whatIsIncluded.length > 4 ? `<span style="font-size: 9px; color: #2e7d32; font-weight: 500;">+${activityData.whatIsIncluded.length - 4}</span>` : ''}
+                        </div>
                       </div>
                       ` : ''}
                       
                       ${activityData.whatIsExcluded && activityData.whatIsExcluded.length > 0 ? `
-                      <div style="margin: 10px 0; padding: 10px; background-color: #ffebee; border-radius: 6px; border-left: 3px solid #f44336;">
-                        <div style="font-weight: bold; font-size: 12px; color: #c62828; margin-bottom: 6px;">What is Excluded:</div>
-                        <ul style="margin: 0; padding-left: 20px; font-size: 11px; color: ${quoteTemplate.colors.muted};">
-                          ${activityData.whatIsExcluded.map(item => `<li style="margin: 2px 0;">${item}</li>`).join('')}
-                        </ul>
+                      <div style="margin: 4px 0; padding: 4px 8px; background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); border-radius: 6px; border: 1px solid #ef9a9a;">
+                        <div style="display: flex; align-items: center; font-weight: 600; font-size: 10px; color: #c62828; margin-bottom: 2px;">
+                          <span style="margin-right: 4px; font-size: 12px;">❌</span>What is Excluded
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 3px;">
+                          ${activityData.whatIsExcluded.slice(0, 4).map(item => `<span style="font-size: 9px; color: #b71c1c; background: white; padding: 1px 4px; border-radius: 3px; border: 1px solid #ef9a9a;">${item}</span>`).join('')}
+                          ${activityData.whatIsExcluded.length > 4 ? `<span style="font-size: 9px; color: #c62828; font-weight: 500;">+${activityData.whatIsExcluded.length - 4}</span>` : ''}
+                        </div>
                       </div>
                       ` : ''}
                       
-                      <div style="display: flex; gap: 15px; font-size: ${quoteTemplate.fontSizes.details}px; color: ${quoteTemplate.colors.muted}; padding-top: 6px; border-top: 1px solid ${quoteTemplate.borders.activity}; font-family: ${quoteTemplate.fonts.body};">
+                      <div style="display: flex; gap: 12px; font-size: ${quoteTemplate.fontSizes.details - 1}px; color: ${quoteTemplate.colors.muted}; padding-top: 4px; border-top: 1px solid ${quoteTemplate.borders.activity}; font-family: ${quoteTemplate.fonts.body};">
                         <span style="display: flex; align-items: center;"><strong>Location:</strong> ${activityData.location || 'Location TBD'}</span>
                         <span style="display: flex; align-items: center;"><strong>Duration:</strong> ${activityData.duration || 'Flexible'}</span>
-                        ${formatPassengerCount(item) ? `<span style="display: flex; align-items: center; background-color: ${quoteTemplate.colors.primary}20; color: ${quoteTemplate.colors.primary}; padding: 2px 6px; border-radius: 4px; font-weight: bold;"><strong>Pax:</strong> ${formatPassengerCount(item)}</span>` : ''}
+                        ${formatPassengerCount(item) ? `<span style="display: flex; align-items: center; background-color: ${quoteTemplate.colors.primary}20; color: ${quoteTemplate.colors.primary}; padding: 1px 4px; border-radius: 3px; font-weight: bold;"><strong>Pax:</strong> ${formatPassengerCount(item)}</span>` : ''}
                       </div>
                     </div>
                   </div>

@@ -27,6 +27,36 @@ router.post('/', auth, upload.array('images', 5), async (req, res) => {
     const sightseeingData = {
       name: req.body.name,
       description: req.body.description,
+      whatToBring: req.body.whatToBring ? (() => {
+        try {
+          const parsed = JSON.parse(req.body.whatToBring);
+          console.log('Parsed whatToBring:', parsed);
+          return parsed;
+        } catch (e) {
+          console.error('Error parsing whatToBring:', e);
+          return [];
+        }
+      })() : [],
+      whatIsIncluded: req.body.whatIsIncluded ? (() => {
+        try {
+          const parsed = JSON.parse(req.body.whatIsIncluded);
+          console.log('Parsed whatIsIncluded:', parsed);
+          return parsed;
+        } catch (e) {
+          console.error('Error parsing whatIsIncluded:', e);
+          return [];
+        }
+      })() : [],
+      whatIsExcluded: req.body.whatIsExcluded ? (() => {
+        try {
+          const parsed = JSON.parse(req.body.whatIsExcluded);
+          console.log('Parsed whatIsExcluded:', parsed);
+          return parsed;
+        } catch (e) {
+          console.error('Error parsing whatIsExcluded:', e);
+          return [];
+        }
+      })() : [],
       rate: parseFloat(req.body.rate) || 0,
       childRate: parseFloat(req.body.childRate) || 0,
       currency: req.body.currency,
@@ -110,6 +140,38 @@ router.put('/:id', auth, (req, res, next) => {
     // Update sightseeing fields
     if (req.body.name) sightseeing.name = req.body.name;
     if (req.body.description) sightseeing.description = req.body.description;
+    
+    // Parse array fields with error handling
+    if (req.body.whatToBring) {
+      try {
+        sightseeing.whatToBring = JSON.parse(req.body.whatToBring);
+        console.log('Parsed whatToBring:', sightseeing.whatToBring);
+      } catch (e) {
+        console.error('Error parsing whatToBring:', e);
+        sightseeing.whatToBring = [];
+      }
+    }
+    
+    if (req.body.whatIsIncluded) {
+      try {
+        sightseeing.whatIsIncluded = JSON.parse(req.body.whatIsIncluded);
+        console.log('Parsed whatIsIncluded:', sightseeing.whatIsIncluded);
+      } catch (e) {
+        console.error('Error parsing whatIsIncluded:', e);
+        sightseeing.whatIsIncluded = [];
+      }
+    }
+    
+    if (req.body.whatIsExcluded) {
+      try {
+        sightseeing.whatIsExcluded = JSON.parse(req.body.whatIsExcluded);
+        console.log('Parsed whatIsExcluded:', sightseeing.whatIsExcluded);
+      } catch (e) {
+        console.error('Error parsing whatIsExcluded:', e);
+        sightseeing.whatIsExcluded = [];
+      }
+    }
+    
     if (req.body.rate) sightseeing.rate = parseFloat(req.body.rate);
     if (req.body.childRate) sightseeing.childRate = parseFloat(req.body.childRate);
     if (req.body.currency) sightseeing.currency = req.body.currency;

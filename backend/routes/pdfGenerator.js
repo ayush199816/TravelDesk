@@ -59,7 +59,7 @@ router.get('/quote/:quoteId', auth, async (req, res) => {
     const quote = await Quote.findById(quoteId)
       .populate('lead', 'name email phone leadNumber')
       .populate('createdBy', 'name email')
-      .populate('days.sightseeings.sightseeing', 'name location duration images description')
+      .populate('days.sightseeings.sightseeing', 'name location duration images description whatToBring whatIsIncluded whatIsExcluded')
       .populate('days.transfers.transfer', 'name fromLocation toLocation vehicleType')
       .populate('hotels.hotel', 'name city starRating images');
     
@@ -110,7 +110,7 @@ router.post('/batch', auth, async (req, res) => {
         const quote = await Quote.findById(quoteId)
           .populate('lead', 'name email phone leadNumber')
           .populate('createdBy', 'name email')
-          .populate('days.sightseeings.sightseeing', 'name location duration images description')
+          .populate('days.sightseeings.sightseeing', 'name location duration images description whatToBring whatIsIncluded whatIsExcluded')
           .populate('days.transfers.transfer', 'name fromLocation toLocation vehicleType')
           .populate('hotels.hotel', 'name city starRating images');
         
@@ -229,7 +229,7 @@ router.get('/preview/:country', auth, async (req, res) => {
           date: new Date(),
           sightseeings: [
             {
-              sightseeing: { name: 'City Tour', location: 'Sample City', duration: '4 hours' },
+              sightseeing: { name: 'City Tour', location: 'Sample City', duration: '4 hours', whatToBring: ['Sunscreen', 'Camera'], whatIsIncluded: ['Guide', 'Transport'], whatIsExcluded: ['Meals'] },
               adultRate: 500,
               adultCount: 2,
               childCount: 1

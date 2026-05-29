@@ -801,7 +801,11 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
           includeChild: true,
 
-          order: (newDays[dayIndex].sightseeings.length + (newDays[dayIndex].transfers?.length || 0))
+          order: (newDays[dayIndex].sightseeings.length + (newDays[dayIndex].transfers?.length || 0)),
+
+          whatToBring: sightseeing.whatToBring || [],
+          whatIsIncluded: sightseeing.whatIsIncluded || [],
+          whatIsExcluded: sightseeing.whatIsExcluded || []
 
         });
 
