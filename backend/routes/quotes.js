@@ -105,85 +105,12 @@ router.get('/available-services', auth, async (req, res) => {
 // Create a new quote
 router.post('/', auth, async (req, res) => {
   try {
-    // Get organization's default currency
-    const Organization = require('../models/Organization');
-    const organization = await Organization.findById(req.user.organization);
-    const targetCurrency = organization?.currency || 'USD';
-    
-    console.log(`🔄 Creating quote with target currency: ${targetCurrency}`);
-    
     // Ensure hotel images are included
     const quoteData = { ...req.body };
     
-    // Set the quote currency to organization's currency
-    quoteData.currency = targetCurrency;
-    
-    // Convert all currencies to organization's currency
-    if (quoteData.days) {
-      quoteData.days = await Promise.all(quoteData.days.map(async (day) => {
-        let updatedDay = { ...day };
-        
-        // Convert sightseeing currencies
-        if (day.sightseeings) {
-          updatedDay.sightseeings = await Promise.all(day.sightseeings.map(async (sightseeing) => {
-            let updatedSightseeing = { ...sightseeing };
-            if (sightseeing.currency && sightseeing.currency !== targetCurrency) {
-              console.log(`🔄 Converting sightseeing "${sightseeing.sightseeingName || sightseeing.name}" from ${sightseeing.currency} to ${targetCurrency}`);
-              updatedSightseeing.adultRate = await convertCurrency(sightseeing.adultRate, sightseeing.currency, targetCurrency);
-              updatedSightseeing.childRate = await convertCurrency(sightseeing.childRate, sightseeing.currency, targetCurrency);
-              updatedSightseeing.rate = await convertCurrency(sightseeing.rate, sightseeing.currency, targetCurrency);
-              updatedSightseeing.currency = targetCurrency;
-            }
-            return updatedSightseeing;
-          }));
-        }
-        
-        // Convert transfer currencies
-        if (day.transfers) {
-          updatedDay.transfers = await Promise.all(day.transfers.map(async (transfer) => {
-            let updatedTransfer = { ...transfer };
-            if (transfer.currency && transfer.currency !== targetCurrency) {
-              console.log(`🔄 Converting transfer from ${transfer.currency} to ${targetCurrency}`);
-              updatedTransfer.rate = await convertCurrency(transfer.rate, transfer.currency, targetCurrency);
-              updatedTransfer.currency = targetCurrency;
-            }
-            return updatedTransfer;
-          }));
-        }
-        
-        return updatedDay;
-      }));
-    }
-    
-    // Convert hotel currencies
-    if (quoteData.hotels) {
-      quoteData.hotels = await Promise.all(quoteData.hotels.map(async (hotel) => {
-        let updatedHotel = { ...hotel };
-        
-        // Convert hotel room currencies
-        if (hotel.rooms) {
-          updatedHotel.rooms = await Promise.all(hotel.rooms.map(async (room) => {
-            let updatedRoom = { ...room };
-            if (room.currency && room.currency !== targetCurrency) {
-              console.log(`🔄 Converting hotel room from ${room.currency} to ${targetCurrency}`);
-              updatedRoom.adultRate = await convertCurrency(room.adultRate, room.currency, targetCurrency);
-              updatedRoom.childRate = await convertCurrency(room.childRate, room.currency, targetCurrency);
-              updatedRoom.currency = targetCurrency;
-            }
-            return updatedRoom;
-          }));
-        }
-        
-        if (hotel.hotel && !hotel.images?.length) {
-          // Fetch hotel to get images if not included
-          const Hotel = require('../models/Hotel');
-          const hotelDoc = await Hotel.findById(hotel.hotel);
-          if (hotelDoc) {
-            updatedHotel.images = hotelDoc.images || [];
-          }
-        }
-        return updatedHotel;
-      }));
+    // Set default currency to INR if not provided
+    if (!quoteData.currency) {
+      quoteData.currency = 'INR';
     }
     
     // Ensure sightseeings have required rate field and transfers have complete data
@@ -264,6 +191,24 @@ router.post('/', auth, async (req, res) => {
         }
         
         return day;
+      }));
+    }
+    
+    // Handle hotel images
+    if (quoteData.hotels) {
+      quoteData.hotels = await Promise.all(quoteData.hotels.map(async (hotel) => {
+        if (hotel.hotel && !hotel.images?.length) {
+          // Fetch hotel to get images if not included
+          const Hotel = require('../models/Hotel');
+          const hotelDoc = await Hotel.findById(hotel.hotel);
+          if (hotelDoc) {
+            return {
+              ...hotel,
+              images: hotelDoc.images || []
+            };
+          }
+        }
+        return hotel;
       }));
     }
     

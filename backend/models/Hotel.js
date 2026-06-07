@@ -6,7 +6,7 @@ const roomCategorySchema = new mongoose.Schema({
   maxOccupancy: { type: Number, required: true, min: 1 },
   basePrice: { type: Number, required: true, min: 0 },
   childPrice: { type: Number, default: 0, min: 0 },
-  currency: { type: String, default: 'USD' },
+  currency: { type: String, default: 'INR' },
   amenities: [{ type: String }],
   totalRooms: { type: Number, required: true, min: 1 },
   availableRooms: { type: Number, default: 0, min: 0 }

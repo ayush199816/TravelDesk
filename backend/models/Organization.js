@@ -7,7 +7,7 @@ const organizationSchema = new mongoose.Schema({
   phone: { type: String, required: true },
   adminUsername: { type: String, required: true, unique: true },
   adminPassword: { type: String, required: true },
-  currency: { type: String, required: true, default: 'USD', enum: ['USD', 'EUR', 'GBP', 'INR', 'AUD', 'CAD', 'SGD', 'THB', 'MYR', 'IDR', 'PHP', 'VND', 'HKD', 'JPY', 'CNY', 'KRW'] },
+  currency: { type: String, required: true, default: 'INR', enum: ['USD', 'EUR', 'GBP', 'INR', 'AUD', 'CAD', 'SGD', 'THB', 'MYR', 'IDR', 'PHP', 'VND', 'HKD', 'JPY', 'CNY', 'KRW'] },
   leadCounter: { type: Number, default: 0 },
   leadStatuses: [{ 
     type: String, 

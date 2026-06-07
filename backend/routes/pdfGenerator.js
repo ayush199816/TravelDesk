@@ -212,7 +212,7 @@ router.get('/preview/:country', auth, async (req, res) => {
       travelEndDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
       adultPax: 2,
       childPax: 1,
-      currency: 'USD',
+      currency: 'INR',
       sightseeingTotal: 1000,
       transferTotal: 500,
       hotelTotal: 800,

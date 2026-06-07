@@ -4,7 +4,7 @@ const transferSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String, required: true },
   rate: { type: Number, required: true },
-  currency: { type: String, default: 'USD' },
+  currency: { type: String, default: 'INR' },
   vehicleType: { type: String, required: true }, // e.g., "Sedan", "SUV", "Van", "Bus"
   capacity: { type: Number, required: true }, // number of passengers
   fromLocation: { type: String, required: true },

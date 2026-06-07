@@ -119,7 +119,7 @@ const quoteSchema = new mongoose.Schema({
   leadProviderCommission: { type: Number, default: 0 }, // Lead provider commission percentage
   leadProviderCommissionAmount: { type: Number, default: 0 }, // Calculated commission amount
   total: { type: Number, required: true },
-  currency: { type: String, default: 'USD' },
+  currency: { type: String, default: 'INR' },
   
   // Status
   status: { type: String, enum: ['draft', 'sent', 'accepted', 'rejected'], default: 'draft' },

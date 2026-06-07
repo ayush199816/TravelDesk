@@ -37,7 +37,7 @@ const temporaryHotelSchema = new mongoose.Schema({
     currency: {
       type: String,
       required: true,
-      default: 'USD'
+      default: 'INR'
     },
     maxOccupancy: {
       type: Number,

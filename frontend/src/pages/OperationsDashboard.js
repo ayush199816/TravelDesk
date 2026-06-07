@@ -704,7 +704,7 @@ const OperationsDashboard = () => {
     whatIsExcluded: '',
     rate: '',
     childRate: '',
-    currency: organizationData?.currency || 'USD',
+    currency: organizationData?.currency || 'INR',
     duration: '',
     location: '',
     country: ''
@@ -718,7 +718,7 @@ const OperationsDashboard = () => {
     name: '',
     description: '',
     rate: '',
-    currency: organizationData?.currency || 'USD',
+    currency: organizationData?.currency || 'INR',
     vehicleType: '',
     capacity: '',
     fromLocation: '',
@@ -742,7 +742,7 @@ const OperationsDashboard = () => {
     roomCategories: [{
       name: 'Standard Room',
       basePrice: 0,
-      currency: organizationData?.currency || 'USD',
+      currency: organizationData?.currency || 'INR',
       maxOccupancy: 2,
       totalRooms: 1
     }]
@@ -844,7 +844,7 @@ const OperationsDashboard = () => {
       roomCategories: [...prev.roomCategories, {
         name: 'New Room',
         basePrice: 0,
-        currency: organizationData?.currency || 'USD',
+        currency: organizationData?.currency || 'INR',
         maxOccupancy: 2,
         totalRooms: 1
       }]
@@ -944,7 +944,7 @@ const OperationsDashboard = () => {
         roomCategories: [{
           name: 'Standard Room',
           basePrice: 0,
-          currency: organizationData?.currency || 'USD',
+          currency: organizationData?.currency || 'INR',
           maxOccupancy: 2,
           totalRooms: 1
         }]
@@ -1064,7 +1064,7 @@ const OperationsDashboard = () => {
         whatIsExcluded: '',
         rate: '',
         childRate: '',
-        currency: organizationData?.currency || 'USD',
+        currency: organizationData?.currency || 'INR',
         duration: '',
         location: '',
         country: ''
@@ -1097,7 +1097,7 @@ const OperationsDashboard = () => {
         name: '',
         description: '',
         rate: '',
-        currency: organizationData?.currency || 'USD',
+        currency: organizationData?.currency || 'INR',
         vehicleType: '',
         capacity: '',
         fromLocation: '',
@@ -2820,7 +2820,7 @@ const styles = {
                                 <div key={index} style={{fontSize: '12px', marginBottom: '2px', borderBottom: '1px solid #eee', paddingBottom: '2px'}}>
                                   <strong>{room.name}</strong><br />
                                   <span style={{color: '#6c757d'}}>
-                                    {room.currency || 'USD'} {room.basePrice} • {room.maxOccupancy} guests • {room.totalRooms} rooms
+                                    {room.currency || 'INR'} {room.basePrice} • {room.maxOccupancy} guests • {room.totalRooms} rooms
                                   </span>
                                 </div>
                               ))}
@@ -3124,7 +3124,7 @@ const styles = {
                         />
                         
                         <select
-                          value={room.currency || organizationData?.currency || 'USD'}
+                          value={room.currency || organizationData?.currency || 'INR'}
                           onChange={(e) => updateRoomCategoryInHotel(index, 'currency', e.target.value)}
                           style={{
                             padding: '6px',
@@ -3221,7 +3221,7 @@ const styles = {
                       roomCategories: [{
                         name: 'Standard Room',
                         basePrice: 0,
-                        currency: organizationData?.currency || 'USD',
+                        currency: organizationData?.currency || 'INR',
                         maxOccupancy: 2,
                         totalRooms: 1
                       }]
@@ -3473,7 +3473,7 @@ const styles = {
                       whatIsIncluded: '',
                       whatIsExcluded: '',
                       rate: '',
-                      currency: organizationData?.currency || 'USD',
+                      currency: organizationData?.currency || 'INR',
                       duration: '',
                       location: '',
                       country: ''
@@ -3618,7 +3618,7 @@ const styles = {
                       name: '',
                       description: '',
                       rate: '',
-                      currency: organizationData?.currency || 'USD',
+                      currency: organizationData?.currency || 'INR',
                       vehicleType: '',
                       capacity: '',
                       fromLocation: '',
@@ -3647,7 +3647,7 @@ const styles = {
               <div style={{display: 'flex', alignItems: 'center', gap: '15px'}}>
                 <label style={{fontWeight: '500', color: '#333'}}>Default Currency:</label>
                 <span style={{padding: '8px 16px', backgroundColor: '#007bff', color: 'white', borderRadius: '4px', fontWeight: '500'}}>
-                  {organizationData?.currency || 'USD'}
+                  {organizationData?.currency || 'INR'}
                 </span>
               </div>
               <p style={{marginTop: '10px', fontSize: '14px', color: '#6c757d'}}>This currency is used throughout the dashboard for all pricing and financial data.</p>

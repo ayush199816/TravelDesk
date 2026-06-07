@@ -15,7 +15,7 @@ const ManagerSightseeingPage = () => {
     whatIsExcluded: '',
     rate: '',
     childRate: '',
-    currency: 'USD',
+    currency: 'INR',
     duration: '',
     location: '',
     country: ''
@@ -108,7 +108,7 @@ const ManagerSightseeingPage = () => {
       whatIsExcluded: '',
       rate: '',
       childRate: '',
-      currency: 'USD',
+      currency: 'INR',
       duration: '',
       location: '',
       country: ''

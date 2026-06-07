@@ -119,7 +119,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
     tcsEnabled: false, // TCS 2% checkbox
     leadProviderCommission: 0, // Lead provider commission percentage
 
-    currency: user.organization?.currency || 'USD',
+    currency: user.organization?.currency || 'INR',
 
     hotels: [], // Separate hotels array
 
@@ -635,7 +635,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
         tcsEnabled: quote.tcsEnabled || false,
         leadProviderCommission: quote.leadProviderCommission || 0,
 
-        currency: quote.currency || user.organization?.currency || 'USD',
+        currency: quote.currency || user.organization?.currency || 'INR',
 
         hotels: quote.hotels || [],
 
@@ -739,7 +739,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
         childPax: lead.childPax || 0,
 
-        currency: lead.currency || 'USD'
+        currency: lead.currency || user.organization?.currency || 'INR'
 
       }));
 
@@ -793,7 +793,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
           childRate: convertedChildRate,
 
-          currency: prev.currency, // Always use quote currency
+          currency: sightseeing.currency, // Preserve sightseeing's original currency
 
           adultCount: prev.adultPax,
 
@@ -919,7 +919,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
           rate: convertedRate,
 
-          currency: prev.currency, // Always use quote currency
+          currency: transfer.currency, // Preserve transfer's original currency
 
           name: transfer.name,
 
@@ -1244,7 +1244,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
         nights: nights,
 
-        currency: quoteData.currency
+        currency: roomCategory.currency
 
       };
 

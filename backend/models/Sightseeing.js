@@ -8,7 +8,7 @@ const sightseeingSchema = new mongoose.Schema({
   whatIsExcluded: [{ type: String }], // Array of excluded items
   rate: { type: Number, required: true },
   childRate: { type: Number, default: 0 },
-  currency: { type: String, default: 'USD' },
+  currency: { type: String, default: 'INR' },
   duration: { type: String }, // e.g., "2 hours", "Half day", "Full day"
   location: { type: String, required: true },
   country: { type: String, required: true },

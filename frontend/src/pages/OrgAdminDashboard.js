@@ -171,7 +171,7 @@ const OrgAdminDashboard = () => {
   };
 
   const startEditingCurrency = () => {
-    setTempCurrency(organizationData?.currency || 'USD');
+    setTempCurrency(organizationData?.currency || 'INR');
     setEditingCurrency(true);
   };
 
@@ -589,7 +589,7 @@ const OrgAdminDashboard = () => {
                   <div style={{display: 'flex', alignItems: 'center', gap: '15px'}}>
                     <label style={{fontWeight: '500', color: '#333'}}>Default Currency:</label>
                     <span style={{padding: '8px 16px', backgroundColor: '#007bff', color: 'white', borderRadius: '4px', fontWeight: '500'}}>
-                      {organizationData?.currency || 'USD'}
+                      {organizationData?.currency || 'INR'}
                     </span>
                   </div>
                   <p style={{marginTop: '10px', fontSize: '14px', color: '#6c757d'}}>This currency is used throughout the dashboard for all pricing and financial data.</p>
