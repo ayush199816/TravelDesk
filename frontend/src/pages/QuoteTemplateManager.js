@@ -1490,6 +1490,18 @@ const QuoteTemplateManager = () => {
                     style={{ width: '100%', padding: '8px' }}
                   />
                 </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label>Next Steps (one step per line):</label>
+                  <textarea 
+                    value={Array.isArray(currentTemplate.messages.nextSteps) ? currentTemplate.messages.nextSteps.join('\n') : ''}
+                    onChange={(e) => {
+                      const steps = e.target.value.split('\n').filter(step => step.trim() !== '');
+                      updateTemplate('messages.nextSteps', steps);
+                    }}
+                    style={{ width: '100%', padding: '8px', minHeight: '150px' }}
+                    placeholder="Enter each next step on a new line..."
+                  />
+                </div>
               </>
             )}
 

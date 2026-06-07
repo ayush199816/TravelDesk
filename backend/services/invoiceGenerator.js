@@ -237,10 +237,10 @@ const generateInvoiceHTML = async (invoiceId) => {
       </div>
       
       <div class="financial-summary">
-        <!-- Package Cost (includes sightseeing + transfers + hotels + flights + commission) -->
+        <!-- Package Cost (includes sightseeing + transfers + hotels + flights + commission, after discount) -->
         <div class="financial-row">
           <span>Package Cost:</span>
-          <span>${invoice.currency} ${((quote.subtotal || 0) + (invoice.commissionAmount || 0)).toLocaleString('en-IN')}</span>
+          <span>${invoice.currency} ${((quote.subtotal || 0) + (invoice.commissionAmount || 0) - (invoice.discountAmount || 0)).toLocaleString('en-IN')}</span>
         </div>
         ${invoice.markupAmount > 0 ? `
         <div class="financial-row">

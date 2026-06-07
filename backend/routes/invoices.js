@@ -91,7 +91,8 @@ router.post('/', auth, async (req, res) => {
     const taxAmount = quote.taxAmount || 0;
     const tcsAmount = quote.tcsAmount || 0;
     const commissionAmount = quote.leadProviderCommissionAmount || 0;
-    const finalAmount = packageAmount + taxAmount + tcsAmount + commissionAmount;
+    const discountAmount = quote.discountAmount || 0;
+    const finalAmount = packageAmount + taxAmount + tcsAmount + commissionAmount - discountAmount;
     const remainingAmount = finalAmount - firstCycleAmount;
     const cycleAmount = Math.round(remainingAmount / (totalCycles - 1));
     
@@ -114,6 +115,7 @@ router.post('/', auth, async (req, res) => {
       taxAmount: taxAmount || 0,
       tcsAmount: tcsAmount || 0,
       commissionAmount: commissionAmount || 0,
+      discountAmount: discountAmount || 0,
       finalAmount: finalAmount || 0,
       currency: quote.currency || 'INR',
       totalCycles: totalCycles || 1,
