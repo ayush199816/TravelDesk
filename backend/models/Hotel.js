@@ -29,6 +29,7 @@ const hotelSchema = new mongoose.Schema({
   images: [{ type: String }], // URLs to hotel images
   organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  isTemporary: { type: Boolean, default: false },
   isActive: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

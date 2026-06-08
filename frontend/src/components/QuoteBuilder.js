@@ -154,10 +154,15 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
   // Dropdown visibility states
   const [showSightseeingDropdown, setShowSightseeingDropdown] = useState({});
   const [showTransferDropdown, setShowTransferDropdown] = useState({});
+  const [showHotelDropdown, setShowHotelDropdown] = useState(false);
 
   const [filteredHotels, setFilteredHotels] = useState([]);
 
   const [showTempHotelForm, setShowTempHotelForm] = useState(false);
+
+  const [tempHotelImages, setTempHotelImages] = useState([]);
+
+  const [tempHotelImagePreviews, setTempHotelImagePreviews] = useState([]);
 
   const [tempHotelData, setTempHotelData] = useState({
 
@@ -338,11 +343,23 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
     try {
 
-      const hotelsResponse = await api.get(`/hotels?organization=${user.organization._id}`);
+      // Fetch both regular hotels and temporary hotels
+      const [hotelsResponse, tempHotelsResponse] = await Promise.all([
+        api.get(`/hotels?organization=${user.organization._id}`),
+        api.get(`/hotels/temporary?organization=${user.organization._id}`)
+      ]);
 
-      setAvailableHotels(hotelsResponse.data);
+      // Combine regular and temporary hotels
+      const allHotels = [
+        ...hotelsResponse.data,
+        ...tempHotelsResponse.data
+      ];
+
+      setAvailableHotels(allHotels);
 
     } catch (error) {
+
+      console.error('Error fetching hotels:', error);
 
     }
 
@@ -1059,6 +1076,46 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
   };
 
+  const handleTempHotelImageChange = (e) => {
+
+    const files = Array.from(e.target.files);
+
+    
+
+    // Update file state
+
+    setTempHotelImages(prev => [...prev, ...files]);
+
+    
+
+    // Create previews
+
+    files.forEach(file => {
+
+      const reader = new FileReader();
+
+      reader.onload = (event) => {
+
+        setTempHotelImagePreviews(prev => [...prev, event.target.result]);
+
+      };
+
+      reader.readAsDataURL(file);
+
+    });
+
+  };
+
+  
+
+  const removeTempHotelImage = (index) => {
+
+    setTempHotelImages(prev => prev.filter((_, i) => i !== index));
+
+    setTempHotelImagePreviews(prev => prev.filter((_, i) => i !== index));
+
+  };
+
 
 
   const updateRoomCategoryInTempHotel = (index, field, value) => {
@@ -1356,25 +1413,45 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
       // Save temporary hotel to database first
 
-      const response = await api.post('/temporary-hotels', {
+      const formData = new FormData();
 
-        name: tempHotelData.name,
+      formData.append('name', tempHotelData.name);
 
-        city: tempHotelData.city,
+      formData.append('city', tempHotelData.city);
 
-        country: tempHotelData.country,
+      formData.append('country', tempHotelData.country);
 
-        starRating: tempHotelData.starRating,
+      formData.append('starRating', tempHotelData.starRating);
 
-        roomCategories: tempHotelData.roomCategories.map(room => ({
+      formData.append('roomCategories', JSON.stringify(tempHotelData.roomCategories.map(room => ({
 
-          ...room,
+        ...room,
 
-          basePrice: parseFloat(room.basePrice) || 0,
+        basePrice: parseFloat(room.basePrice) || 0,
 
-          currency: quoteData.currency
+        currency: room.currency || quoteData.currency
 
-        }))
+      }))));
+
+      formData.append('organization', user.organization?._id);
+
+      formData.append('isTemporary', 'true');
+
+      // Append images
+
+      tempHotelImages.forEach((file, index) => {
+
+        formData.append(`images`, file);
+
+      });
+
+      const response = await api.post('/hotels', formData, {
+
+        headers: {
+
+          'Content-Type': 'multipart/form-data'
+
+        }
 
       });
 
@@ -1433,6 +1510,10 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
         }]
 
       });
+
+      setTempHotelImages([]);
+
+      setTempHotelImagePreviews([]);
 
     } catch (error) {
       alert('Error saving temporary hotel: ' + (error.response?.data?.message || error.message));
@@ -2327,123 +2408,203 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
             <div style={{marginBottom: '15px'}}>
 
-              {/* Dropdown Search */}
+              {/* Unified Search Dropdown Bar */}
 
-              <select
+              <div style={{display: 'flex', gap: '10px', alignItems: 'center', position: 'relative'}}>
 
-                id="hotel-select"
+                <div style={{position: 'relative', flex: 1, maxWidth: '400px'}}>
 
-                style={{...styles.input, width: '300px', marginRight: '10px'}}
+                  <input
 
-                onChange={(e) => {
+                    type="text"
 
-                  const value = e.target.value;
+                    placeholder="🔍 Search hotels by name, city, country..."
 
-                  if (value) {
+                    value={hotelSearch}
 
-                    const hotel = filteredHotels.find(h => h._id === value);
+                    onChange={(e) => setHotelSearch(e.target.value)}
 
-                    if (hotel) {
+                    onFocus={() => setShowHotelDropdown(true)}
 
-                      addHotel(hotel);
+                    onBlur={() => setTimeout(() => setShowHotelDropdown(false), 200)}
 
-                      setHotelSearch('');
+                    style={{
 
-                    }
+                      ...styles.input,
 
-                    e.target.value = '';
+                      width: '100%',
 
-                  }
+                      paddingRight: '40px'
 
-                }}
+                    }}
 
-              >
+                  />
 
-                <option value="">🔍 Search hotels... {hotelSearch && `(searching: ${hotelSearch})`}</option>
+                  
 
-                {Array.isArray(filteredHotels) && filteredHotels.map(hotel => (
+                  {hotelSearch && (
 
-                  <option key={hotel._id} value={hotel._id}>
+                    <button
 
-                    {hotel.name} - {hotel.city} ({'⭐'.repeat(hotel.starRating)})
+                      type="button"
 
-                  </option>
+                      onClick={() => setHotelSearch('')}
 
-                ))}
+                      style={{
 
-              </select>
+                        position: 'absolute',
 
-              
+                        right: '8px',
 
-              <input
+                        top: '50%',
 
-                type="text"
+                        transform: 'translateY(-50%)',
 
-                placeholder="Type to filter hotels..."
+                        background: 'none',
 
-                value={hotelSearch}
+                        border: 'none',
 
-                onChange={(e) => setHotelSearch(e.target.value)}
+                        color: '#6c757d',
 
-                style={{
+                        cursor: 'pointer',
 
-                  ...styles.input,
+                        fontSize: '16px'
 
-                  width: '300px',
+                      }}
 
-                  marginRight: '10px'
+                    >
 
-                }}
+                      ×
 
-              />
+                    </button>
 
-              
+                  )}
 
-              <button
+                  
 
-                type="button"
+                  {/* Dropdown Results */}
 
-                onClick={() => setShowTempHotelForm(true)}
+                  {showHotelDropdown && hotelSearch && (
 
-                style={{
+                    <div style={{
 
-                  padding: '8px 16px',
+                      position: 'absolute',
 
-                  backgroundColor: '#6c757d',
+                      top: '100%',
 
-                  color: 'white',
+                      left: 0,
 
-                  border: 'none',
+                      right: 0,
 
-                  borderRadius: '4px',
+                      backgroundColor: 'white',
 
-                  cursor: 'pointer',
+                      border: '1px solid #ddd',
 
-                  marginRight: '10px'
+                      borderTop: 'none',
 
-                }}
+                      borderRadius: '0 0 4px 4px',
 
-              >
+                      maxHeight: '200px',
 
-                + Add Temporary Hotel
+                      overflowY: 'auto',
 
-              </button>
+                      zIndex: 1000,
 
-              
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
 
-              {hotelSearch && (
+                    }}>
+
+                      {Array.isArray(filteredHotels) && filteredHotels.length > 0 ? (
+
+                        filteredHotels.map(hotel => (
+
+                          <div
+
+                            key={hotel._id}
+
+                            onClick={() => {
+
+                              addHotel(hotel);
+
+                              setHotelSearch('');
+
+                              setShowHotelDropdown(false);
+
+                            }}
+
+                            style={{
+
+                              padding: '10px 15px',
+
+                              cursor: 'pointer',
+
+                              borderBottom: '1px solid #eee',
+
+                              transition: 'background-color 0.2s'
+
+                            }}
+
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
+
+                            onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+
+                          >
+
+                            <div style={{fontWeight: 'bold', color: '#333'}}>
+
+                              {hotel.name}
+
+                            </div>
+
+                            <div style={{fontSize: '12px', color: '#666'}}>
+
+                              {hotel.city}, {hotel.country} {'⭐'.repeat(hotel.starRating || 0)}
+
+                            </div>
+
+                            {hotel.isTemporary && (
+
+                              <div style={{fontSize: '11px', color: '#28a745', fontWeight: 'bold'}}>
+
+                                Temporary Hotel
+
+                              </div>
+
+                            )}
+
+                          </div>
+
+                        ))
+
+                      ) : (
+
+                        <div style={{padding: '10px 15px', color: '#6c757d', fontStyle: 'italic'}}>
+
+                          No hotels found matching "{hotelSearch}"
+
+                        </div>
+
+                      )}
+
+                    </div>
+
+                  )}
+
+                </div>
+
+                
 
                 <button
 
                   type="button"
 
-                  onClick={() => setHotelSearch('')}
+                  onClick={() => setShowTempHotelForm(true)}
 
                   style={{
 
                     padding: '8px 16px',
 
-                    backgroundColor: '#dc3545',
+                    backgroundColor: '#6c757d',
 
                     color: 'white',
 
@@ -2451,17 +2612,19 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                     borderRadius: '4px',
 
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+
+                    whiteSpace: 'nowrap'
 
                   }}
 
                 >
 
-                  Clear
+                  + Add Temporary Hotel
 
                 </button>
 
-              )}
+              </div>
 
             </div>
 
@@ -4762,7 +4925,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
               }}>
 
-                <div style={{display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '10px', alignItems: 'center'}}>
+                <div style={{display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr auto', gap: '10px', alignItems: 'center'}}>
 
                   <input
 
@@ -4811,6 +4974,44 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                     min="0"
 
                   />
+
+                  
+
+                  <select
+
+                    value={room.currency}
+
+                    onChange={(e) => updateRoomCategoryInTempHotel(index, 'currency', e.target.value)}
+
+                    style={{
+
+                      padding: '6px',
+
+                      border: '1px solid #ddd',
+
+                      borderRadius: '4px'
+
+                    }}
+
+                  >
+
+                    <option value="USD">USD</option>
+
+                    <option value="EUR">EUR</option>
+
+                    <option value="GBP">GBP</option>
+
+                    <option value="INR">INR</option>
+
+                    <option value="THB">THB</option>
+
+                    <option value="MYR">MYR</option>
+
+                    <option value="SGD">SGD</option>
+
+                    <option value="AED">AED</option>
+
+                  </select>
 
                   
 
@@ -4886,6 +5087,180 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
           
 
+          {/* Image Upload Section */}
+
+          <div style={{marginBottom: '20px'}}>
+
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px'}}>
+
+              <h4 style={{margin: 0, color: '#333'}}>Hotel Images</h4>
+
+              <label style={{
+
+                padding: '8px 16px',
+
+                backgroundColor: '#007bff',
+
+                color: 'white',
+
+                borderRadius: '4px',
+
+                cursor: 'pointer',
+
+                fontSize: '14px'
+
+              }}>
+
+                + Add Images
+
+                <input
+
+                  type="file"
+
+                  multiple
+
+                  accept="image/*"
+
+                  onChange={handleTempHotelImageChange}
+
+                  style={{display: 'none'}}
+
+                />
+
+              </label>
+
+            </div>
+
+            
+
+            {/* Image Previews */}
+
+            {tempHotelImagePreviews.length > 0 && (
+
+              <div style={{
+
+                display: 'flex',
+
+                flexWrap: 'wrap',
+
+                gap: '10px',
+
+                marginTop: '10px'
+
+              }}>
+
+                {tempHotelImagePreviews.map((preview, index) => (
+
+                  <div key={index} style={{
+
+                    position: 'relative',
+
+                    width: '100px',
+
+                    height: '100px'
+
+                  }}>
+
+                    <img
+
+                      src={preview}
+
+                      alt={`Hotel ${index + 1}`}
+
+                      style={{
+
+                        width: '100%',
+
+                        height: '100%',
+
+                        objectFit: 'cover',
+
+                        borderRadius: '4px',
+
+                        border: '1px solid #ddd'
+
+                      }}
+
+                    />
+
+                    <button
+
+                      type="button"
+
+                      onClick={() => removeTempHotelImage(index)}
+
+                      style={{
+
+                        position: 'absolute',
+
+                        top: '-5px',
+
+                        right: '-5px',
+
+                        backgroundColor: '#dc3545',
+
+                        color: 'white',
+
+                        border: 'none',
+
+                        borderRadius: '50%',
+
+                        width: '20px',
+
+                        height: '20px',
+
+                        cursor: 'pointer',
+
+                        fontSize: '12px',
+
+                        display: 'flex',
+
+                        alignItems: 'center',
+
+                        justifyContent: 'center'
+
+                      }}
+
+                    >
+
+                      ×
+
+                    </button>
+
+                  </div>
+
+                ))}
+
+              </div>
+
+            )}
+
+            
+
+            {tempHotelImagePreviews.length === 0 && (
+
+              <p style={{
+
+                color: '#6c757d',
+
+                fontSize: '14px',
+
+                fontStyle: 'italic',
+
+                margin: '10px 0'
+
+              }}>
+
+                No images uploaded. Click "Add Images" to upload hotel photos.
+
+              </p>
+
+            )}
+
+          </div>
+
+          
+
           <div style={{display: 'flex', justifyContent: 'flex-end', gap: '10px'}}>
 
             <button
@@ -4919,6 +5294,10 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                   }]
 
                 });
+
+                setTempHotelImages([]);
+
+                setTempHotelImagePreviews([]);
 
               }}
 

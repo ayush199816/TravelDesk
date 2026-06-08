@@ -23,6 +23,29 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
+// Get temporary hotels for an organization
+router.get('/temporary', auth, async (req, res) => {
+  try {
+    const { organization, city, country } = req.query;
+    let query = { 
+      organization, 
+      isActive: true, 
+      isTemporary: true 
+    };
+    
+    if (city) query.city = new RegExp(city, 'i');
+    if (country) query.country = new RegExp(country, 'i');
+    
+    const hotels = await Hotel.find(query)
+      .populate('createdBy', 'name email')
+      .sort({ createdAt: -1 });
+    
+    res.json(hotels);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Get a single hotel by ID
 router.get('/:id', auth, async (req, res) => {
   try {
@@ -46,10 +69,12 @@ router.post('/', auth, upload.array('images', 5), async (req, res) => {
     console.log('Uploaded files:', req.files);
     
     // Parse JSON fields from FormData
+    const isTemporary = req.body.isTemporary === 'true' || req.body.isTemporary === true;
+    
     const hotelData = {
       name: req.body.name,
       description: req.body.description,
-      address: req.body.address,
+      address: isTemporary ? (req.body.address || 'Temporary Hotel Address') : req.body.address,
       city: req.body.city,
       country: req.body.country,
       phoneNumber: req.body.phoneNumber,
@@ -58,10 +83,24 @@ router.post('/', auth, upload.array('images', 5), async (req, res) => {
       starRating: parseInt(req.body.starRating) || 3,
       checkInTime: req.body.checkInTime,
       checkOutTime: req.body.checkOutTime,
-      organization: req.body.organization,
-      roomCategories: req.body.roomCategories ? JSON.parse(req.body.roomCategories) : [],
-      amenities: req.body.amenities ? JSON.parse(req.body.amenities) : []
+      organization: req.body.organization || req.user.organization?._id,
+      roomCategories: req.body.roomCategories ? 
+        (typeof req.body.roomCategories === 'string' ? JSON.parse(req.body.roomCategories) : req.body.roomCategories) : [],
+      amenities: req.body.amenities ? 
+        (typeof req.body.amenities === 'string' ? JSON.parse(req.body.amenities) : req.body.amenities) : [],
+      isTemporary: isTemporary
     };
+    
+    // For temporary hotels, add default values for missing required fields in roomCategories
+    if (isTemporary) {
+      hotelData.roomCategories = hotelData.roomCategories.map(room => ({
+        ...room,
+        totalRooms: room.totalRooms || 1, // Default to 1 room for temporary hotels
+        availableRooms: room.availableRooms || 1,
+        description: room.description || '',
+        childPrice: room.childPrice || 0
+      }));
+    }
     
     // Upload images to Cloudinary
     const imageUrls = [];
