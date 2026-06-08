@@ -816,6 +816,12 @@ class PDFGenerator {
             year: 'numeric' 
           }) : 'N/A';
           
+          const checkOutDate = room.checkOut ? new Date(room.checkOut).toLocaleDateString('en-US', { 
+            day: 'numeric', 
+            month: 'short', 
+            year: 'numeric' 
+          }) : 'N/A';
+          
           const nights = room.nights || 1;
           
           hotelStays.push({
@@ -826,6 +832,7 @@ class PDFGenerator {
             numberOfRooms: room.numberOfRooms || 1,
             roomName: room.roomName || 'Standard Room',
             checkInDate,
+            checkOutDate,
             nights,
             checkIn: new Date(room.checkIn)
           });
@@ -917,7 +924,7 @@ class PDFGenerator {
                     <div style="flex: 1;">
                       ${stay.checkInDate !== 'N/A' ? `
                         <div style="font-size: ${quoteTemplate.hotel?.bodyFontSize || 14}px; color: ${quoteTemplate.hotel?.bodyColor || '#666666'}; margin-bottom: 10px; font-family: ${quoteTemplate.hotel?.bodyFont || 'Arial, sans-serif'};">
-                          Check-in: ${stay.checkInDate}
+                          Check-in: ${stay.checkInDate} | Check-out: ${stay.checkOutDate}
                         </div>
                       ` : ''}
                       <div style="font-size: ${quoteTemplate.hotel?.titleFontSize || 18}px; font-weight: bold; color: ${quoteTemplate.hotel?.titleColor || '#333333'}; margin-bottom: 5px; font-family: ${quoteTemplate.hotel?.titleFont || 'Arial, sans-serif'};">
