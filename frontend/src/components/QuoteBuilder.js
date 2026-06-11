@@ -164,6 +164,8 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
   const [tempHotelImagePreviews, setTempHotelImagePreviews] = useState([]);
 
+  const [isUploadingTempHotel, setIsUploadingTempHotel] = useState(false);
+
   const [tempHotelData, setTempHotelData] = useState({
 
     name: '',
@@ -1411,6 +1413,9 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
       
 
+      // Set loading state
+      setIsUploadingTempHotel(true);
+
       // Save temporary hotel to database first
 
       const formData = new FormData();
@@ -1477,7 +1482,9 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
         starRating: savedHotel.starRating,
 
-        roomCategories: savedHotel.roomCategories
+        roomCategories: savedHotel.roomCategories,
+
+        images: savedHotel.images || [] // Include hotel images
 
       };
 
@@ -1514,8 +1521,13 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
       setTempHotelImages([]);
 
       setTempHotelImagePreviews([]);
+      
+      // Reset loading state
+      setIsUploadingTempHotel(false);
 
     } catch (error) {
+      // Reset loading state
+      setIsUploadingTempHotel(false);
       alert('Error saving temporary hotel: ' + (error.response?.data?.message || error.message));
 
     }
@@ -2692,7 +2704,28 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                 </div>
 
-                
+                {/* Hotel Images Display */}
+                {hotelItem.images && hotelItem.images.length > 0 && (
+                  <div style={{marginBottom: '15px'}}>
+                    <h6 style={{marginBottom: '8px', color: '#495057'}}>Hotel Images</h6>
+                    <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                      {hotelItem.images.map((image, imageIndex) => (
+                        <img
+                          key={imageIndex}
+                          src={image}
+                          alt={`${hotelItem.name} - Image ${imageIndex + 1}`}
+                          style={{
+                            width: '80px',
+                            height: '60px',
+                            objectFit: 'cover',
+                            borderRadius: '4px',
+                            border: '1px solid #dee2e6'
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div style={{marginBottom: '10px'}}>
 
@@ -5331,13 +5364,13 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
               onClick={addTempHotelToQuote}
 
-              disabled={!tempHotelData.name || !tempHotelData.city}
+              disabled={!tempHotelData.name || !tempHotelData.city || isUploadingTempHotel}
 
               style={{
 
                 padding: '10px 20px',
 
-                backgroundColor: tempHotelData.name && tempHotelData.city ? '#007bff' : '#6c757d',
+                backgroundColor: (!tempHotelData.name || !tempHotelData.city || isUploadingTempHotel) ? '#6c757d' : '#007bff',
 
                 color: 'white',
 
@@ -5345,13 +5378,30 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
 
                 borderRadius: '4px',
 
-                cursor: tempHotelData.name && tempHotelData.city ? 'pointer' : 'not-allowed'
+                cursor: (!tempHotelData.name || !tempHotelData.city || isUploadingTempHotel) ? 'not-allowed' : 'pointer',
+
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
 
               }}
 
             >
 
-              Add Hotel to Quote
+              {isUploadingTempHotel && (
+                <div style={{
+                  width: '16px',
+                  height: '16px',
+                  border: '2px solid #ffffff',
+                  borderTop: '2px solid transparent',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite',
+                  WebkitAnimation: 'spin 1s linear infinite',
+                  MozAnimation: 'spin 1s linear infinite'
+                }}></div>
+              )}
+
+              {isUploadingTempHotel ? 'Uploading...' : 'Add Hotel to Quote'}
 
             </button>
 
@@ -5362,6 +5412,16 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
       </div>
 
     )}
+
+    {/* Add CSS animation for spinner */}
+    <style dangerouslySetInnerHTML={{
+      __html: `
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `
+    }} />
 
     </React.Fragment>
 

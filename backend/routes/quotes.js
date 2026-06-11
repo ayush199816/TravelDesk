@@ -197,8 +197,8 @@ router.post('/', auth, async (req, res) => {
     // Handle hotel images
     if (quoteData.hotels) {
       quoteData.hotels = await Promise.all(quoteData.hotels.map(async (hotel) => {
+        // For regular hotels, fetch images if not included
         if (hotel.hotel && !hotel.images?.length) {
-          // Fetch hotel to get images if not included
           const Hotel = require('../models/Hotel');
           const hotelDoc = await Hotel.findById(hotel.hotel);
           if (hotelDoc) {
@@ -207,6 +207,10 @@ router.post('/', auth, async (req, res) => {
               images: hotelDoc.images || []
             };
           }
+        }
+        // For temporary hotels or hotels with images already included, ensure images array exists
+        if (!hotel.images) {
+          hotel.images = [];
         }
         return hotel;
       }));
@@ -238,8 +242,8 @@ router.put('/:id', auth, async (req, res) => {
     const quoteData = { ...req.body };
     if (quoteData.hotels) {
       quoteData.hotels = await Promise.all(quoteData.hotels.map(async (hotel) => {
+        // For regular hotels, fetch images if not included
         if (hotel.hotel && !hotel.images?.length) {
-          // Fetch hotel to get images if not included
           const Hotel = require('../models/Hotel');
           const hotelDoc = await Hotel.findById(hotel.hotel);
           if (hotelDoc) {
@@ -248,6 +252,10 @@ router.put('/:id', auth, async (req, res) => {
               images: hotelDoc.images || []
             };
           }
+        }
+        // For temporary hotels or hotels with images already included, ensure images array exists
+        if (!hotel.images) {
+          hotel.images = [];
         }
         return hotel;
       }));
