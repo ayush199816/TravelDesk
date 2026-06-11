@@ -2713,7 +2713,7 @@ const QuoteBuilder = ({ lead, quote, onClose, onSave }) => {
                         <img
                           key={imageIndex}
                           src={image}
-                          alt={`${hotelItem.name} - Image ${imageIndex + 1}`}
+                          alt={`${hotelItem.name} ${imageIndex + 1}`}
                           style={{
                             width: '80px',
                             height: '60px',
