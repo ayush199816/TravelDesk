@@ -38,8 +38,8 @@ const OrgLogin = () => {
       <nav className="login-nav">
         <div className="nav-brand">
           <div className="brand-logo">
-            <div className="logo-icon">N</div>
-            <span className="logo-text">NaviDesk</span>
+            <div className="logo-icon">DS</div>
+            <span className="logo-text">DMCstation</span>
           </div>
         </div>
         <Link to="/" className="back-home">

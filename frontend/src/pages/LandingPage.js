@@ -65,8 +65,8 @@ const LandingPage = () => {
         <nav className="hero-nav">
           <div className="nav-brand">
             <div className="brand-logo">
-              <div className="logo-icon">N</div>
-              <span className="logo-text">NaviDesk</span>
+              <div className="logo-icon">DS</div>
+              <span className="logo-text">DMCStation</span>
             </div>
           </div>
           <div className="nav-actions">
@@ -94,7 +94,7 @@ const LandingPage = () => {
               <p className="hero-description">
                 Empower your travel agency with intelligent automation, seamless collaboration, 
                 and data-driven insights. Join thousands of successful agencies transforming 
-                their operations with NaviDesk.
+                their operations with DMCstation.
               </p>
               
               <div className="hero-metrics" ref={metricsRef}>
@@ -147,7 +147,7 @@ const LandingPage = () => {
                           <div className="control control-2"></div>
                           <div className="control control-3"></div>
                         </div>
-                        <div className="header-url">navidesk.com/dashboard</div>
+                        <div className="header-url">dmcstation.com/dashboard</div>
                       </div>
                       
                       <div className="frame-content">
@@ -434,7 +434,7 @@ const LandingPage = () => {
               <span>Get Started Today</span>
             </div>
             <h2>Ready to Transform Your Travel Business?</h2>
-            <p>Join 1000+ travel agencies using NaviDesk to streamline operations and increase revenue by an average of 40%</p>
+            <p>Join 1000+ travel agencies using DMCstation to streamline operations and increase revenue by an average of 40%</p>
             <div className="cta-stats">
               <div className="cta-stat">
                 <div className="stat-number">14-day</div>
@@ -474,8 +474,8 @@ const LandingPage = () => {
             <div className="footer-brand">
               <div className="brand-section">
                 <div className="brand-logo">
-                  <div className="logo-icon">N</div>
-                  <span className="logo-text">NaviDesk</span>
+                  <div className="logo-icon">DS</div>
+                  <span className="logo-text">DMCstation</span>
                 </div>
                 <p className="brand-description">
                   The world's most advanced travel management platform. Empowering agencies to streamline operations and accelerate growth.
@@ -546,7 +546,7 @@ const LandingPage = () => {
           
           <div className="footer-bottom">
             <div className="footer-bottom-left">
-              <p>&copy; 2024 NaviDesk. All rights reserved.</p>
+              <p>&copy; 2026 Navigatio Asia DMC. All rights reserved.</p>
               <div className="footer-legal">
                 <button className="legal-link">Privacy Policy</button>
                 <span className="separator">•</span>

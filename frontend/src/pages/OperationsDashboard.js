@@ -1565,8 +1565,8 @@ const styles = {
       <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
         <div className="sidebar-header">
           <div className="brand-logo">
-            <div className="logo-icon">N</div>
-            <span className="logo-text">NaviDesk</span>
+            <div className="logo-icon">DS</div>
+            <span className="logo-text">DMCstation</span>
           </div>
           <button className="sidebar-toggle" onClick={toggleSidebar}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
