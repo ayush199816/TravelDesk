@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://travel-desk-five.vercel.app'],
+  origin: ['http://localhost:3000', 'https://travel-desk-five.vercel.app', 'https://www.dmcstation.com', 'https://dmcstation.com'],
   credentials: true
 }));
 app.use(express.json());
