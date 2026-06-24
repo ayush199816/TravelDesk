@@ -303,7 +303,8 @@ const OperationsDashboard = () => {
     };
 
     // Calculate from quotes and their supplier assignments
-    quotes.forEach(quote => {
+    // Only include confirmed quotes (accepted status or converted)
+    quotes.filter(quote => quote.status === 'accepted' || quote.isConverted).forEach(quote => {
       // Process activities from quote days
       if (quote.days && quote.days.length > 0) {
         quote.days.forEach((day, dayIndex) => {
