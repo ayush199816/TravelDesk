@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import api from '../api/axios';
+import NotificationBell from '../components/NotificationBell';
 import './OperationsDashboard.css';
 
 const OperationsDashboard = () => {
@@ -1732,6 +1733,7 @@ const styles = {
           </div>
           
           <div className="header-right">
+            <NotificationBell />
             <div className="org-info">
               <span className="org-name">{user?.organization?.name || 'Organization'}</span>
             </div>

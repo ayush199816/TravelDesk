@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect, useCallback, useMemo } from 're
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import api from '../api/axios';
+import NotificationBell from '../components/NotificationBell';
 import './SalesDashboard.css';
 
 const SalesDashboard = () => {
@@ -734,6 +735,7 @@ const SalesDashboard = () => {
             </div>
           </div>
           <div className="header-right">
+            <NotificationBell />
             <div className="org-info">
               <span className="org-name">{user?.organization?.name || 'Organization'}</span>
             </div>

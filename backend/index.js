@@ -4,6 +4,8 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
+const { startReminderScheduler } = require('./services/reminderService');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -25,6 +27,9 @@ mongoose.connect(process.env.MONGO_URI)
       await new MainAdmin({ username: 'admin', password: hashed }).save();
       console.log('Main admin seeded');
     }
+
+    // Start daily reminder scheduler
+    startReminderScheduler();
   })
   .catch(err => console.error('MongoDB connection error:', err));
 
@@ -45,6 +50,7 @@ app.use('/api/invoices', require('./routes/invoices'));
 app.use('/api/suppliers', require('./routes/suppliers'));
 app.use('/api/supplier-assignments', require('./routes/supplierAssignments'));
 app.use('/api/suppliers', require('./routes/supplierDetails'));
+app.use('/api/notifications', require('./routes/notifications'));
 
 app.get('/', (req, res) => {
   res.send('NaviDesk Backend is running');

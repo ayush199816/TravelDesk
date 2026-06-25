@@ -66,7 +66,7 @@ const LandingPage = () => {
           <div className="nav-brand">
             <div className="brand-logo">
               <div className="logo-icon">DS</div>
-              <span className="logo-text">DMCStation</span>
+              <span className="logo-text" style={{ color: 'white' }}>DMCStation</span>
             </div>
           </div>
           <div className="nav-actions">
@@ -475,7 +475,7 @@ const LandingPage = () => {
               <div className="brand-section">
                 <div className="brand-logo">
                   <div className="logo-icon">DS</div>
-                  <span className="logo-text">DMCstation</span>
+                  <span className="logo-text" style={{ color: 'white' }}>DMCstation</span>
                 </div>
                 <p className="brand-description">
                   The world's most advanced travel management platform. Empowering agencies to streamline operations and accelerate growth.
