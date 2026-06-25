@@ -1,0 +1,17 @@
+name: Keep Render Server Alive
+
+on:
+  schedule:
+    # 3:20 AM UTC = 8:50 AM IST
+    - cron: '20 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render server
+        run: |
+          echo "Pinging Render server at $(date -u)"
+          curl -sS --max-time 30 https://traveldesk-yxkp.onrender.com/ || true
+          echo "Ping complete"
