@@ -1,0 +1,48 @@
+name: Daily Reminder Cron Job
+ 
+on:
+  schedule:
+    # Run daily at 3:20 AM UTC (8:50 AM IST) - 15 min buffer
+    - cron: '20 3 * * *'
+  workflow_dispatch: # Allow manual triggering
+ 
+jobs:
+  wake-up-and-remind:
+    runs-on: ubuntu-latest
+ 
+    steps:
+    - name: Wake up server (first ping)
+      run: |
+        echo "First wake-up ping at $(date -u)"
+        curl -sS --max-time 60 --retry 2 --retry-delay 10 https://traveldesk-yxkp.onrender.com/api/health/wake-up || echo "First ping failed, will retry"
+        
+    - name: Wait for server to fully wake up
+      run: |
+        echo "Waiting 30 seconds for server to fully initialize..."
+        sleep 30
+        
+    - name: Check server health
+      run: |
+        echo "Checking server health..."
+        curl -sS --max-time 30 https://traveldesk-yxkp.onrender.com/api/health/health || echo "Health check failed, proceeding anyway"
+        
+    - name: Trigger Reminder Job
+      run: |
+        echo "Triggering reminder job at $(date -u)"
+        curl -X POST \
+          'https://traveldesk-yxkp.onrender.com/api/health/cron-trigger' \
+          -H 'Content-Type: application/json' \
+          -d '{}' \
+          --max-time 45 \
+          --retry 2 \
+          --retry-delay 10
+ 
+    - name: Log Result
+      run: |
+        echo "Reminder cron job executed at $(date)"
+ 
+    - name: Notify on Failure
+      if: failure()
+      run: |
+        echo "Reminder job failed - check backend logs"
+ 

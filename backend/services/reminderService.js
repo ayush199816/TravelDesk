@@ -152,12 +152,21 @@ const startReminderScheduler = () => {
   const cronExpression = `0 ${REMINDER_HOUR} * * *`;
   console.log(`Reminder scheduler starting. Will run daily at ${REMINDER_HOUR}:00 IST (${TIMEZONE})`);
 
-  cron.schedule(cronExpression, runReminders, {
-    timezone: TIMEZONE
+  const task = cron.schedule(cronExpression, runReminders, {
+    timezone: TIMEZONE,
+    scheduled: true
   });
 
-  // Also run once on startup (for testing/immediate feedback)
-  // runReminders();
+  // Add error handling
+  task.on('error', (err) => {
+    console.error('Cron task error:', err);
+  });
+
+  // Log next execution time
+  console.log('Next reminder execution:', task.nextDates().toString());
+
+  // Also run once on startup for testing (optional)
+  // setTimeout(runReminders, 5000);
 };
 
 module.exports = {

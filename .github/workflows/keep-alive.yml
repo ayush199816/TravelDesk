@@ -1,0 +1,29 @@
+name: Keep Render Server Alive
+
+on:
+  schedule:
+    # 3:10 AM UTC = 8:45 AM IST (30 min before reminders)
+    - cron: '10 3 * * *'
+    # Also run at 2:30 AM UTC = 8:00 AM IST (extra buffer)
+    - cron: '30 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wake up server with lightweight endpoint
+        run: |
+          echo "Waking up Render server at $(date -u)"
+          curl -sS --max-time 90 --retry 3 --retry-delay 15 https://traveldesk-yxkp.onrender.com/api/health/wake-up || echo "Wake-up ping failed"
+          
+      - name: Wait and verify
+        run: |
+          echo "Waiting 20 seconds for server initialization..."
+          sleep 20
+          echo "Verification ping..."
+          curl -sS --max-time 30 https://traveldesk-yxkp.onrender.com/api/health/wake-up || echo "Verification failed"
+          
+      - name: Log completion
+        run: |
+          echo "Keep-alive job completed at $(date -u)"

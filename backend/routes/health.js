@@ -2,6 +2,21 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
+// Simple wake-up endpoint (lightweight, no database calls)
+router.get('/wake-up', (req, res) => {
+  const timestamp = new Date().toISOString();
+  const uptime = process.uptime();
+  
+  console.log(`Server wake-up ping received at: ${timestamp}`);
+  
+  res.status(200).json({
+    status: 'awake',
+    timestamp,
+    uptime: `${Math.floor(uptime)}s`,
+    message: 'Server is awake and ready'
+  });
+});
+
 // Health check endpoint for cron jobs
 router.get('/health', async (req, res) => {
   try {
