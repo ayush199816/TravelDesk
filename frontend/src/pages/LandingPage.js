@@ -98,8 +98,8 @@ const LandingPage = () => {
               </svg>
             </button>
             <Link to="/features" className="mobile-nav-link" onClick={closeMobileMenu}>Features</Link>
+            <Link to="/about" className="mobile-nav-link" onClick={closeMobileMenu}>About</Link>
             <button className="mobile-nav-link" onClick={() => { document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); closeMobileMenu(); }}>Pricing</button>
-            <button className="mobile-nav-link" onClick={() => { document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }); closeMobileMenu(); }}>About</button>
             <Link to="/org-login" className="mobile-nav-cta" onClick={closeMobileMenu}>Sign In</Link>
           </div>
         </nav>
@@ -532,8 +532,8 @@ const LandingPage = () => {
               <div className="footer-section">
                 <h4>Product</h4>
                 <ul>
-                  <li><button className="footer-link">Features</button></li>
-                  <li><button className="footer-link">Pricing</button></li>
+                  <li><Link to="/features" className="footer-link">Features</Link></li>
+                  <li><button className="footer-link" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>Pricing</button></li>
                   <li><button className="footer-link">Security</button></li>
                   <li><button className="footer-link">Roadmap</button></li>
                 </ul>
@@ -542,7 +542,7 @@ const LandingPage = () => {
               <div className="footer-section">
                 <h4>Company</h4>
                 <ul>
-                  <li><button className="footer-link">About</button></li>
+                  <li><Link to="/about" className="footer-link">About</Link></li>
                   <li><button className="footer-link">Blog</button></li>
                   <li><button className="footer-link">Careers</button></li>
                   <li><button className="footer-link">Press</button></li>

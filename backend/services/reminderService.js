@@ -162,8 +162,8 @@ const startReminderScheduler = () => {
     console.error('Cron task error:', err);
   });
 
-  // Log next execution time
-  console.log('Next reminder execution:', task.nextDates().toString());
+  // Log that scheduler is started
+  console.log('Reminder scheduler started successfully');
 
   // Also run once on startup for testing (optional)
   // setTimeout(runReminders, 5000);

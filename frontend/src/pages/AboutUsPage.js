@@ -69,7 +69,7 @@ const AboutUsPage = () => {
           <div className="hero-content">
             <h1 className="hero-title">About DMCStation</h1>
             <p className="hero-subtitle">
-              Empowering travel agencies with innovative technology solutions since 2020
+              Empowering travel agencies with innovative technology solutions since 2026
             </p>
           </div>
         </div>
@@ -144,50 +144,30 @@ const AboutUsPage = () => {
       <section className="team-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">Meet Our Team</h2>
+            <h2 className="section-title">Meet Our Co-Founders</h2>
             <p className="section-subtitle">
-              The passionate people behind DMCStation
+              The visionaries behind DMCStation
             </p>
           </div>
           <div className="team-grid">
             <div className="team-member">
               <div className="member-avatar">
-                <div className="avatar-placeholder">JD</div>
+                <div className="avatar-placeholder">AG</div>
               </div>
-              <h4 className="member-name">John Doe</h4>
-              <p className="member-role">CEO & Founder</p>
+              <h4 className="member-name">Ayush Gupta</h4>
+              <p className="member-role">Co-Founder</p>
               <p className="member-bio">
-                Visionary leader with 15+ years in travel technology
+                Worked with TravClan, Atica, and Skillbound, helping them in operations and building reliable tech solutions
               </p>
             </div>
             <div className="team-member">
               <div className="member-avatar">
-                <div className="avatar-placeholder">JS</div>
+                <div className="avatar-placeholder">AD</div>
               </div>
-              <h4 className="member-name">Jane Smith</h4>
-              <p className="member-role">CTO</p>
+              <h4 className="member-name">Anitya Dubey</h4>
+              <p className="member-role">Co-Founder</p>
               <p className="member-bio">
-                Tech expert specializing in scalable solutions
-              </p>
-            </div>
-            <div className="team-member">
-              <div className="member-avatar">
-                <div className="avatar-placeholder">MJ</div>
-              </div>
-              <h4 className="member-name">Mike Johnson</h4>
-              <p className="member-role">Head of Product</p>
-              <p className="member-bio">
-                Product strategist focused on user experience
-              </p>
-            </div>
-            <div className="team-member">
-              <div className="member-avatar">
-                <div className="avatar-placeholder">SB</div>
-              </div>
-              <h4 className="member-name">Sarah Brown</h4>
-              <p className="member-role">Customer Success Lead</p>
-              <p className="member-bio">
-                Dedicated to ensuring customer satisfaction
+                Very experienced in the travel business since 2019, with background in Banking, Byjus, and core sales, bringing deep industry expertise and insights
               </p>
             </div>
           </div>
@@ -249,7 +229,7 @@ const AboutUsPage = () => {
               Join hundreds of travel agencies already using DMCStation
             </p>
             <div className="cta-buttons">
-              <Link to="/login" className="cta-btn primary">Get Started</Link>
+              <a href="https://cal.com/ayush-gupta-1h1hth" target="_blank" rel="noopener noreferrer" className="cta-btn primary">Get Started</a>
               <Link to="/features" className="cta-btn secondary">Learn More</Link>
             </div>
           </div>
@@ -291,7 +271,7 @@ const AboutUsPage = () => {
             </div>
           </div>
           <div className="footer-bottom">
-            <p>&copy; 2024 DMCStation. All rights reserved.</p>
+            <p>&copy; 2026 DMCStation. All rights reserved.</p>
             <div className="footer-legal">
               <Link to="/privacy">Privacy Policy</Link>
               <Link to="/terms">Terms of Service</Link>
