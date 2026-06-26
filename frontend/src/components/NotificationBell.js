@@ -158,20 +158,49 @@ const NotificationBell = () => {
             alignItems: 'center'
           }}>
             <span style={{ fontWeight: '600', fontSize: '14px' }}>Notifications</span>
-            {unreadCount > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {unreadCount > 0 && (
+                <button
+                  onClick={markAllAsRead}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#007bff',
+                    cursor: 'pointer',
+                    fontSize: '12px'
+                  }}
+                >
+                  Mark all read
+                </button>
+              )}
               <button
-                onClick={markAllAsRead}
+                onClick={() => setIsOpen(false)}
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#007bff',
+                  color: '#6c757d',
                   cursor: 'pointer',
-                  fontSize: '12px'
+                  fontSize: '16px',
+                  padding: '4px',
+                  borderRadius: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '24px',
+                  height: '24px'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#f8f9fa';
+                  e.target.style.color = '#495057';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'none';
+                  e.target.style.color = '#6c757d';
                 }}
               >
-                Mark all read
+                ×
               </button>
-            )}
+            </div>
           </div>
 
           <div style={{ maxHeight: '340px', overflowY: 'auto' }}>

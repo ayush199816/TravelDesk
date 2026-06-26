@@ -8,7 +8,7 @@
 
 /* Sidebar Navigation */
 .sidebar {
-  width: 380px;
+  width: 280px;
   background: #f8f9fa;
   border-right: 1px solid #e9ecef;
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
@@ -31,11 +31,84 @@
 
 /* Main Content States */
 .main-content.sidebar-open {
-  margin-left: 380px;
+  margin-left: 280px;
 }
 
 .main-content.sidebar-closed {
   margin-left: 0;
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle-btn {
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.sidebar-toggle-btn:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+/* Mobile Menu Toggle Button */
+.mobile-menu-toggle-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
+  transition: all 0.3s ease;
+  display: flex; /* Show by default when sidebar is closed */
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.mobile-menu-toggle-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.mobile-menu-toggle-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.mobile-menu-toggle-btn:hover::before {
+  left: 100%;
+}
+
+.mobile-menu-toggle-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+}
+
+.mobile-menu-toggle-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.mobile-menu-toggle-btn:hover svg {
+  transform: scale(1.1);
 }
 
 /* Floating Sidebar Toggle Button */
@@ -94,9 +167,21 @@
 .logo-text {
   font-size: 26px;
   font-weight: 700;
-  color: #1e293b;
+  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 50%, #ef4444 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   letter-spacing: -0.5px;
 }
+
+/* Ensure logo text gradient in sidebar */
+.sidebar .logo-text {
+  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 50%, #ef4444 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 
 .sidebar-toggle {
   background: #e9ecef;
@@ -275,7 +360,7 @@
 .top-header {
   background: white;
   border-bottom: 1px solid #e2e8f0;
-  padding: 16px 32px;
+  padding: 16px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -283,21 +368,93 @@
   position: sticky;
   top: 0;
   z-index: 100;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* Notification dropdown positioning fix - multiple selectors for override */
+.notification-bell > div > div[style*="position: absolute"],
+.notification-bell div[style*="position: absolute"],
+div[class*="notification"] div[style*="position: absolute"] {
+  position: fixed !important;
+  z-index: 1001 !important;
+  top: 80px !important;
+  right: 20px !important;
+  left: auto !important;
+  width: 320px !important;
+  max-width: 320px !important;
+  transform: none !important;
+}
+
+/* Additional override for any notification dropdown */
+div[style*="position: absolute"][style*="top: 40px"] {
+  position: fixed !important;
+  top: 80px !important;
+  right: 20px !important;
+  left: auto !important;
+  width: 320px !important;
+  max-width: 320px !important;
+  z-index: 1001 !important;
+}
+
+/* Ensure notification dropdown appears outside header */
+.header-right {
+  position: relative;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.notification-bell {
+  position: relative;
+  overflow: visible;
 }
 
 /* Full width header when sidebar is closed */
 .main-content.sidebar-closed .top-header {
-  width: 100vw;
+  width: 100%;
+  max-width: 100%;
   margin-left: 0;
-  padding-left: 90px; /* Adjusted for button moved up */
-  padding-right: 32px;
+  padding-left: 24px;
+  padding-right: 24px;
   box-sizing: border-box;
+  overflow: hidden;
+  min-width: 0;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.header-left .page-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.header-left .page-title h1 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  font-size: 18px;
+}
+
+.header-left .page-title p {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  font-size: 14px;
 }
 
 /* Organization info styling in header-right - positioned more to the left */
@@ -1133,6 +1290,10 @@
     display: block;
   }
 
+  .mobile-menu-toggle-btn {
+    display: flex; /* Show mobile menu toggle button on mobile */
+  }
+
   .top-header {
     padding: 12px 20px;
     position: relative; /* Changed from sticky to relative on mobile */
@@ -1189,6 +1350,11 @@
     position: relative; /* Changed from sticky to relative */
   }
 
+  /* Hide sidebar toggle button on mobile, show only mobile menu */
+  .sidebar-toggle-btn {
+    display: none;
+  }
+
   .page-content {
     padding: 12px;
   }
@@ -1213,8 +1379,52 @@
     font-size: 16px;
   }
 
+  /* Mobile notification dropdown fixes - only apply on mobile */
+  @media (max-width: 768px) {
+    .notification-bell > div > div[style*="position: absolute"] {
+      position: fixed !important;
+      top: 60px !important;
+      left: 20px !important;
+      right: 20px !important;
+      width: auto !important;
+      max-width: calc(100vw - 40px) !important;
+      max-height: 50vh !important;
+      overflow-y: auto !important;
+      box-sizing: border-box !important;
+      border-radius: 8px !important;
+      transform: none !important;
+    }
+  }
+
   .analytics-grid {
     grid-template-columns: 1fr;
+  }
+
+  /* Mobile analytics responsive styles */
+  .analytics-card {
+    margin: 10px 0 !important;
+    padding: 15px !important;
+  }
+
+  .analytics-card h4 {
+    font-size: 16px !important;
+    margin-bottom: 15px !important;
+  }
+
+  .analytics-grid-responsive {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .analytics-select {
+    width: 100% !important;
+    margin-bottom: 10px !important;
+  }
+
+  .country-analytics-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
   }
 
   .modal-content {
@@ -1595,6 +1805,28 @@
 
   .sidebar-header {
     padding: 20px 16px;
+  }
+
+  /* Hide sidebar toggle button on mobile, show only mobile menu */
+  .sidebar-toggle-btn {
+    display: none;
+  }
+
+  /* Mobile notification dropdown fixes for smaller screens */
+  @media (max-width: 480px) {
+    .notification-bell > div > div[style*="position: absolute"] {
+      position: fixed !important;
+      top: 60px !important;
+      left: 10px !important;
+      right: 10px !important;
+      width: auto !important;
+      max-width: calc(100vw - 20px) !important;
+      max-height: 45vh !important;
+      overflow-y: auto !important;
+      box-sizing: border-box !important;
+      border-radius: 6px !important;
+      transform: none !important;
+    }
   }
 
   .logo-icon {

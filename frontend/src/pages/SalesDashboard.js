@@ -8,8 +8,8 @@ import './SalesDashboard.css';
 const SalesDashboard = () => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeView, setActiveView] = useState('analytics');
   const [leads, setLeads] = useState([]);
   const [filteredLeads, setFilteredLeads] = useState([]);
@@ -57,15 +57,16 @@ const SalesDashboard = () => {
   };
 
   const toggleSidebar = () => {
-    setMenuOpen(!menuOpen);
+    setSidebarOpen(!sidebarOpen);
   };
 
+  
   const toggleUserMenu = () => {
     setUserMenuOpen(!userMenuOpen);
   };
 
   const closeSidebar = () => {
-    setMenuOpen(false);
+    setSidebarOpen(false);
   };
 
   const fetchMyLeads = useCallback(async () => {
@@ -646,7 +647,7 @@ const SalesDashboard = () => {
   return (
     <div className="sales-dashboard">
       {/* Sidebar Navigation */}
-      <aside className={`sidebar ${menuOpen ? 'sidebar-open' : ''}`}>
+      <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
         <div className="sidebar-header">
           <div className="brand-logo">
             <div className="logo-icon">DS</div>
@@ -729,15 +730,24 @@ const SalesDashboard = () => {
       </aside>
 
       {/* Main Content Area */}
-      <div className="main-content">
+      <div className={`main-content ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
         {/* Top Header */}
         <header className="top-header">
           <div className="header-left">
-            <button className="mobile-menu-toggle" onClick={toggleSidebar}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-              </svg>
-            </button>
+            {sidebarOpen && (
+              <button className="sidebar-toggle-btn" onClick={toggleSidebar}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                </svg>
+              </button>
+            )}
+            {!sidebarOpen && (
+              <button className="mobile-menu-toggle-btn" onClick={toggleSidebar}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                </svg>
+              </button>
+            )}
             <div className="page-title">
               <h1>Sales Dashboard</h1>
               <p>Welcome back, {user?.name}</p>

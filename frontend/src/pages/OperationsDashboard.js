@@ -10,8 +10,8 @@ const OperationsDashboard = () => {
   const navigate = useNavigate();
   
   // Debug user data
-    const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [activeView, setActiveView] = useState('tasks');
   const [leads, setLeads] = useState([]);
   const [filteredLeads, setFilteredLeads] = useState([]);
@@ -70,12 +70,14 @@ const OperationsDashboard = () => {
     notes: ''
   });
 
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
-  };
-
+  
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  
+  const toggleUserMenu = () => {
+    setUserMenuOpen(!userMenuOpen);
   };
 
   const getPageTitle = () => {
@@ -1352,7 +1354,7 @@ const styles = {
     padding: '15px',
     minWidth: '200px',
     zIndex: 1000,
-    display: menuOpen ? 'block' : 'none',
+    display: userMenuOpen ? 'block' : 'none',
     marginTop: '5px'
   },
   userInfo: {
@@ -1710,22 +1712,23 @@ const styles = {
 
       {/* Main Content Area */}
       <div className={`main-content ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
-        {/* Floating Sidebar Toggle Button */}
-        {!sidebarOpen && (
-          <button className="floating-sidebar-toggle" onClick={toggleSidebar}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-            </svg>
-          </button>
-        )}
         {/* Top Header */}
         <header className="top-header">
           <div className="header-left">
-            <button className="mobile-menu-toggle" onClick={toggleMenu}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-              </svg>
-            </button>
+            {sidebarOpen && (
+              <button className="sidebar-toggle-btn" onClick={toggleSidebar}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                </svg>
+              </button>
+            )}
+            {!sidebarOpen && (
+              <button className="mobile-menu-toggle-btn" onClick={toggleSidebar}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                </svg>
+              </button>
+            )}
             <div className="page-title">
               <h1>{getPageTitle()}</h1>
               <p>{getPageSubtitle()}</p>
@@ -1736,6 +1739,26 @@ const styles = {
             <NotificationBell />
             <div className="org-info">
               <span className="org-name">{user?.organization?.name || 'Organization'}</span>
+            </div>
+            <div className="user-dropdown">
+              <button className="user-menu-btn" onClick={toggleUserMenu}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+                <span>{user?.name || 'User'}</span>
+              </button>
+              <div className="dropdown" style={styles.dropdown}>
+                <div style={styles.userInfo}>
+                  <div>{user?.name || 'User'}</div>
+                  <div style={{ fontSize: '12px', color: '#999' }}>{user?.email || 'user@example.com'}</div>
+                </div>
+                <button 
+                  style={styles.logoutButton}
+                  onClick={logout}
+                >
+                  Logout
+                </button>
+              </div>
             </div>
           </div>
         </header>
@@ -1783,16 +1806,17 @@ const styles = {
                 return (
                   <div style={{display: 'flex', flexDirection: 'column', gap: '25px'}}>
                     {/* Top Row - Country Analytics */}
-                    <div style={{
+                    <div className="analytics-card" style={{
                       backgroundColor: '#ffffff',
                       border: '1px solid #e3e6f0',
                       borderRadius: '12px',
                       padding: '24px',
                       boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07)'
                     }}>
-                      <h4 style={{margin: '0 0 20px 0', color: '#2c3e50', fontSize: '20px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '10px'}}>
+                      <h4 className="country-analytics-header" style={{margin: '0 0 20px 0', color: '#2c3e50', fontSize: '20px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '10px'}}>
                         📊 Country-wise Analytics
                         <select
+                          className="analytics-select"
                           value={selectedAnalyticsCountry}
                           onChange={(e) => setSelectedAnalyticsCountry(e.target.value)}
                           style={{
@@ -1818,7 +1842,7 @@ const styles = {
                           <p>No data available for analytics</p>
                         </div>
                       ) : (
-                        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px'}}>
+                        <div className="analytics-grid-responsive" style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px'}}>
                           {countries.map(country => (
                             <div key={country} style={{
                               backgroundColor: '#f8f9fa',
@@ -1886,7 +1910,7 @@ const styles = {
                     </div>
 
                     {/* Supplier Assignment Analytics */}
-                    <div style={{
+                    <div className="analytics-card" style={{
                         backgroundColor: '#ffffff',
                         border: '1px solid #e3e6f0',
                         borderRadius: '12px',
@@ -1896,7 +1920,7 @@ const styles = {
                         <h4 style={{margin: '0 0 20px 0', color: '#2c3e50', fontSize: '18px', fontWeight: '700'}}>
                           🏢 Supplier Assignment Analytics
                         </h4>
-                        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
+                        <div className="analytics-grid-responsive" style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
                           {[
                             { type: 'Activities', data: supplierStats.activities, icon: '🎯', color: '#2196f3' },
                             { type: 'Transfers', data: supplierStats.transfers, icon: '🚗', color: '#ff9800' },
