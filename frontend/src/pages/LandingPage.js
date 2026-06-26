@@ -79,7 +79,8 @@ const LandingPage = () => {
             </div>
           </div>
           <div className="nav-actions">
-            <button className="nav-link" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>Features</button>
+            <Link to="/features" className="nav-link">Features</Link>
+            <Link to="/about" className="nav-link">About</Link>
             <button className="nav-link" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>Pricing</button>
             <button className="nav-link" onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}>About</button>
             <Link to="/org-login" className="nav-cta">Sign In</Link>
@@ -96,7 +97,7 @@ const LandingPage = () => {
                 <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
               </svg>
             </button>
-            <button className="mobile-nav-link" onClick={() => { document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); closeMobileMenu(); }}>Features</button>
+            <Link to="/features" className="mobile-nav-link" onClick={closeMobileMenu}>Features</Link>
             <button className="mobile-nav-link" onClick={() => { document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); closeMobileMenu(); }}>Pricing</button>
             <button className="mobile-nav-link" onClick={() => { document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }); closeMobileMenu(); }}>About</button>
             <Link to="/org-login" className="mobile-nav-cta" onClick={closeMobileMenu}>Sign In</Link>

@@ -13,6 +13,8 @@ import QuoteTemplateManager from './pages/QuoteTemplateManager';
 import InvoiceListPageSimple from './pages/InvoiceListPageSimple';
 import SupplierManagementPage from './pages/SupplierManagementPage';
 import CalendarPage from './pages/CalendarPage';
+import FeaturesPage from './pages/FeaturesPage';
+import AboutUsPage from './pages/AboutUsPage';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
@@ -22,6 +24,8 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/features" element={<FeaturesPage />} />
+          <Route path="/about" element={<AboutUsPage />} />
           <Route path="/org-login" element={<OrgLogin />} />
           <Route path="/admin-login" element={<MainAdminLogin />} />
           <Route path="/admin-dashboard" element={<ProtectedRoute requiredUserType="mainAdmin"><MainAdminDashboard /></ProtectedRoute>} />

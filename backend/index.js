@@ -51,6 +51,7 @@ app.use('/api/suppliers', require('./routes/suppliers'));
 app.use('/api/supplier-assignments', require('./routes/supplierAssignments'));
 app.use('/api/suppliers', require('./routes/supplierDetails'));
 app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/health', require('./routes/health'));
 
 app.get('/', (req, res) => {
   res.send('NaviDesk Backend is running');
