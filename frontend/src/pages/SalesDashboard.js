@@ -9,6 +9,7 @@ const SalesDashboard = () => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [activeView, setActiveView] = useState('analytics');
   const [leads, setLeads] = useState([]);
   const [filteredLeads, setFilteredLeads] = useState([]);
@@ -55,8 +56,16 @@ const SalesDashboard = () => {
     navigate('/');
   };
 
-  const toggleMenu = () => {
+  const toggleSidebar = () => {
     setMenuOpen(!menuOpen);
+  };
+
+  const toggleUserMenu = () => {
+    setUserMenuOpen(!userMenuOpen);
+  };
+
+  const closeSidebar = () => {
+    setMenuOpen(false);
   };
 
   const fetchMyLeads = useCallback(async () => {
@@ -439,7 +448,7 @@ const SalesDashboard = () => {
       padding: '15px',
       minWidth: '200px',
       zIndex: 1000,
-      display: menuOpen ? 'block' : 'none',
+      display: userMenuOpen ? 'block' : 'none',
     },
     userInfo: {
       marginBottom: '10px',
@@ -643,7 +652,7 @@ const SalesDashboard = () => {
             <div className="logo-icon">DS</div>
             <span className="logo-text">DMCstation</span>
           </div>
-          <button className="sidebar-toggle" onClick={toggleMenu}>
+          <button className="sidebar-toggle" onClick={toggleSidebar}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
             </svg>
@@ -655,7 +664,7 @@ const SalesDashboard = () => {
             <div className="nav-section-title">Main</div>
             <button
               className={`nav-item ${activeView === 'analytics' ? 'nav-active' : ''}`}
-              onClick={() => setActiveView('analytics')}
+              onClick={() => { setActiveView('analytics'); closeSidebar(); }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="nav-icon">
                 <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
@@ -664,7 +673,7 @@ const SalesDashboard = () => {
             </button>
             <button
               className={`nav-item ${activeView === 'tasks' ? 'nav-active' : ''}`}
-              onClick={() => setActiveView('tasks')}
+              onClick={() => { setActiveView('tasks'); closeSidebar(); }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="nav-icon">
                 <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
@@ -673,7 +682,7 @@ const SalesDashboard = () => {
             </button>
             <button
               className={`nav-item ${activeView === 'leads' ? 'nav-active' : ''}`}
-              onClick={() => setActiveView('leads')}
+              onClick={() => { setActiveView('leads'); closeSidebar(); }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="nav-icon">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -686,7 +695,7 @@ const SalesDashboard = () => {
             <div className="nav-section-title">Management</div>
             <button
               className={`nav-item ${activeView === 'invoices' ? 'nav-active' : ''}`}
-              onClick={() => navigate('/invoices')}
+              onClick={() => { navigate('/invoices'); closeSidebar(); }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="nav-icon">
                 <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
@@ -695,7 +704,7 @@ const SalesDashboard = () => {
             </button>
             <button
               className={`nav-item ${activeView === 'calendar' ? 'nav-active' : ''}`}
-              onClick={() => navigate('/calendar')}
+              onClick={() => { navigate('/calendar'); closeSidebar(); }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="nav-icon">
                 <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
@@ -724,7 +733,7 @@ const SalesDashboard = () => {
         {/* Top Header */}
         <header className="top-header">
           <div className="header-left">
-            <button className="mobile-menu-toggle" onClick={toggleMenu}>
+            <button className="mobile-menu-toggle" onClick={toggleSidebar}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
               </svg>
@@ -740,12 +749,12 @@ const SalesDashboard = () => {
               <span className="org-name">{user?.organization?.name || 'Organization'}</span>
             </div>
             <div className="user-dropdown">
-              <button className="user-menu-btn" onClick={toggleMenu}>
+              <button className="user-menu-btn" onClick={toggleUserMenu}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                 </svg>
               </button>
-              <div className={`user-dropdown-menu ${menuOpen ? 'dropdown-open' : ''}`}>
+              <div className={`user-dropdown-menu ${userMenuOpen ? 'dropdown-open' : ''}`}>
                 <div className="user-dropdown-item">{user?.name}</div>
                 <div className="user-dropdown-item">Role: Sales</div>
                 <div className="user-dropdown-item" onClick={handleLogout}>Logout</div>

@@ -1,9 +1,18 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './LandingPage.css';
 
 const LandingPage = () => {
   const metricsRef = useRef(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -70,10 +79,27 @@ const LandingPage = () => {
             </div>
           </div>
           <div className="nav-actions">
-            <button className="nav-link">Features</button>
-            <button className="nav-link">Pricing</button>
-            <button className="nav-link">About</button>
+            <button className="nav-link" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>Features</button>
+            <button className="nav-link" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>Pricing</button>
+            <button className="nav-link" onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}>About</button>
             <Link to="/org-login" className="nav-cta">Sign In</Link>
+          </div>
+          <button className="mobile-menu-toggle" onClick={toggleMobileMenu} aria-label="Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+            </svg>
+          </button>
+          <div className={`mobile-nav-backdrop ${mobileMenuOpen ? 'backdrop-open' : ''}`} onClick={closeMobileMenu}></div>
+          <div className={`mobile-nav-menu ${mobileMenuOpen ? 'mobile-nav-open' : ''}`}>
+            <button className="mobile-nav-close" onClick={closeMobileMenu} aria-label="Close menu">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              </svg>
+            </button>
+            <button className="mobile-nav-link" onClick={() => { document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); closeMobileMenu(); }}>Features</button>
+            <button className="mobile-nav-link" onClick={() => { document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); closeMobileMenu(); }}>Pricing</button>
+            <button className="mobile-nav-link" onClick={() => { document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }); closeMobileMenu(); }}>About</button>
+            <Link to="/org-login" className="mobile-nav-cta" onClick={closeMobileMenu}>Sign In</Link>
           </div>
         </nav>
 
