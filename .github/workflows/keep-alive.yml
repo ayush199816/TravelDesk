@@ -2,10 +2,10 @@ name: Keep Render Server Alive
 
 on:
   schedule:
-    # 3:10 AM UTC = 8:45 AM IST (30 min before reminders)
-    - cron: '10 3 * * *'
-    # Also run at 2:30 AM UTC = 8:00 AM IST (extra buffer)
-    - cron: '30 2 * * *'
+    # 12:10 AM UTC = 5:45 AM IST (30 min before reminders)
+    - cron: '10 0 * * *'
+    # Also run at 11:30 PM UTC previous day = 5:00 AM IST same day (extra buffer)
+    - cron: '30 23 * * *'
   workflow_dispatch:
 
 jobs:

@@ -13,10 +13,25 @@ const MainAdminDashboard = () => {
   const [adminUsername, setAdminUsername] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [organizations, setOrganizations] = useState([]);
+  const [isTriggeringReminders, setIsTriggeringReminders] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const handleTriggerReminders = async () => {
+    setIsTriggeringReminders(true);
+    try {
+      const response = await api.post('/health/cron-trigger');
+      alert('Reminders triggered successfully!');
+      console.log('Reminders triggered:', response.data);
+    } catch (error) {
+      console.error('Error triggering reminders:', error);
+      alert('Failed to trigger reminders. Please try again.');
+    } finally {
+      setIsTriggeringReminders(false);
+    }
   };
 
   const handleLogoChange = (e) => {
@@ -123,7 +138,21 @@ const MainAdminDashboard = () => {
     <div style={styles.container}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={styles.title}>Main Admin Dashboard</h2>
-        <button onClick={handleLogout} style={{ ...styles.button, backgroundColor: '#dc3545' }}>Logout</button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button 
+            onClick={handleTriggerReminders} 
+            disabled={isTriggeringReminders}
+            style={{ 
+              ...styles.button, 
+              backgroundColor: isTriggeringReminders ? '#6c757d' : '#28a745',
+              cursor: isTriggeringReminders ? 'not-allowed' : 'pointer',
+              opacity: isTriggeringReminders ? 0.7 : 1
+            }}
+          >
+            {isTriggeringReminders ? 'Triggering...' : 'Trigger Reminders'}
+          </button>
+          <button onClick={handleLogout} style={{ ...styles.button, backgroundColor: '#dc3545' }}>Logout</button>
+        </div>
       </div>
       <div style={styles.form}>
         <form onSubmit={handleSubmit}>
